@@ -1,0 +1,261 @@
+name: CI Pipeline (Parallelized)
+
+on:
+  push:
+  pull_request:
+
+# Cancel in-progress runs for the same branch/PR to save CI minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
+  TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
+  REDIS_URL: redis://localhost:6379/0
+  TEST_REDIS_URL: redis://localhost:6379/1
+  JWT_ACCESS_SECRET: super-secret
+  JWT_REFRESH_SECRET: super-secret
+  EMAIL_VERIFY_SECRET: super-secret
+  PASSWORD_RESET_SECRET: super-secret
+  SMTP_HOST: localhost
+  SMTP_PORT: 2525
+  SMTP_USER: test
+  SMTP_PASS: test
+  MAIL_FROM: test@example.com
+  PORT: 5000
+  NEXT_PUBLIC_API_URL: http://localhost:5000/api/v1
+  NODE_ENV: test
+
+jobs:
+  # ---------------------------------------------------------
+  # BACKEND JOBS
+  # ---------------------------------------------------------
+  backend-unit:
+    name: Backend 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./backend/package-lock.json"
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run test:unit
+
+  backend-integration:
+    name: Backend 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: erp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./backend/package-lock.json"
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma db push --accept-data-loss
+      - run: npm run test:integration
+
+  # ---------------------------------------------------------
+  # FRONTEND JOBS
+  # ---------------------------------------------------------
+  frontend-lint:
+    name: Frontend 🧹 Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+      - run: npm ci
+      - run: npm run lint
+
+  frontend-typecheck:
+    name: Frontend 🧹 Typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+      - run: npm ci
+      - run: npm run typecheck
+
+  frontend-build:
+    name: Frontend 📦 Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+      - run: npm ci
+      - run: npm run build
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.next
+          include-hidden-files: true
+
+  # ---------------------------------------------------------
+  # SECURITY SCAN
+  # ---------------------------------------------------------
+  security-scan:
+    name: Security 🛡️ Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backend Audit
+        working-directory: ./backend
+        run: npm audit --audit-level=high || true
+      - name: Frontend Audit
+        working-directory: ./frontend
+        run: npm audit --audit-level=high || true
+
+  # ---------------------------------------------------------
+  # END-TO-END JOB
+  # ---------------------------------------------------------
+  e2e:
+    name: Cypress 🌲 E2E Tests
+    needs: [backend-unit, backend-integration, frontend-lint, frontend-typecheck, frontend-build, security-scan]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: erp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v4
+        id: cache-backend
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-backend-node-${{ hashFiles('backend/package-lock.json') }}
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v4
+        id: cache-frontend
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-node-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        id: cache-cypress
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Install Backend Deps
+        if: steps.cache-backend.outputs.cache-hit != 'true'
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Install Frontend Deps
+        if: steps.cache-frontend.outputs.cache-hit != 'true'
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Download Frontend Build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.next
+
+      - name: Start Backend
+        working-directory: ./backend
+        run: |
+          npx prisma generate
+          npx prisma db push --accept-data-loss
+          npm run build
+          npm run start > backend.log 2>&1 &
+          npx --yes wait-on http-get://localhost:5000/api/v1/health/liveness -t 30000 || { cat backend.log; exit 1; }
+
+      - name: Start Frontend
+        working-directory: ./frontend
+        env:
+          PORT: 3000
+        run: |
+          npm run start > frontend.log 2>&1 &
+          npx --yes wait-on http-get://localhost:3000 -t 30000 || { cat frontend.log; exit 1; }
+
+      - name: Run Cypress
+        working-directory: ./frontend
+        run: |
+          npx cypress install
+          npm run cypress:run
+
+      - name: Upload Cypress Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-artifacts
+          path: |
+            frontend/cypress/screenshots
+            frontend/cypress/videos
+          retention-days: 7
