@@ -1,0 +1,18 @@
+export const queryKeys = {
+  dashboard: (workspaceId: string) => ["dashboard", workspaceId] as const,
+  customers: (workspaceId: string) => ["customers", workspaceId] as const,
+  customerDetail: (workspaceId: string, customerId: string) => ["customers", workspaceId, customerId] as const,
+  vendors: (workspaceId: string) => ["vendors", workspaceId] as const,
+  vendorDetail: (workspaceId: string, vendorId: string) => ["vendors", workspaceId, vendorId] as const,
+  products: (workspaceId: string) => ["products", workspaceId] as const,
+  productDetail: (workspaceId: string, productId: string) => ["products", workspaceId, productId] as const,
+  invoices: (workspaceId: string) => ["invoices", workspaceId] as const,
+  invoiceDetail: (workspaceId: string, invoiceId: string) => ["invoices", workspaceId, invoiceId] as const,
+  inventory: (workspaceId: string) => ["inventory", workspaceId] as const,
+  purchases: (workspaceId: string) => ["purchases", workspaceId] as const,
+  purchaseDetail: (workspaceId: string, purchaseId: string) => ["purchases", workspaceId, purchaseId] as const,
+  purchaseReceipts: (workspaceId: string) => ["purchases", workspaceId, "receipts"] as const,
+  transactions: (workspaceId: string) => ["transactions", workspaceId] as const,
+  transactionDetail: (workspaceId: string, transactionId: string) => ["transactions", workspaceId, transactionId] as const,
+  transactionReconciliation: (workspaceId: string) => ["transactions", workspaceId, "reconciliation"] as const,
+};
