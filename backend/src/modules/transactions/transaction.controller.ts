@@ -12,4 +12,11 @@ export const transactionController = {
     );
     sendSuccess(res, { statusCode: 200, data: transactions });
   },
+  getTransaction: async (req: Request, res: Response) => {
+    const transaction = await transactionService.getTransaction(
+      req.organization!.id,
+      req.params.id,
+    );
+    sendSuccess(res, { statusCode: 200, data: transaction });
+  },
 };

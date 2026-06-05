@@ -23,4 +23,10 @@ router.get(
   asyncHandler(transactionController.listTransactions),
 );
 
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.TRANSACTIONS_VIEW),
+  asyncHandler(transactionController.getTransaction),
+);
+
 export default router;

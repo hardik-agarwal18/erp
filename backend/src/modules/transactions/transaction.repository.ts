@@ -31,4 +31,12 @@ export const transactionRepository = {
         limit: pagination.limit,
       }));
   },
+  getTransaction: (organizationId: string, transactionId: string) => {
+    return prisma.transaction.findFirst({
+      where: {
+        id: transactionId,
+        organizationId,
+      },
+    });
+  },
 };

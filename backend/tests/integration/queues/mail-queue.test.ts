@@ -27,8 +27,9 @@ describe("Mail Queue", () => {
 
   beforeAll(async () => {
 
-    queueEvents = new QueueEvents(QueueNames.MAIL, { connection: queueConnection as any });
-    worker = new Worker<MailJobPayload>(QueueNames.MAIL, processMailJob, { connection: queueConnection as any });
+    const prefix = env.NODE_ENV === "test" ? "{test-bull}" : "bull";
+    queueEvents = new QueueEvents(QueueNames.MAIL, { connection: queueConnection as any, prefix });
+    worker = new Worker<MailJobPayload>(QueueNames.MAIL, processMailJob, { connection: queueConnection as any, prefix });
     await worker.waitUntilReady();
   });
 
