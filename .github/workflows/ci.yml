@@ -137,6 +137,7 @@ jobs:
         with:
           name: frontend-build
           path: frontend/.next
+          include-hidden-files: true
 
   # ---------------------------------------------------------
   # SECURITY SCAN
