@@ -17,7 +17,7 @@ export const inventoryController = {
   getItem: async (req: Request, res: Response) => {
     const items = await inventoryService.listItems(
       req.organization!.id,
-      { productId: req.params.productId },
+      { productId: req.params.productId as string },
       { limit: 1 }
     );
     if (!items.items.length) {

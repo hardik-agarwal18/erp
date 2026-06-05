@@ -23,7 +23,7 @@ export function PurchaseListView() {
   });
 
   const data = query.data;
-  const orders = data?.orders ?? [];
+  const orders = useMemo(() => data?.orders ?? [], [data?.orders]);
   const summary = data?.summary;
 
   const filteredOrders = useMemo(() => {

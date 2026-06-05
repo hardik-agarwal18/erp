@@ -1,5 +1,6 @@
 import { transactionRepository } from "./transaction.repository.js";
 import { TransactionFilters } from "./transaction.types.js";
+import ApiError from "../../utils/ApiError.js";
 
 export const transactionService = {
   listTransactions: (
@@ -19,7 +20,6 @@ export const transactionService = {
       transactionId,
     );
     if (!transaction) {
-      const { ApiError } = await import("../../shared/utils/ApiError.js");
       throw new ApiError(404, "Transaction not found");
     }
     return transaction;

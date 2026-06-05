@@ -15,7 +15,7 @@ export const transactionController = {
   getTransaction: async (req: Request, res: Response) => {
     const transaction = await transactionService.getTransaction(
       req.organization!.id,
-      req.params.id,
+      req.params.id as string,
     );
     sendSuccess(res, { statusCode: 200, data: transaction });
   },

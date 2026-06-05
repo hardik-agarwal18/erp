@@ -12,13 +12,17 @@ import { TopNavbar } from "./top-navbar";
 export function AppShell({ activePath, children }: { activePath: string; children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated, isLoading } = useWorkspace();
+  const { isAuthenticated, isLoading, workspaces } = useWorkspace();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace(`/login?next=${encodeURIComponent(pathname || activePath)}`);
+    if (!isLoading) {
+      if (!isAuthenticated) {
+        router.replace(`/login?next=${encodeURIComponent(pathname || activePath)}`);
+      } else if (workspaces.length === 0 && !pathname?.startsWith("/onboarding")) {
+        router.replace("/onboarding");
+      }
     }
-  }, [activePath, isAuthenticated, isLoading, pathname, router]);
+  }, [activePath, isAuthenticated, isLoading, pathname, router, workspaces.length]);
 
   if (isLoading) {
     return <PageLoader />;

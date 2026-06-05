@@ -31,14 +31,14 @@ export const createQueue = <DataType, ResultType = any, NameType extends string 
   });
 
   const originalAdd = queue.add.bind(queue);
-  queue.add = async (name: NameType, data: DataType, opts?: JobsOptions) => {
+  queue.add = (async (name: any, data: any, opts?: any) => {
     const store = loggerContext.getStore();
     if (store) {
       const _context = Object.fromEntries(store.entries());
-      data = { ...data, _context } as DataType;
+      data = { ...data, _context };
     }
     return originalAdd(name, data, opts);
-  };
+  }) as any;
 
   queues.set(queueName, queue);
   return queue;

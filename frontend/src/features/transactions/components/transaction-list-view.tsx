@@ -23,7 +23,7 @@ export function TransactionListView() {
   });
 
   const data = query.data;
-  const transactions = data?.transactions ?? [];
+  const transactions = useMemo(() => data?.transactions ?? [], [data?.transactions]);
   const summary = data?.summary;
 
   const filteredTransactions = useMemo(() => {
