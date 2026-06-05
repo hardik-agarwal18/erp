@@ -13,6 +13,19 @@ const isIntegrationTestFile = () => {
   return /[\\/]tests[\\/](integration|helpers|setup)[\\/]/.test(testPath);
 };
 
+// Globally mock ioredis for unit tests to prevent actual TCP connections
+if (!isIntegrationTestFile()) {
+  jest.mock("ioredis", () => {
+    return {
+      Redis: jest.fn().mockImplementation(() => ({
+        on: jest.fn(),
+        quit: jest.fn().mockResolvedValue("OK"),
+        ping: jest.fn().mockResolvedValue("PONG"),
+      })),
+    };
+  });
+}
+
 beforeAll(async () => {
   if (isIntegrationTestFile()) {
     await connectTestInfrastructure();

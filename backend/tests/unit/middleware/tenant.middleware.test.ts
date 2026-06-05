@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 import { Request, Response, NextFunction } from "express";
 
 jest.mock("../../../src/config/database.js", () => ({
+  __esModule: true,
   default: {
     organizationMember: {
       findUnique: jest.fn(),

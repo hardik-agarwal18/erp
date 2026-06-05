@@ -2,6 +2,7 @@ import { jest } from "@jest/globals";
 
 // ── Mock fs/promises ─────────────────────────────────────────────────────────
 jest.mock("fs/promises", () => ({
+  __esModule: true,
   default: {
     mkdir: jest.fn(),
     writeFile: jest.fn(),
