@@ -281,7 +281,32 @@ export const invoiceService = {
     return invoiceRepository.listInvoices(organizationId, filters, query);
   },
 
-  getInvoice: (organizationId: string, invoiceId: string) => {
-    return invoiceRepository.findById(organizationId, invoiceId);
+  getInvoice: async (organizationId: string, invoiceId: string) => {
+    const invoice = await invoiceRepository.findById(organizationId, invoiceId);
+    if (!invoice) throw new ApiError(404, "Invoice not found");
+    return invoice;
+  },
+
+  deleteInvoice: async (
+    organizationId: string,
+    actorUserId: string,
+    invoiceId: string,
+  ) => {
+    const existing = await invoiceRepository.findById(organizationId, invoiceId);
+    if (!existing) throw new ApiError(404, "Invoice not found");
+    if (existing.status !== "DRAFT") throw new ApiError(400, "Only DRAFT invoices can be deleted");
+
+    await prisma.invoice.update({
+      where: { id: invoiceId },
+      data: { deletedAt: new Date() },
+    });
+
+    await auditService.record({
+      organizationId,
+      userId: actorUserId,
+      action: AUDIT_ACTIONS.INVOICE_DELETED,
+      entityType: AUDIT_ENTITY_TYPES.INVOICE,
+      entityId: invoiceId,
+    });
   },
 };

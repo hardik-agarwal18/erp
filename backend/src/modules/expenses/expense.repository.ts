@@ -25,7 +25,7 @@ export const expenseRepository = {
   },
   listExpenses: (
     organizationId: string,
-    filters: { category?: string; vendorId?: string },
+    filters: { category?: string; vendorId?: string; startDate?: string; endDate?: string },
     query: Record<string, unknown>,
   ) => {
     const pagination = parsePagination(query);
@@ -35,6 +35,12 @@ export const expenseRepository = {
       ...(filters.category ? { category: filters.category } : {}),
       ...(filters.vendorId ? { vendorId: filters.vendorId } : {}),
     };
+
+    if (filters.startDate || filters.endDate) {
+      where.expenseDate = {};
+      if (filters.startDate) (where.expenseDate as any).gte = new Date(filters.startDate);
+      if (filters.endDate) (where.expenseDate as any).lte = new Date(filters.endDate);
+    }
 
     return prisma
       .$transaction([
@@ -53,5 +59,8 @@ export const expenseRepository = {
         page: pagination.page,
         limit: pagination.limit,
       }));
+  },
+  findById: (organizationId: string, id: string) => {
+    return expenseCrudRepository.findById(id, organizationId);
   },
 };

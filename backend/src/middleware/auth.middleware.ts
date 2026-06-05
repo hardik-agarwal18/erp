@@ -4,6 +4,7 @@ import ApiError from "../utils/ApiError.js";
 import { env } from "../config/env.js";
 import { verifyToken } from "../lib/jwt.js";
 import { redisClient } from "../redis/redisClient.js";
+import { loggerContext } from "../config/logger.js";
 import { AccessTokenPayload } from "../modules/auth/auth.types.js";
 
 export const authMiddleware = async (
@@ -42,6 +43,11 @@ export const authMiddleware = async (
       role: payload.role ?? null,
     };
     req.auth = { jti: payload.jti, exp: payload.exp, token };
+
+    const store = loggerContext.getStore();
+    if (store) {
+      store.set("userId", payload.sub);
+    }
 
     return next();
   } catch {

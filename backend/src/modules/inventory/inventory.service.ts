@@ -76,6 +76,9 @@ export const inventoryService = {
       let item = existingItem;
 
       if (!item) {
+        if (payload.quantity < 0) {
+          throw new ApiError(400, "Insufficient stock for adjustment");
+        }
         item = await inventoryRepository.createInventoryItem(
           tx,
           organizationId,
@@ -83,6 +86,9 @@ export const inventoryService = {
           payload.quantity,
         );
       } else {
+        if (Number(item.quantity) + payload.quantity < 0) {
+          throw new ApiError(400, "Insufficient stock for adjustment");
+        }
         await inventoryRepository.incrementInventoryItem(
           tx,
           organizationId,

@@ -40,9 +40,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './backend/package-lock.json'
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./backend/package-lock.json"
       - run: npm ci
       - run: npx prisma generate
       - run: npm run test:unit
@@ -74,9 +74,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './backend/package-lock.json'
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./backend/package-lock.json"
       - run: npm ci
       - run: npx prisma generate
       - run: npx prisma db push --accept-data-loss
@@ -85,12 +85,9 @@ jobs:
   # ---------------------------------------------------------
   # FRONTEND JOBS
   # ---------------------------------------------------------
-  frontend-static:
-    name: Frontend 🧹 Lint & Typecheck
+  frontend-lint:
+    name: Frontend 🧹 Lint
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        script: [lint, typecheck]
     defaults:
       run:
         working-directory: ./frontend
@@ -98,11 +95,27 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
       - run: npm ci
-      - run: npm run ${{ matrix.script }}
+      - run: npm run lint
+
+  frontend-typecheck:
+    name: Frontend 🧹 Typecheck
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+      - run: npm ci
+      - run: npm run typecheck
 
   frontend-build:
     name: Frontend 📦 Build
@@ -114,18 +127,38 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
       - run: npm ci
       - run: npm run build
+      - name: Upload frontend build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.next
+
+  # ---------------------------------------------------------
+  # SECURITY SCAN
+  # ---------------------------------------------------------
+  security-scan:
+    name: Security 🛡️ Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Backend Audit
+        working-directory: ./backend
+        run: npm audit --audit-level=high || true
+      - name: Frontend Audit
+        working-directory: ./frontend
+        run: npm audit --audit-level=high || true
 
   # ---------------------------------------------------------
   # END-TO-END JOB
   # ---------------------------------------------------------
   e2e:
     name: Cypress 🌲 E2E Tests
-    needs: [backend-unit, backend-integration, frontend-static, frontend-build]
+    needs: [backend-unit, backend-integration, frontend-lint, frontend-typecheck, frontend-build, security-scan]
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -146,25 +179,57 @@ jobs:
           --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v4
-      
+
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Cache backend node_modules
+        uses: actions/cache@v4
+        id: cache-backend
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-backend-node-${{ hashFiles('backend/package-lock.json') }}
+
+      - name: Cache frontend node_modules
+        uses: actions/cache@v4
+        id: cache-frontend
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-node-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Install Backend Deps
+        if: steps.cache-backend.outputs.cache-hit != 'true'
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Install Frontend Deps
+        if: steps.cache-frontend.outputs.cache-hit != 'true'
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Download Frontend Build
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/.next
 
       - name: Start Backend
         working-directory: ./backend
         run: |
-          npm ci
           npx prisma generate
           npx prisma db push --accept-data-loss
-          npm run dev &
+          npm run build
+          npm run start &
           npx wait-on http://localhost:5000/health || sleep 10
 
       - name: Start Frontend
         working-directory: ./frontend
         run: |
-          npm ci
-          npm run build
           npm run start &
           npx wait-on http://localhost:3000 || sleep 10
 

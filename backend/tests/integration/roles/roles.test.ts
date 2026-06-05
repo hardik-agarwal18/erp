@@ -23,7 +23,7 @@ describe("Roles — scenario tests", () => {
       const res = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "accountant", description: "Can manage finances" });
+        .send({ name: "accountant", description: "Can manage finances", permissionNames: ["permissions.view"] });
 
       expect(res.status).toBe(201);
       expect(res.body.data.name).toBe("accountant");
@@ -58,7 +58,7 @@ describe("Roles — scenario tests", () => {
         .get("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`);
 
-      expect(res.status).toBe(200);
+      console.log(res.body); expect(res.status).toBe(200);
       const names = (res.body.data.items ?? res.body.data).map((r: any) => r.name);
       // Built-in roles should always be present
       expect(names).toContain("owner");
@@ -82,7 +82,7 @@ describe("Roles — scenario tests", () => {
     });
   });
 
-  describe("PUT /api/v1/roles/:id", () => {
+  describe("PATCH /api/v1/roles/:id", () => {
     it("updates a custom role description", async () => {
       const auth = await createAuthenticatedUser(app, { email: "role.update@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Role Update Org" });
@@ -91,10 +91,10 @@ describe("Roles — scenario tests", () => {
       const created = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "editor", description: "Old description" });
+        .send({ name: "editor", description: "Old description", permissionNames: ["permissions.view"] });
 
       const res = await request(app)
-        .put(`/api/v1/roles/${created.body.data.id}`)
+        .patch(`/api/v1/roles/${created.body.data.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send({ description: "Updated description" });
 
@@ -113,12 +113,12 @@ describe("Roles — scenario tests", () => {
       const roleRes = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "custom-viewer" });
+        .send({ name: "custom-viewer", permissionNames: ["permissions.view"] });
       const roleId = roleRes.body.data.id;
 
       // Get available permissions
       const permsRes = await request(app)
-        .get("/api/v1/permissions")
+        .get("/api/v1/roles/permissions")
         .set("Authorization", `Bearer ${token}`);
       expect(permsRes.status).toBe(200);
 
@@ -129,9 +129,9 @@ describe("Roles — scenario tests", () => {
 
       // Assign permission to role
       const assignRes = await request(app)
-        .post(`/api/v1/roles/${roleId}/permissions`)
+        .patch(`/api/v1/roles/${roleId}`)
         .set("Authorization", `Bearer ${token}`)
-        .send({ permissionId });
+        .send({ permissionNames: [perms[0].name] });
 
       expect([200, 201]).toContain(assignRes.status);
     });
@@ -146,7 +146,7 @@ describe("Roles — scenario tests", () => {
       const created = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "to-delete-role" });
+        .send({ name: "to-delete-role", permissionNames: ["permissions.view"] });
 
       const del = await request(app)
         .delete(`/api/v1/roles/${created.body.data.id}`)

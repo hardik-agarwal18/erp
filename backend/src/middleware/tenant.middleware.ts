@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import prisma from "../config/database.js";
 import { getCachedMemberPermissions } from "../shared/utils/permissions.js";
 import ApiError from "../utils/ApiError.js";
+import { loggerContext } from "../config/logger.js";
 
 type TenantMiddlewareOptions = {
   allowRouteParam?: boolean;
@@ -90,6 +91,11 @@ export const tenantContextMiddleware =
       roleName: membership.role.name,
     };
     req.permissions = permissions;
+
+    const store = loggerContext.getStore();
+    if (store) {
+      store.set("workspaceId", membership.organizationId);
+    }
 
     return next();
   };

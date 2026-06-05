@@ -33,12 +33,12 @@ describe("Payments — scenario tests", () => {
         .send({
           invoiceId: invoice.id,
           amount: 500,
-          method: "BANK_TRANSFER",
-          paidAt: new Date().toISOString(),
+          paymentMethod: "BANK_TRANSFER",
+          paymentDate: new Date().toISOString(),
         });
 
       expect(res.status).toBe(201);
-      expect(res.body.data.amount).toBe(500);
+      expect(Number(res.body.data.amount)).toBe(500);
       expect(res.body.data.invoiceId).toBe(invoice.id);
     });
 
@@ -56,10 +56,10 @@ describe("Payments — scenario tests", () => {
       const res = await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ invoiceId: invoice.id, amount: 400, method: "CASH", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invoice.id, amount: 400, paymentMethod: "CASH", paymentDate: new Date().toISOString() });
 
       expect(res.status).toBe(201);
-      expect(res.body.data.amount).toBe(400);
+      expect(Number(res.body.data.amount)).toBe(400);
     });
 
     it("returns 400 when amount exceeds invoice total", async () => {
@@ -76,7 +76,7 @@ describe("Payments — scenario tests", () => {
       const res = await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ invoiceId: invoice.id, amount: 9999, method: "BANK_TRANSFER", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invoice.id, amount: 9999, paymentMethod: "BANK_TRANSFER", paymentDate: new Date().toISOString() });
 
       expect(res.status).toBeGreaterThanOrEqual(400);
     });
@@ -89,7 +89,7 @@ describe("Payments — scenario tests", () => {
       const res = await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ amount: 100, method: "CASH", paidAt: new Date().toISOString() });
+        .send({ amount: 100, paymentMethod: "CASH", paymentDate: new Date().toISOString() });
 
       expect(res.status).toBe(400);
     });
@@ -121,13 +121,13 @@ describe("Payments — scenario tests", () => {
       await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${tokenA}`)
-        .send({ invoiceId: invA.id, amount: 200, method: "CASH", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invA.id, amount: 200, paymentMethod: "CASH", paymentDate: new Date().toISOString() });
 
       const tokenB = await switchAndGetToken(authB, orgB.id);
       await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${tokenB}`)
-        .send({ invoiceId: invB.id, amount: 300, method: "CASH", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invB.id, amount: 300, paymentMethod: "CASH", paymentDate: new Date().toISOString() });
 
       const res = await request(app)
         .get("/api/v1/payments")
@@ -152,7 +152,7 @@ describe("Payments — scenario tests", () => {
       const createRes = await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ invoiceId: invoice.id, amount: 100, method: "CASH", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invoice.id, amount: 100, paymentMethod: "CASH", paymentDate: new Date().toISOString() });
 
       const del = await request(app)
         .delete(`/api/v1/payments/${createRes.body.data.id}`)

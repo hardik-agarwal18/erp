@@ -31,8 +31,8 @@ describe("Reports — scenario tests", () => {
       // Should include revenue and expense totals
       expect(res.body.data).toMatchObject(
         expect.objectContaining({
-          totalRevenue: expect.any(Number),
-          totalExpenses: expect.any(Number),
+          monthlyRevenue: expect.any(Number),
+          monthlyExpenses: expect.any(Number),
         }),
       );
     });

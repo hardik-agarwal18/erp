@@ -34,7 +34,7 @@ describe("Expenses — scenario tests", () => {
         });
 
       expect(res.status).toBe(201);
-      expect(res.body.data.amount).toBe(250);
+      expect(Number(res.body.data.amount)).toBe(250);
       expect(res.body.data.category).toBe("TRAVEL");
     });
 
@@ -90,7 +90,7 @@ describe("Expenses — scenario tests", () => {
         .set("Authorization", `Bearer ${tokenA}`);
 
       expect(res.status).toBe(200);
-      const amounts = (res.body.data.items ?? res.body.data).map((e: any) => e.amount);
+      const amounts = (res.body.data.items ?? res.body.data).map((e: any) => Number(e.amount));
       expect(amounts).toContain(111);
       expect(amounts).not.toContain(999);
     });
@@ -115,7 +115,7 @@ describe("Expenses — scenario tests", () => {
         .set("Authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
-      const amounts = (res.body.data.items ?? res.body.data).map((e: any) => e.amount);
+      const amounts = (res.body.data.items ?? res.body.data).map((e: any) => Number(e.amount));
       expect(amounts).toContain(50);
       expect(amounts).not.toContain(75);
     });
@@ -137,7 +137,7 @@ describe("Expenses — scenario tests", () => {
     });
   });
 
-  describe("PUT /api/v1/expenses/:id", () => {
+  describe("PATCH /api/v1/expenses/:id", () => {
     it("updates expense amount", async () => {
       const auth = await createAuthenticatedUser(app, { email: "exp.update@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Exp Update Org" });
@@ -145,12 +145,12 @@ describe("Expenses — scenario tests", () => {
       const expense = await createExpense(org.id, { amount: 100 });
 
       const res = await request(app)
-        .put(`/api/v1/expenses/${expense.id}`)
+        .patch(`/api/v1/expenses/${expense.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send({ amount: 200 });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.amount).toBe(200);
+      expect(Number(res.body.data.amount)).toBe(200);
     });
   });
 

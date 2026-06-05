@@ -2,7 +2,7 @@ import request from "supertest";
 import app from "../../../src/app.js";
 import { createAuthenticatedUser } from "../../helpers/auth.helper.js";
 import { createOrganization } from "../../helpers/organization.helper.js";
-import { createCustomer, createProduct, createInvoice } from "../../helpers/entity.helper.js";
+import { createCustomer, createProduct, createInvoice, createInventoryItem } from "../../helpers/entity.helper.js";
 
 const switchAndGetToken = async (auth: any, orgId: string) => {
   const res = await request(app)
@@ -35,7 +35,7 @@ describe("Invoices — scenario tests", () => {
       expect(res.status).toBe(201);
       expect(res.body.data.customerId).toBe(customer.id);
       expect(res.body.data.items).toHaveLength(1);
-      expect(res.body.data.subtotal).toBe(300);
+      expect(Number(res.body.data.subtotal)).toBe(300);
     });
 
     it("returns 400 when customerId is missing", async () => {
@@ -128,9 +128,13 @@ describe("Invoices — scenario tests", () => {
       const product = await createProduct(org.id, { sellingPrice: 100 });
       const invoice = await createInvoice(org.id, customer.id, product.id);
 
+      // Create enough inventory so the invoice can be issued without 400 Insufficient Stock
+      await createInventoryItem(org.id, product.id, 100);
+
       const res = await request(app)
-        .patch(`/api/v1/invoices/${invoice.id}/send`)
-        .set("Authorization", `Bearer ${token}`);
+        .patch(`/api/v1/invoices/${invoice.id}`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({ status: "ISSUED" });
 
       expect(res.status).toBe(200);
       expect(["ISSUED", "SENT"]).toContain(res.body.data.status);

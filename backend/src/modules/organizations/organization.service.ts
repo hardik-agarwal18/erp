@@ -52,18 +52,13 @@ const createSystemAuthorization = async (
   tx: DatabaseTransactionClient,
   organizationId: string,
 ) => {
-  for (const permission of DEFAULT_PERMISSIONS) {
-    await tx.permission.upsert({
-      where: { name: permission.name },
-      create: {
-        name: permission.name,
-        description: permission.description,
-      },
-      update: {
-        description: permission.description,
-      },
-    });
-  }
+  await tx.permission.createMany({
+    data: DEFAULT_PERMISSIONS.map((permission) => ({
+      name: permission.name,
+      description: permission.description,
+    })),
+    skipDuplicates: true,
+  });
 
   const permissions = await tx.permission.findMany({
     where: {

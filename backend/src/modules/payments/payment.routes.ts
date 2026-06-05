@@ -31,5 +31,10 @@ router.get(
   validate(listPaymentsSchema),
   asyncHandler(paymentController.listPayments),
 );
+router.delete(
+  "/:id",
+  requirePermission(PERMISSIONS.PAYMENTS_CREATE),
+  asyncHandler(paymentController.deletePayment),
+);
 
 export default router;

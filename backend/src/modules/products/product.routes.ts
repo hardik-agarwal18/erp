@@ -37,6 +37,12 @@ router.get(
   validate(listProductsSchema),
   asyncHandler(productController.listProducts),
 );
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.PRODUCTS_MANAGE),
+  validate(productIdParamSchema),
+  asyncHandler(productController.getProduct),
+);
 router.patch(
   "/:id",
   requirePermission(PERMISSIONS.PRODUCTS_MANAGE),

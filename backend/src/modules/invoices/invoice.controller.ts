@@ -39,4 +39,12 @@ export const invoiceController = {
     );
     sendSuccess(res, { statusCode: 200, data: invoice });
   },
+  deleteInvoice: async (req: Request, res: Response) => {
+    await invoiceService.deleteInvoice(
+      req.organization!.id,
+      req.user!.id,
+      req.params.id as string,
+    );
+    sendSuccess(res, { statusCode: 200, message: "Invoice deleted successfully" });
+  },
 };

@@ -28,6 +28,11 @@ router.get(
   asyncHandler(inventoryController.listItems),
 );
 router.get(
+  "/items/:productId",
+  requirePermission(PERMISSIONS.INVENTORY_MANAGE),
+  asyncHandler(inventoryController.getItem),
+);
+router.get(
   "/movements",
   requirePermission(PERMISSIONS.INVENTORY_MANAGE),
   validate(listInventoryMovementsSchema),

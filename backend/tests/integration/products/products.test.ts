@@ -26,9 +26,9 @@ describe("Products — scenario tests", () => {
         .set("Authorization", `Bearer ${token}`)
         .send({ name: "Widget A", type: "PHYSICAL", sellingPrice: 99.99 });
 
-      expect(res.status).toBe(201);
+      if (res.status !== 201) console.log(res.body); expect(res.status).toBe(201);
       expect(res.body.data.name).toBe("Widget A");
-      expect(res.body.data.sellingPrice).toBe(99.99);
+      expect(Number(res.body.data.sellingPrice)).toBe(99.99);
     });
 
     it("creates a product with a tax applied", async () => {
@@ -117,7 +117,7 @@ describe("Products — scenario tests", () => {
     });
   });
 
-  describe("PUT /api/v1/products/:id", () => {
+  describe("PATCH /api/v1/products/:id", () => {
     it("updates product price", async () => {
       const auth = await createAuthenticatedUser(app, { email: "prod.update@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Prod Update Org" });
@@ -125,12 +125,12 @@ describe("Products — scenario tests", () => {
       const product = await createProduct(org.id, { name: "Update Product", sellingPrice: 50 });
 
       const res = await request(app)
-        .put(`/api/v1/products/${product.id}`)
+        .patch(`/api/v1/products/${product.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send({ sellingPrice: 75 });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.sellingPrice).toBe(75);
+      expect(Number(res.body.data.sellingPrice)).toBe(75);
     });
   });
 

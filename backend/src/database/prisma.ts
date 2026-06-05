@@ -15,17 +15,19 @@ const PRISMA_LOG_LEVELS = [
  * Minimal logger facade so the database layer can run independently from any
  * app-specific logger implementation.
  */
+import logger from "../config/logger.js";
+
 const databaseLogger = {
   debug(message: string, metadata?: Record<string, unknown>): void {
     if (process.env.NODE_ENV === "development") {
-      console.debug(`[database] ${message}`, metadata ?? {});
+      logger.debug(metadata ?? {}, `[database] ${message}`);
     }
   },
   info(message: string, metadata?: Record<string, unknown>): void {
-    console.info(`[database] ${message}`, metadata ?? {});
+    logger.info(metadata ?? {}, `[database] ${message}`);
   },
   error(message: string, metadata?: Record<string, unknown>): void {
-    console.error(`[database] ${message}`, metadata ?? {});
+    logger.error(metadata ?? {}, `[database] ${message}`);
   },
 };
 

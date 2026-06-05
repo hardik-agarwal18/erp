@@ -192,6 +192,14 @@ export const productService = {
     return productRepository.listProducts(organizationId, filters, query);
   },
 
+  getProduct: async (organizationId: string, productId: string) => {
+    const product = await productRepository.findById(organizationId, productId);
+    if (!product) {
+      throw new ApiError(404, "Product not found");
+    }
+    return product;
+  },
+
   createCategory: async (
     organizationId: string,
     actorUserId: string,

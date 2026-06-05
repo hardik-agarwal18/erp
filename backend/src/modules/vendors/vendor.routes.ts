@@ -46,6 +46,12 @@ router.delete(
   asyncHandler(vendorController.archiveVendor),
 );
 router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.VENDORS_VIEW),
+  validate(vendorIdParamSchema),
+  asyncHandler(vendorController.getVendor),
+);
+router.get(
   "/:id/ledger",
   requirePermission(PERMISSIONS.VENDORS_VIEW),
   validate(vendorIdParamSchema),

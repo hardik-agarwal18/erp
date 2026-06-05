@@ -15,7 +15,7 @@ const switchAndGetToken = async (auth: any, orgId: string) => {
 };
 
 describe("Inventory — scenario tests", () => {
-  describe("GET /api/v1/inventory", () => {
+  describe("GET /api/v1/inventory/items", () => {
     it("lists inventory items for the authenticated org", async () => {
       const auth = await createAuthenticatedUser(app, { email: "inv.list@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Inv List Org" });
@@ -24,7 +24,7 @@ describe("Inventory — scenario tests", () => {
       await createInventoryItem(org.id, product.id, 100);
 
       const res = await request(app)
-        .get("/api/v1/inventory")
+        .get("/api/v1/inventory/items")
         .set("Authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
@@ -36,7 +36,7 @@ describe("Inventory — scenario tests", () => {
     });
   });
 
-  describe("GET /api/v1/inventory/:productId", () => {
+  describe("GET /api/v1/inventory/items/:productId", () => {
     it("returns current stock level for a product", async () => {
       const auth = await createAuthenticatedUser(app, { email: "inv.get@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Inv Get Org" });
@@ -45,15 +45,15 @@ describe("Inventory — scenario tests", () => {
       await createInventoryItem(org.id, product.id, 75);
 
       const res = await request(app)
-        .get(`/api/v1/inventory/${product.id}`)
+        .get(`/api/v1/inventory/items/${product.id}`)
         .set("Authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
-      expect(res.body.data.quantity).toBe(75);
+      expect(Number(res.body.data.quantity)).toBe(75);
     });
   });
 
-  describe("POST /api/v1/inventory/movements", () => {
+  describe("POST /api/v1/inventory/adjustments", () => {
     it("records an IN movement and increases stock", async () => {
       const auth = await createAuthenticatedUser(app, { email: "inv.in@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Inv IN Org" });
@@ -62,17 +62,17 @@ describe("Inventory — scenario tests", () => {
       await createInventoryItem(org.id, product.id, 10);
 
       const res = await request(app)
-        .post("/api/v1/inventory/movements")
+        .post("/api/v1/inventory/adjustments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ productId: product.id, type: "IN", quantity: 20, notes: "Restocked" });
+        .send({ productId: product.id, quantity: 20 });
 
       expect(res.status).toBe(201);
 
       // Verify stock increased
       const stockRes = await request(app)
-        .get(`/api/v1/inventory/${product.id}`)
+        .get(`/api/v1/inventory/items/${product.id}`)
         .set("Authorization", `Bearer ${token}`);
-      expect(stockRes.body.data.quantity).toBe(30);
+      expect(Number(stockRes.body.data.quantity)).toBe(30);
     });
 
     it("records an OUT movement and decreases stock", async () => {
@@ -83,16 +83,16 @@ describe("Inventory — scenario tests", () => {
       await createInventoryItem(org.id, product.id, 50);
 
       const res = await request(app)
-        .post("/api/v1/inventory/movements")
+        .post("/api/v1/inventory/adjustments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ productId: product.id, type: "OUT", quantity: 15 });
+        .send({ productId: product.id, quantity: -15 });
 
       expect(res.status).toBe(201);
 
       const stockRes = await request(app)
-        .get(`/api/v1/inventory/${product.id}`)
+        .get(`/api/v1/inventory/items/${product.id}`)
         .set("Authorization", `Bearer ${token}`);
-      expect(stockRes.body.data.quantity).toBe(35);
+      expect(Number(stockRes.body.data.quantity)).toBe(35);
     });
 
     it("returns 400 when quantity exceeds available stock (OUT movement)", async () => {
@@ -103,9 +103,9 @@ describe("Inventory — scenario tests", () => {
       await createInventoryItem(org.id, product.id, 5);
 
       const res = await request(app)
-        .post("/api/v1/inventory/movements")
+        .post("/api/v1/inventory/adjustments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ productId: product.id, type: "OUT", quantity: 100 });
+        .send({ productId: product.id, quantity: -100 });
 
       expect(res.status).toBeGreaterThanOrEqual(400);
     });
@@ -121,9 +121,9 @@ describe("Inventory — scenario tests", () => {
 
       // Create a movement first
       await request(app)
-        .post("/api/v1/inventory/movements")
+        .post("/api/v1/inventory/adjustments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ productId: product.id, type: "IN", quantity: 10 });
+        .send({ productId: product.id, quantity: 10 });
 
       const res = await request(app)
         .get("/api/v1/inventory/movements")

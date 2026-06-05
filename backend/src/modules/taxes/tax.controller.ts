@@ -37,4 +37,8 @@ export const taxController = {
     );
     sendSuccess(res, { statusCode: 200, data: taxes });
   },
+  getTax: async (req: Request, res: Response) => {
+    const tax = await taxService.getTax(req.organization!.id, req.params.id as string);
+    sendSuccess(res, { statusCode: 200, data: tax });
+  },
 };

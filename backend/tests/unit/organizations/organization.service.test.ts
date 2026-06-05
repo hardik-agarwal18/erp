@@ -39,7 +39,7 @@ jest.mock("../../../src/services/audit/index.js", () => ({
 jest.mock("../../../src/config/database.js", () => {
   const mockTx = {
     organization: { create: jest.fn(), update: jest.fn() },
-    permission: { upsert: jest.fn(), findMany: jest.fn() },
+    permission: { createMany: jest.fn(), findMany: jest.fn() },
     role: { create: jest.fn() },
     rolePermission: { createMany: jest.fn() },
     organizationMember: { create: jest.fn(), update: jest.fn() },
@@ -87,7 +87,7 @@ describe("organizationService", () => {
         capturedTx = {
           organization: { create: jest.fn().mockResolvedValue({ id: "o1", name: "Org", slug: "org-slug" }) },
           permission: {
-            upsert: jest.fn(),
+            createMany: jest.fn(),
             findMany: jest.fn().mockResolvedValue([{ id: "p1", name: "admin.full" }]),
           },
           role: { create: jest.fn().mockResolvedValue({ id: "r1", name: "owner" }) },

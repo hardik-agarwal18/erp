@@ -34,5 +34,7 @@ export const listExpensesSchema = z.object({
       ])
       .optional(),
     vendorId: z.string().uuid().optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
   }),
 });

@@ -41,6 +41,13 @@ export const productController = {
     );
     sendSuccess(res, { statusCode: 200, data: products });
   },
+  getProduct: async (req: Request, res: Response) => {
+    const product = await productService.getProduct(
+      req.organization!.id,
+      req.params.id as string,
+    );
+    sendSuccess(res, { statusCode: 200, data: product });
+  },
   createCategory: async (req: Request, res: Response) => {
     const category = await productService.createCategory(
       req.organization!.id,

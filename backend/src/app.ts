@@ -28,7 +28,37 @@ import reportRoutes from "./modules/reports/report.routes.js";
 const app = express();
 
 app.set("trust proxy", 1);
-app.use(pinoHttp({ logger }));
+import { loggerContext } from "./config/logger.js";
+import crypto from "crypto";
+
+app.use((req, _res, next) => {
+  const store = new Map<string, string>();
+  const reqId = crypto.randomUUID();
+  store.set("reqId", reqId);
+  req.id = reqId;
+  loggerContext.run(store, next);
+});
+
+app.use(pinoHttp({
+  logger,
+  genReqId: (req) => req.id,
+  serializers: {
+    req: (req) => ({
+      id: req.id,
+      method: req.method,
+      url: req.url,
+      query: req.query,
+      headers: {
+        host: req.headers.host,
+        "user-agent": req.headers["user-agent"],
+        "content-type": req.headers["content-type"],
+      },
+    }),
+    res: (res) => ({
+      statusCode: res.statusCode,
+    }),
+  },
+}));
 app.use(helmet());
 app.use(
   cors({

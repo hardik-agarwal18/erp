@@ -113,4 +113,12 @@ export const vendorService = {
       totalPurchases,
     };
   },
+
+  getVendor: async (organizationId: string, vendorId: string) => {
+    const vendor = await vendorRepository.findById(organizationId, vendorId);
+    if (!vendor) {
+      throw new ApiError(404, "Vendor not found");
+    }
+    return vendor;
+  },
 };

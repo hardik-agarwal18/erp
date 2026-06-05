@@ -1,4 +1,5 @@
 import prisma from "../../config/database.js";
+import logger from "../../config/logger.js";
 import ApiError from "../../utils/ApiError.js";
 import {
   AUDIT_ACTIONS,
@@ -57,6 +58,8 @@ export const expenseService = {
         tx,
       );
 
+      logger.info({ action: "expense.create", expenseId: created.id, amount: payload.amount }, "Expense created");
+
       return created;
     });
 
@@ -65,9 +68,66 @@ export const expenseService = {
 
   listExpenses: (
     organizationId: string,
-    filters: { category?: string; vendorId?: string },
+    filters: { category?: string; vendorId?: string; startDate?: string; endDate?: string },
     query: Record<string, unknown>,
   ) => {
     return expenseRepository.listExpenses(organizationId, filters, query);
+  },
+
+  getExpenseById: async (organizationId: string, expenseId: string) => {
+    const expense = await expenseRepository.findById(organizationId, expenseId);
+    if (!expense) throw new ApiError(404, "Expense not found");
+    return expense;
+  },
+
+  updateExpense: async (
+    organizationId: string,
+    actorUserId: string,
+    expenseId: string,
+    payload: Partial<CreateExpenseInput>,
+  ) => {
+    const expense = await expenseRepository.findById(organizationId, expenseId);
+    if (!expense) throw new ApiError(404, "Expense not found");
+
+    const updated = await prisma.expense.update({
+      where: { id: expenseId },
+      data: payload,
+    });
+
+    await auditService.record({
+      organizationId,
+      userId: actorUserId,
+      action: AUDIT_ACTIONS.EXPENSE_UPDATED,
+      entityType: AUDIT_ENTITY_TYPES.EXPENSE,
+      entityId: expenseId,
+    });
+
+    logger.info({ action: "expense.update", expenseId, amount: updated.amount }, "Expense updated");
+
+    return updated;
+  },
+
+  deleteExpense: async (
+    organizationId: string,
+    actorUserId: string,
+    expenseId: string,
+  ) => {
+    const expense = await expenseRepository.findById(organizationId, expenseId);
+    if (!expense) throw new ApiError(404, "Expense not found");
+
+    await prisma.expense.update({
+      where: { id: expenseId },
+      data: { deletedAt: new Date() },
+    });
+
+    await auditService.record({
+      organizationId,
+      userId: actorUserId,
+      action: AUDIT_ACTIONS.EXPENSE_DELETED,
+      entityType: AUDIT_ENTITY_TYPES.EXPENSE,
+      entityId: expenseId,
+    });
+
+    logger.info({ action: "expense.delete", expenseId }, "Expense deleted");
   },
 };

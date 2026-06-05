@@ -31,5 +31,20 @@ router.get(
   validate(listExpensesSchema),
   asyncHandler(expenseController.listExpenses),
 );
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.EXPENSES_MANAGE),
+  asyncHandler(expenseController.getExpenseById),
+);
+router.patch(
+  "/:id",
+  requirePermission(PERMISSIONS.EXPENSES_MANAGE),
+  asyncHandler(expenseController.updateExpense),
+);
+router.delete(
+  "/:id",
+  requirePermission(PERMISSIONS.EXPENSES_MANAGE),
+  asyncHandler(expenseController.deleteExpense),
+);
 
 export default router;

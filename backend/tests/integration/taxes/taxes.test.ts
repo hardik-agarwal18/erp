@@ -28,7 +28,7 @@ describe("Taxes — scenario tests", () => {
 
       expect(res.status).toBe(201);
       expect(res.body.data.name).toBe("GST 18%");
-      expect(res.body.data.rate).toBe(18);
+      expect(Number(res.body.data.rate)).toBe(18);
     });
 
     it("returns 400 when rate is missing", async () => {
@@ -84,7 +84,7 @@ describe("Taxes — scenario tests", () => {
     });
   });
 
-  describe("PUT /api/v1/taxes/:id", () => {
+  describe("PATCH /api/v1/taxes/:id", () => {
     it("updates the tax rate", async () => {
       const auth = await createAuthenticatedUser(app, { email: "tax.update@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Tax Update Org" });
@@ -92,12 +92,12 @@ describe("Taxes — scenario tests", () => {
       const tax = await createTax(org.id, { name: "Update Tax", rate: 10 });
 
       const res = await request(app)
-        .put(`/api/v1/taxes/${tax.id}`)
+        .patch(`/api/v1/taxes/${tax.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send({ rate: 20 });
 
       expect(res.status).toBe(200);
-      expect(res.body.data.rate).toBe(20);
+      expect(Number(res.body.data.rate)).toBe(20);
     });
   });
 

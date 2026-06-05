@@ -29,7 +29,7 @@ describe("Transactions — scenario tests", () => {
       await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ invoiceId: invoice.id, amount: 200, method: "BANK_TRANSFER", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invoice.id, amount: 200, paymentMethod: "BANK_TRANSFER", paymentDate: new Date().toISOString() });
 
       const res = await request(app)
         .get("/api/v1/transactions")
@@ -54,7 +54,7 @@ describe("Transactions — scenario tests", () => {
       await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ invoiceId: invoice.id, amount: 100, method: "CASH", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invoice.id, amount: 100, paymentMethod: "CASH", paymentDate: new Date().toISOString() });
 
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - 1);
@@ -87,7 +87,7 @@ describe("Transactions — scenario tests", () => {
       await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ invoiceId: invoice.id, amount: paymentAmount, method: "BANK_TRANSFER", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invoice.id, amount: paymentAmount, paymentMethod: "BANK_TRANSFER", paymentDate: new Date().toISOString() });
 
       // Verify transaction was created in DB
       const transactions = await prisma.transaction.findMany({
@@ -112,7 +112,7 @@ describe("Transactions — scenario tests", () => {
       await request(app)
         .post("/api/v1/payments")
         .set("Authorization", `Bearer ${token}`)
-        .send({ invoiceId: invoice.id, amount: 75, method: "CASH", paidAt: new Date().toISOString() });
+        .send({ invoiceId: invoice.id, amount: 75, paymentMethod: "CASH", paymentDate: new Date().toISOString() });
 
       const txns = await prisma.transaction.findMany({ where: { organizationId: org.id } });
       if (txns.length > 0) {

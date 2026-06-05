@@ -20,15 +20,20 @@ const getPermissionIds = async (permissionNames: string[]) => {
 
 const serializeRole = (
   role: Awaited<ReturnType<typeof roleRepository.listRoles>>[number],
-) => ({
-  id: role.id,
-  name: role.name,
-  description: role.description,
-  isSystem: role.isSystem,
-  permissions: role.rolePermissions.map((item) => item.permission),
-  createdAt: role.createdAt,
-  updatedAt: role.updatedAt,
-});
+) => {
+  if (!role.rolePermissions) {
+    console.error("ROLE HAS NO ROLEPERMISSIONS:", role);
+  }
+  return {
+    id: role.id,
+    name: role.name,
+    description: role.description,
+    isSystem: role.isSystem,
+    permissions: (role.rolePermissions || []).map((item) => item.permission),
+    createdAt: role.createdAt,
+    updatedAt: role.updatedAt,
+  };
+};
 
 export const roleService = {
   listRoles: async (organizationId: string) => {
@@ -70,7 +75,13 @@ export const roleService = {
       include: {
         rolePermissions: {
           select: {
-            permission: true,
+            permission: {
+              select: {
+                id: true,
+                name: true,
+                description: true,
+              },
+            },
           },
         },
       },
@@ -118,7 +129,13 @@ export const roleService = {
         include: {
           rolePermissions: {
             select: {
-              permission: true,
+              permission: {
+                select: {
+                  id: true,
+                  name: true,
+                  description: true,
+                },
+              },
             },
           },
         },
@@ -156,5 +173,13 @@ export const roleService = {
 
   listAvailablePermissions: () => {
     return DEFAULT_PERMISSIONS;
+  },
+
+  getRole: async (organizationId: string, roleId: string) => {
+    const role = await roleRepository.findRoleById(organizationId, roleId);
+    if (!role) {
+      throw new ApiError(404, "Role not found");
+    }
+    return serializeRole(role);
   },
 };

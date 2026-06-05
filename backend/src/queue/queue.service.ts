@@ -1,7 +1,7 @@
 import { Queue, JobsOptions } from "bullmq";
 import { queueConnection } from "./connection.js";
 import { QueueNames, MailJobPayload, PdfGenerationJobPayload, ReportJobPayload, AuditExportJobPayload } from "./types.js";
-import logger from "../config/logger.js";
+import logger, { loggerContext } from "../config/logger.js";
 import { env } from "../config/env.js";
 
 const defaultJobOptions: JobsOptions = {
@@ -23,11 +23,22 @@ export const createQueue = <DataType, ResultType = any, NameType extends string 
   const queue = new Queue<DataType, ResultType, NameType>(queueName, {
     connection: queueConnection as any,
     defaultJobOptions,
+    prefix: env.NODE_ENV === "test" ? "{test-bull}" : "{bull}",
   });
 
   queue.on("error", (error) => {
     logger.error({ error, queueName }, "Queue error");
   });
+
+  const originalAdd = queue.add.bind(queue);
+  queue.add = async (name: NameType, data: DataType, opts?: JobsOptions) => {
+    const store = loggerContext.getStore();
+    if (store) {
+      const _context = Object.fromEntries(store.entries());
+      data = { ...data, _context } as DataType;
+    }
+    return originalAdd(name, data, opts);
+  };
 
   queues.set(queueName, queue);
   return queue;

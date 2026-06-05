@@ -129,4 +129,12 @@ export const taxService = {
   ) => {
     return taxRepository.listTaxes(organizationId, search, query);
   },
+
+  getTax: async (organizationId: string, taxId: string) => {
+    const tax = await taxRepository.findById(organizationId, taxId);
+    if (!tax) {
+      throw new ApiError(404, "Tax not found");
+    }
+    return tax;
+  },
 };

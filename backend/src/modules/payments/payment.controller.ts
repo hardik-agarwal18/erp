@@ -20,4 +20,12 @@ export const paymentController = {
     );
     sendSuccess(res, { statusCode: 200, data: payments });
   },
+  deletePayment: async (req: Request, res: Response) => {
+    await paymentService.deletePayment(
+      req.organization!.id,
+      req.user!.id,
+      req.params.id as string,
+    );
+    sendSuccess(res, { statusCode: 200, message: "Payment deleted successfully" });
+  },
 };

@@ -44,4 +44,11 @@ export const vendorController = {
     );
     sendSuccess(res, { statusCode: 200, data: ledger });
   },
+  getVendor: async (req: Request, res: Response) => {
+    const vendor = await vendorService.getVendor(
+      req.organization!.id,
+      req.params.id as string,
+    );
+    sendSuccess(res, { statusCode: 200, data: vendor });
+  },
 };

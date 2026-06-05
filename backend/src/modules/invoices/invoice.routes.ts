@@ -45,5 +45,11 @@ router.patch(
   validate(updateInvoiceSchema),
   asyncHandler(invoiceController.updateInvoice),
 );
+router.delete(
+  "/:id",
+  requirePermission(PERMISSIONS.INVOICES_DELETE),
+  validate(invoiceIdParamSchema),
+  asyncHandler(invoiceController.deleteInvoice),
+);
 
 export default router;

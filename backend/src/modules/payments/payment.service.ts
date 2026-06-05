@@ -55,6 +55,9 @@ export const paymentService = {
       );
 
       const totalPaid = Number(totals._sum.amount ?? 0);
+      if (totalPaid > Number(scopedInvoice.totalAmount)) {
+        throw new ApiError(400, "Payment amount exceeds invoice total");
+      }
       const status = resolveInvoiceStatus(
         totalPaid,
         Number(scopedInvoice.totalAmount),
@@ -87,6 +90,7 @@ export const paymentService = {
         tx,
       );
 
+
       return payment;
     });
 
@@ -99,5 +103,28 @@ export const paymentService = {
     query: Record<string, unknown>,
   ) => {
     return paymentRepository.listPayments(organizationId, invoiceId, query);
+  },
+
+  deletePayment: async (
+    organizationId: string,
+    actorUserId: string,
+    paymentId: string,
+  ) => {
+    const payment = await paymentRepository.findById(organizationId, paymentId);
+    if (!payment) throw new ApiError(404, "Payment not found");
+
+    await prisma.payment.update({
+      where: { id: paymentId },
+      data: { deletedAt: new Date() },
+    });
+
+    await auditService.record({
+      organizationId,
+      userId: actorUserId,
+      action: AUDIT_ACTIONS.PAYMENT_DELETED,
+      entityType: AUDIT_ENTITY_TYPES.PAYMENT,
+      entityId: paymentId,
+      metadata: { invoiceId: payment.invoiceId },
+    });
   },
 };

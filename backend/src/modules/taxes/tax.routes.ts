@@ -33,6 +33,12 @@ router.get(
   validate(listTaxesSchema),
   asyncHandler(taxController.listTaxes),
 );
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.TAXES_MANAGE),
+  validate(taxIdParamSchema),
+  asyncHandler(taxController.getTax),
+);
 router.patch(
   "/:id",
   requirePermission(PERMISSIONS.TAXES_MANAGE),

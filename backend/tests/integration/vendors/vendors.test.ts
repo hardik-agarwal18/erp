@@ -100,7 +100,7 @@ describe("Vendors — scenario tests", () => {
     });
   });
 
-  describe("PUT /api/v1/vendors/:id", () => {
+  describe("PATCH /api/v1/vendors/:id", () => {
     it("updates vendor name", async () => {
       const auth = await createAuthenticatedUser(app, { email: "vendor.update@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Vendor Update Org" });
@@ -108,7 +108,7 @@ describe("Vendors — scenario tests", () => {
       const vendor = await createVendor(org.id, { name: "Old Vendor Name" });
 
       const res = await request(app)
-        .put(`/api/v1/vendors/${vendor.id}`)
+        .patch(`/api/v1/vendors/${vendor.id}`)
         .set("Authorization", `Bearer ${token}`)
         .send({ name: "Updated Vendor Name" });
 

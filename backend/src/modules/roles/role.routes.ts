@@ -26,6 +26,16 @@ router.get(
   requirePermission(PERMISSIONS.PERMISSIONS_VIEW),
   asyncHandler(roleController.listRoles),
 );
+router.get(
+  "/permissions",
+  requirePermission(PERMISSIONS.PERMISSIONS_VIEW),
+  asyncHandler(roleController.listPermissions),
+);
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.PERMISSIONS_VIEW),
+  asyncHandler(roleController.getRole),
+);
 router.patch(
   "/:id",
   validate(updateRoleSchema),

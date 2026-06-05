@@ -40,7 +40,7 @@ router.get(
   asyncHandler(reportController.taxReport),
 );
 router.get(
-  "/dashboard",
+  "/overview",
   requirePermission(PERMISSIONS.REPORTS_VIEW),
   asyncHandler(reportController.dashboard),
 );

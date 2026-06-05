@@ -58,6 +58,11 @@ export const paymentRepository = {
       where: { id: invoiceId, organizationId, deletedAt: null },
     });
   },
+  findById: (organizationId: string, paymentId: string) => {
+    return prisma.payment.findFirst({
+      where: { id: paymentId, organizationId, deletedAt: null },
+    });
+  },
   findInvoiceById: (
     organizationId: string,
     invoiceId: string,
