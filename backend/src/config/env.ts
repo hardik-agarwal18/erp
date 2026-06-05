@@ -17,6 +17,16 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(1),
   JWT_ACCESS_EXPIRES_IN: z.string().default("15m"),
   JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
+
+  // Storage settings
+  STORAGE_PROVIDER: z.enum(["local", "s3"]).default("local"),
+  STORAGE_LOCAL_PATH: z.string().default("./uploads"),
+  S3_REGION: z.string().optional(),
+  S3_ACCESS_KEY: z.string().optional(),
+  S3_SECRET_KEY: z.string().optional(),
+  S3_BUCKET: z.string().optional(),
+  S3_ENDPOINT: z.string().optional(),
+
   EMAIL_VERIFY_SECRET: z.string().min(1),
   PASSWORD_RESET_SECRET: z.string().min(1),
   SMTP_HOST: z.string().min(1),
@@ -33,6 +43,13 @@ const envSchema = z.object({
     .default(false),
   APP_URL: z.string().url().optional(),
   CORS_ORIGIN: z.string().optional(),
+  QUEUE_ENABLED: z
+    .preprocess((value) => {
+      if (value === "false" || value === false) return false;
+      return true;
+    }, z.boolean())
+    .optional()
+    .default(true),
 });
 
 const parsed = envSchema.safeParse(process.env);

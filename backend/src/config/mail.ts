@@ -1,7 +1,7 @@
 import nodemailer, { type Transporter } from "nodemailer";
 
 import { env } from "./env.js";
-import logger from "../utils/logger.js";
+import logger from "./logger.js";
 
 export const mailConfig = {
   host: env.SMTP_HOST,

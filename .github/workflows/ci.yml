@@ -1,0 +1,174 @@
+name: CI Pipeline (Parallelized)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Cancel in-progress runs for the same branch/PR to save CI minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------
+  # BACKEND JOBS
+  # ---------------------------------------------------------
+  backend-unit:
+    name: Backend 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './backend/package-lock.json'
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run test:unit
+
+  backend-integration:
+    name: Backend 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: erp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
+      TEST_REDIS_URL: redis://localhost:6379/1
+      JWT_ACCESS_SECRET: secret
+      JWT_REFRESH_SECRET: secret
+      EMAIL_VERIFY_SECRET: secret
+    defaults:
+      run:
+        working-directory: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './backend/package-lock.json'
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma db push --accept-data-loss
+      - run: npm run test:integration
+
+  # ---------------------------------------------------------
+  # FRONTEND JOBS
+  # ---------------------------------------------------------
+  frontend-static:
+    name: Frontend 🧹 Lint & Typecheck
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        script: [lint, typecheck]
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+      - run: npm ci
+      - run: npm run ${{ matrix.script }}
+
+  frontend-build:
+    name: Frontend 📦 Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+      - run: npm ci
+      - run: npm run build
+
+  # ---------------------------------------------------------
+  # END-TO-END JOB
+  # ---------------------------------------------------------
+  e2e:
+    name: Cypress 🌲 E2E Tests
+    needs: [backend-unit, backend-integration, frontend-static, frontend-build]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: erp_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
+      TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
+      REDIS_URL: redis://localhost:6379/0
+      TEST_REDIS_URL: redis://localhost:6379/1
+      JWT_ACCESS_SECRET: super-secret
+      JWT_REFRESH_SECRET: super-secret
+      EMAIL_VERIFY_SECRET: super-secret
+      PORT: 5000
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Start Backend
+        working-directory: ./backend
+        run: |
+          npm ci
+          npx prisma generate
+          npx prisma db push --accept-data-loss
+          npm run dev &
+          npx wait-on http://localhost:5000/health || sleep 10
+
+      - name: Start Frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+          npm run start &
+          npx wait-on http://localhost:3000 || sleep 10
+
+      - name: Run Cypress
+        working-directory: ./frontend
+        run: npm run cypress:run

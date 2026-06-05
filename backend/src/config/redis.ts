@@ -1,7 +1,7 @@
 import { createClient, RedisClientType } from "redis";
 
 import { env } from "./env.js";
-import logger from "../utils/logger.js";
+import logger from "./logger.js";
 
 const redisUrl =
   env.NODE_ENV === "test"

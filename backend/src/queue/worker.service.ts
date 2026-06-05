@@ -1,0 +1,82 @@
+import { Worker } from "bullmq";
+import { queueConnection } from "./connection.js";
+import { QueueNames, MailJobPayload } from "./types.js";
+import { processMailJob } from "./jobs/mail.job.js";
+import { processPdfGenerationJob } from "./jobs/pdf.job.js";
+import { processCleanupJob } from "./jobs/storage-cleanup.job.js";
+import { processReportJob } from "./jobs/report-export.job.js";
+import { processAuditExportJob } from "./jobs/audit-export.job.js";
+import { queueJobsCompletedTotal, queueJobsFailedTotal } from "../monitoring/metrics.js";
+import logger from "../config/logger.js";
+import { env } from "../config/env.js";
+
+const workers: Worker[] = [];
+
+export const startWorkers = () => {
+  if (!env.QUEUE_ENABLED) {
+    logger.info("Queues are disabled via QUEUE_ENABLED=false. Skipping worker startup.");
+    return;
+  }
+
+  logger.info("Starting background workers...");
+
+  // Helper to attach observability listeners
+  const attachWorkerObservability = (worker: Worker, queueName: string) => {
+    worker.on("completed", (job) => {
+      const durationMs = (job.finishedOn || Date.now()) - (job.processedOn || job.timestamp);
+      queueJobsCompletedTotal.labels(queueName).inc();
+      logger.info({ queueName, jobId: job.id, duration: durationMs, attemptsMade: job.attemptsMade }, "Job completed");
+    });
+
+    worker.on("failed", (job, err) => {
+      queueJobsFailedTotal.labels(queueName, err.message).inc();
+      logger.error({ queueName, jobId: job?.id, attemptsMade: job?.attemptsMade, failureReason: err.message }, "Job failed");
+    });
+
+    worker.on("stalled", (jobId) => {
+      logger.warn({ queueName, jobId }, "Job stalled");
+    });
+
+    worker.on("progress", (job, progress) => {
+      logger.debug({ queueName, jobId: job.id, progress }, "Job progress");
+    });
+
+    worker.on("error", (err) => {
+      logger.error({ queueName, error: err.message }, "Worker error");
+    });
+
+    workers.push(worker);
+  };
+
+  // Mail worker
+  const mailWorker = new Worker<MailJobPayload>(QueueNames.MAIL, processMailJob, { connection: queueConnection as any, concurrency: 5 });
+  attachWorkerObservability(mailWorker, QueueNames.MAIL);
+
+  // PDF Generation Worker
+  const pdfWorker = new Worker(QueueNames.PDF_GENERATION, processPdfGenerationJob, { connection: queueConnection as any, concurrency: 2 });
+  attachWorkerObservability(pdfWorker, QueueNames.PDF_GENERATION);
+
+  // Cleanup Worker
+  const cleanupWorker = new Worker(QueueNames.STORAGE_CLEANUP, processCleanupJob, { connection: queueConnection as any, concurrency: 1 });
+  attachWorkerObservability(cleanupWorker, QueueNames.STORAGE_CLEANUP);
+
+  // Report Worker
+  const reportWorker = new Worker(QueueNames.REPORTS, processReportJob, { connection: queueConnection as any, concurrency: 2 });
+  attachWorkerObservability(reportWorker, QueueNames.REPORTS);
+
+  // Audit Worker
+  const auditWorker = new Worker(QueueNames.AUDIT_EXPORTS, processAuditExportJob, { connection: queueConnection as any, concurrency: 1 });
+  attachWorkerObservability(auditWorker, QueueNames.AUDIT_EXPORTS);
+};
+
+export const shutdownWorkers = async () => {
+  logger.info("Shutting down background workers gracefully...");
+  
+  const closePromises = workers.map(async (worker) => {
+    await worker.close();
+    logger.info(`Worker for ${worker.name} closed.`);
+  });
+
+  await Promise.all(closePromises);
+  logger.info("All background workers shutdown complete.");
+};
