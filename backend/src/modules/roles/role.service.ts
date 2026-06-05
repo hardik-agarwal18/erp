@@ -21,9 +21,7 @@ const getPermissionIds = async (permissionNames: string[]) => {
 const serializeRole = (
   role: Awaited<ReturnType<typeof roleRepository.listRoles>>[number],
 ) => {
-  if (!role.rolePermissions) {
-    console.error("ROLE HAS NO ROLEPERMISSIONS:", role);
-  }
+  // rolePermissions validation removed for cleaner logs
   return {
     id: role.id,
     name: role.name,
@@ -112,7 +110,7 @@ export const roleService = {
       ? await getPermissionIds(payload.permissionNames)
       : null;
 
-    const updatedRole = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       if (permissionIds) {
         await tx.rolePermission.deleteMany({ where: { roleId } });
         await tx.rolePermission.createMany({
@@ -120,24 +118,11 @@ export const roleService = {
         });
       }
 
-      return tx.role.update({
+      await tx.role.update({
         where: { id: roleId },
         data: {
           name: payload.name ? slugify(payload.name).replace(/-/g, "_") : undefined,
           description: payload.description,
-        },
-        include: {
-          rolePermissions: {
-            select: {
-              permission: {
-                select: {
-                  id: true,
-                  name: true,
-                  description: true,
-                },
-              },
-            },
-          },
         },
       });
     });
@@ -148,7 +133,8 @@ export const roleService = {
     });
     await clearMembersPermissionCache(affectedMembers.map((member) => member.id));
 
-    return serializeRole(updatedRole);
+    const finalRole = await roleRepository.findRoleById(organizationId, roleId);
+    return serializeRole(finalRole as any);
   },
 
   deleteRole: async (organizationId: string, roleId: string) => {
