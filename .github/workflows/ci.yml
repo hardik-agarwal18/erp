@@ -9,6 +9,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
+  TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
+  REDIS_URL: redis://localhost:6379/0
+  TEST_REDIS_URL: redis://localhost:6379/1
+  JWT_ACCESS_SECRET: super-secret
+  JWT_REFRESH_SECRET: super-secret
+  EMAIL_VERIFY_SECRET: super-secret
+  PORT: 5000
+  NEXT_PUBLIC_API_URL: http://localhost:5000
+
 jobs:
   # ---------------------------------------------------------
   # BACKEND JOBS
@@ -50,12 +61,6 @@ jobs:
           - 6379:6379
         options: >-
           --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
-    env:
-      TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
-      TEST_REDIS_URL: redis://localhost:6379/1
-      JWT_ACCESS_SECRET: secret
-      JWT_REFRESH_SECRET: secret
-      EMAIL_VERIFY_SECRET: secret
     defaults:
       run:
         working-directory: ./backend
@@ -133,16 +138,6 @@ jobs:
           - 6379:6379
         options: >-
           --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
-    env:
-      DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
-      TEST_DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/erp_test?schema=public
-      REDIS_URL: redis://localhost:6379/0
-      TEST_REDIS_URL: redis://localhost:6379/1
-      JWT_ACCESS_SECRET: super-secret
-      JWT_REFRESH_SECRET: super-secret
-      EMAIL_VERIFY_SECRET: super-secret
-      PORT: 5000
-      NEXT_PUBLIC_API_URL: http://localhost:5000
     steps:
       - uses: actions/checkout@v4
       
