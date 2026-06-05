@@ -39,6 +39,12 @@ router.patch(
   validate(updateCustomerSchema),
   asyncHandler(customerController.updateCustomer),
 );
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.CUSTOMERS_VIEW),
+  validate(customerIdParamSchema),
+  asyncHandler(customerController.getCustomerById),
+);
 router.delete(
   "/:id",
   requirePermission(PERMISSIONS.CUSTOMERS_UPDATE),

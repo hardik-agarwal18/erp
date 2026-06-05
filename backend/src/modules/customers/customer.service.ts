@@ -95,6 +95,17 @@ export const customerService = {
     return customerRepository.listCustomers(organizationId, filters, query);
   },
 
+  getCustomerById: async (organizationId: string, customerId: string) => {
+    const customer = await customerRepository.findById(
+      organizationId,
+      customerId,
+    );
+    if (!customer) {
+      throw new ApiError(404, "Customer not found");
+    }
+    return customer;
+  },
+
   getLedger: async (organizationId: string, customerId: string) => {
     const customer = await customerRepository.findById(
       organizationId,

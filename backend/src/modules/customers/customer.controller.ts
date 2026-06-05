@@ -12,6 +12,13 @@ export const customerController = {
     );
     sendSuccess(res, { statusCode: 201, data: customer });
   },
+  getCustomerById: async (req: Request, res: Response) => {
+    const customer = await customerService.getCustomerById(
+      req.organization!.id,
+      req.params.id as string,
+    );
+    sendSuccess(res, { statusCode: 200, data: customer });
+  },
   updateCustomer: async (req: Request, res: Response) => {
     const customer = await customerService.updateCustomer(
       req.organization!.id,

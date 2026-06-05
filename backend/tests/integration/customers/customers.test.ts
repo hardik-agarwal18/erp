@@ -12,6 +12,7 @@ describe("Customers — scenario tests", () => {
       const org = await createOrganization(auth.user.id, { name: "Cust Create Org" });
       const tokenRes = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Cookie", auth.cookieHeader)
         .set("x-csrf-token", auth.csrfToken!)
         .send({ organizationId: org.id });
@@ -32,6 +33,7 @@ describe("Customers — scenario tests", () => {
       const org = await createOrganization(auth.user.id, { name: "Cust NoName Org" });
       const tokenRes = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Cookie", auth.cookieHeader)
         .set("x-csrf-token", auth.csrfToken!)
         .send({ organizationId: org.id });
@@ -61,6 +63,7 @@ describe("Customers — scenario tests", () => {
       const orgA = await createOrganization(authA.user.id, { name: "Cust List Org A" });
       const tokenResA = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${authA.accessToken}`)
         .set("Cookie", authA.cookieHeader)
         .set("x-csrf-token", authA.csrfToken!)
         .send({ organizationId: orgA.id });
@@ -87,6 +90,7 @@ describe("Customers — scenario tests", () => {
       const org = await createOrganization(auth.user.id, { name: "Cust Page Org" });
       const tokenRes = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Cookie", auth.cookieHeader)
         .set("x-csrf-token", auth.csrfToken!)
         .send({ organizationId: org.id });
@@ -100,7 +104,8 @@ describe("Customers — scenario tests", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.data.items).toHaveLength(2);
-      expect(res.body.data.pagination).toBeDefined();
+      expect(res.body.data.page).toBeDefined();
+      expect(res.body.data.total).toBeDefined();
     });
   });
 
@@ -111,6 +116,7 @@ describe("Customers — scenario tests", () => {
       const org = await createOrganization(auth.user.id, { name: "Cust Get Org" });
       const tokenRes = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Cookie", auth.cookieHeader)
         .set("x-csrf-token", auth.csrfToken!)
         .send({ organizationId: org.id });
@@ -131,6 +137,7 @@ describe("Customers — scenario tests", () => {
       const org = await createOrganization(auth.user.id, { name: "Cust 404 Org" });
       const tokenRes = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Cookie", auth.cookieHeader)
         .set("x-csrf-token", auth.csrfToken!)
         .send({ organizationId: org.id });
@@ -151,6 +158,7 @@ describe("Customers — scenario tests", () => {
       const org = await createOrganization(auth.user.id, { name: "Cust Update Org" });
       const tokenRes = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Cookie", auth.cookieHeader)
         .set("x-csrf-token", auth.csrfToken!)
         .send({ organizationId: org.id });
@@ -158,7 +166,7 @@ describe("Customers — scenario tests", () => {
       const customer = await createCustomer(org.id, { name: "Old Name" });
 
       const res = await request(app)
-        .put(`/api/v1/customers/${customer.id}`)
+        .patch(`/api/v1/customers/${customer.id}`)
         .set("Authorization", `Bearer ${accessToken}`)
         .send({ name: "New Name" });
 
@@ -174,6 +182,7 @@ describe("Customers — scenario tests", () => {
       const org = await createOrganization(auth.user.id, { name: "Cust Delete Org" });
       const tokenRes = await request(app)
         .post("/api/v1/auth/switch-workspace")
+        .set("Authorization", `Bearer ${auth.accessToken}`)
         .set("Cookie", auth.cookieHeader)
         .set("x-csrf-token", auth.csrfToken!)
         .send({ organizationId: org.id });

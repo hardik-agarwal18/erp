@@ -8,6 +8,7 @@ import { prisma } from "../../setup/testDb.js";
 const switchAndGetToken = async (auth: any, orgId: string) => {
   const res = await request(app)
     .post("/api/v1/auth/switch-workspace")
+    .set("Authorization", `Bearer ${auth.accessToken}`)
     .set("Cookie", auth.cookieHeader)
     .set("x-csrf-token", auth.csrfToken!)
     .send({ organizationId: orgId });
