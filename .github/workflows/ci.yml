@@ -252,7 +252,7 @@ jobs:
 
       - name: Upload Cypress Artifacts
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: always()
         with:
           name: cypress-artifacts
           path: |
