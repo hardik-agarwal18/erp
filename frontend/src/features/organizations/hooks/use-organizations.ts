@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMembers, inviteMember, updateMemberRole, removeMember, transferOwnership, getOrganization, updateOrganization, deleteOrganization, getAuditLogs } from "../service";
 import type { UpdateOrganizationSchema } from "../schema";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { listJoinRequests, approveJoinRequest, rejectJoinRequest } from "@/services/organization.service";
 
 export function useMembers() {
   const { workspace } = useWorkspace();
@@ -21,6 +22,17 @@ export function useAuditLogs() {
   return useQuery({
     queryKey: ["organizations", organizationId, "audit-logs"],
     queryFn: () => getAuditLogs(organizationId),
+    enabled: !!organizationId,
+  });
+}
+
+export function useJoinRequests() {
+  const { workspace } = useWorkspace();
+  const organizationId = workspace.id;
+
+  return useQuery({
+    queryKey: ["organizations", organizationId, "join-requests"],
+    queryFn: () => listJoinRequests(organizationId),
     enabled: !!organizationId,
   });
 }
@@ -48,6 +60,10 @@ export function useOrganizationMutations() {
 
   const invalidateAll = () => {
     queryClient.invalidateQueries({ queryKey: ["organizations"] });
+  };
+
+  const invalidateJoinRequests = () => {
+    queryClient.invalidateQueries({ queryKey: ["organizations", organizationId, "join-requests"] });
   };
 
   const invite = useMutation({
@@ -96,6 +112,19 @@ export function useOrganizationMutations() {
     },
   });
 
+  const approveRequest = useMutation({
+    mutationFn: (requestId: string) => approveJoinRequest({ organizationId, requestId }),
+    onSuccess: () => {
+      invalidateJoinRequests();
+      invalidateMembers();
+    },
+  });
+
+  const rejectRequest = useMutation({
+    mutationFn: (requestId: string) => rejectJoinRequest({ organizationId, requestId }),
+    onSuccess: invalidateJoinRequests,
+  });
+
   return {
     inviteMember: invite,
     updateMemberRole: updateRole,
@@ -103,5 +132,7 @@ export function useOrganizationMutations() {
     transferOwnership: transfer,
     updateOrganization: updateOrg,
     deleteOrganization: deleteOrg,
+    approveJoinRequest: approveRequest,
+    rejectJoinRequest: rejectRequest,
   };
 }

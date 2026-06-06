@@ -20,6 +20,10 @@ export const apiEndpoints = {
     updateMember: (organizationId: string, memberId: string) => `/organizations/${organizationId}/members/${memberId}`,
     removeMember: (organizationId: string, memberId: string) => `/organizations/${organizationId}/members/${memberId}`,
     transferOwnership: (organizationId: string) => `/organizations/${organizationId}/transfer-ownership`,
+    join: "/organizations/join",
+    joinRequests: (organizationId: string) => `/organizations/${organizationId}/join-requests`,
+    approveJoinRequest: (organizationId: string, requestId: string) => `/organizations/${organizationId}/join-requests/${requestId}/approve`,
+    rejectJoinRequest: (organizationId: string, requestId: string) => `/organizations/${organizationId}/join-requests/${requestId}/reject`,
   },
   permissions: {
     list: "/permissions",

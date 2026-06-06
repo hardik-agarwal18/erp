@@ -22,12 +22,14 @@ model User {
   organizationMembers     OrganizationMember[]
   passwordResetTokens     PasswordResetToken[]
   refreshSessions         RefreshSession[]
+  joinRequests            JoinRequest[]
 }
 
 model Organization {
   id                 String               @id @default(uuid())
   name               String
   slug               String               @unique
+  joinCode           String               @unique
   logo               String?
   ownerId            String
   settings           Json?
@@ -41,6 +43,7 @@ model Organization {
   invitations        Invitation[]
   invoices           Invoice[]
   invoiceSequences   InvoiceSequence?
+  joinRequests       JoinRequest[]
   owner              User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
   members            OrganizationMember[]
   payments           Payment[]
@@ -143,6 +146,24 @@ model RefreshSession {
   user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([activeOrganizationId])
+}
+
+model JoinRequest {
+  id             String            @id @default(uuid())
+  organizationId String
+  userId         String
+  status         JoinRequestStatus @default(PENDING)
+  message        String?
+  approvedById   String?
+  approvedAt     DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId, status])
+  @@index([userId])
 }
 
 model EmailVerificationToken {
@@ -485,4 +506,10 @@ enum ExpenseCategory {
   TRAVEL
   SOFTWARE
   OTHER
+}
+
+enum JoinRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
 }

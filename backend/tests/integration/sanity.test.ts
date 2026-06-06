@@ -35,6 +35,7 @@ describe("DB sanity check", () => {
           data: {
             name: "Org",
             slug: `org-${i}`,
+            joinCode: `ORG-${i}-XXXXXX`,
             ownerId: user.id,
           },
         });

@@ -1,6 +1,4 @@
 /// <reference types="cypress" />
-import "./index.d.ts";
-
 Cypress.Commands.add("login", (email, password = "Password123!") => {
   const apiUrl = Cypress.env("apiUrl");
 

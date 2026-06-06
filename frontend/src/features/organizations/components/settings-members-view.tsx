@@ -12,11 +12,13 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { PermissionGuard } from "@/components/ui/permission-guard";
 import { usePermissions } from "@/hooks/use-permissions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { InviteMemberDialog } from "./invite-member-dialog";
 import { ChangeRoleDialog } from "./change-role-dialog";
 import { RemoveMemberDialog } from "./remove-member-dialog";
 import { TransferOwnershipDialog } from "./transfer-ownership-dialog";
+import { JoinRequestsView } from "./join-requests-view";
 
 export type Member = {
   userId: string;
@@ -130,8 +132,17 @@ export function SettingsMembersView() {
         }
       />
 
-      <DataTable
-        columns={columns}
+      <Tabs defaultValue="members" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="members">Active Members</TabsTrigger>
+          {hasRole("owner", "admin") && (
+            <TabsTrigger value="requests">Join Requests</TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="members" className="space-y-6">
+          <DataTable
+            columns={columns}
         data={members || []}
         density="comfortable"
         isLoading={isLoading}
@@ -159,6 +170,14 @@ export function SettingsMembersView() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+
+        {hasRole("owner", "admin") && (
+          <TabsContent value="requests">
+            <JoinRequestsView />
+          </TabsContent>
+        )}
+      </Tabs>
 
       {/* Dialogs */}
       <PermissionGuard permission="member.invite">

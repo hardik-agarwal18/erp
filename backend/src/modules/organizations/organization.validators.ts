@@ -21,6 +21,7 @@ export const createOrganizationSchema = z.object({
     slug: z.string().min(2).max(120).optional(),
     logo: z.string().url().optional(),
     settings: settingsSchema.optional(),
+    invites: z.array(z.string().email()).optional(),
   }),
 });
 

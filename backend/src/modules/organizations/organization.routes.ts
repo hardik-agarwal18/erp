@@ -19,6 +19,11 @@ import {
   updateMemberSchema,
   updateOrganizationSchema,
 } from "./organization.validators.js";
+import { joinRequestController } from "./join-request.controller.js";
+import {
+  createJoinRequestSchema,
+  joinRequestIdParamSchema,
+} from "./join-request.validators.js";
 
 const router = Router();
 
@@ -28,6 +33,11 @@ router.post(
   "/",
   validate(createOrganizationSchema),
   asyncHandler(organizationController.createOrganization),
+);
+router.post(
+  "/join",
+  validate(createJoinRequestSchema),
+  asyncHandler(joinRequestController.createJoinRequest),
 );
 router.get("/", asyncHandler(organizationController.listOrganizations));
 
@@ -101,6 +111,27 @@ router.post(
   requireRole("owner"),
   requirePermission(PERMISSIONS.OWNERSHIP_TRANSFER),
   asyncHandler(organizationController.transferOwnership),
+);
+router.get(
+  "/:id/join-requests",
+  validate(organizationIdParamSchema),
+  organizationContextMiddleware,
+  requireRole("owner", "admin"),
+  asyncHandler(joinRequestController.listJoinRequests),
+);
+router.post(
+  "/:id/join-requests/:requestId/approve",
+  validate(joinRequestIdParamSchema),
+  organizationContextMiddleware,
+  requireRole("owner", "admin"),
+  asyncHandler(joinRequestController.approveJoinRequest),
+);
+router.post(
+  "/:id/join-requests/:requestId/reject",
+  validate(joinRequestIdParamSchema),
+  organizationContextMiddleware,
+  requireRole("owner", "admin"),
+  asyncHandler(joinRequestController.rejectJoinRequest),
 );
 
 export default router;

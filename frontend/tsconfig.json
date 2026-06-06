@@ -38,6 +38,8 @@
     "node_modules",
     "legacy-app",
     "legacy-components",
-    "legacy-lib"
+    "legacy-lib",
+    "cypress",
+    "cypress.config.ts"
   ]
 }

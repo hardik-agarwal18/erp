@@ -139,12 +139,14 @@ export const organizationService = {
     payload: CreateOrganizationInput,
   ) => {
     const slug = await buildUniqueSlug(payload.slug ?? payload.name);
+    const joinCode = `${payload.name.substring(0, 4).toUpperCase().replace(/[^A-Z]/g, "O")}-${randomBytes(3).toString("hex").toUpperCase()}`;
 
     const organization = await prisma.$transaction(async (tx) => {
       const createdOrganization = await tx.organization.create({
         data: {
           name: payload.name,
           slug,
+          joinCode,
           logo: payload.logo,
           settings: payload.settings as Prisma.InputJsonValue | undefined,
           ownerId: userId,
@@ -185,6 +187,20 @@ export const organizationService = {
       userId,
       organization.id,
     );
+
+    if (payload.invites && payload.invites.length > 0) {
+      await Promise.allSettled(
+        payload.invites.map((email) =>
+          organizationService.inviteMember(organization.id, userId, {
+            email,
+            roleName: "member",
+          }).catch(err => {
+            // Log error but don't fail org creation
+            console.error(`Failed to invite ${email} during onboarding`, err);
+          })
+        )
+      );
+    }
 
     return {
       ...organization,

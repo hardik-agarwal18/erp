@@ -3,6 +3,7 @@ export interface CreateOrganizationInput {
   slug?: string;
   logo?: string;
   settings?: Record<string, unknown>;
+  invites?: string[];
 }
 
 export interface UpdateOrganizationInput {
