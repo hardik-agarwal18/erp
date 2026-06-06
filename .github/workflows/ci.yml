@@ -204,6 +204,13 @@ jobs:
           path: frontend/node_modules
           key: ${{ runner.os }}-frontend-node-${{ hashFiles('frontend/package-lock.json') }}
 
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        id: cache-cypress
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('frontend/package-lock.json') }}
+
       - name: Install Backend Deps
         if: steps.cache-backend.outputs.cache-hit != 'true'
         working-directory: ./backend
@@ -239,7 +246,9 @@ jobs:
 
       - name: Run Cypress
         working-directory: ./frontend
-        run: npm run cypress:run
+        run: |
+          npx cypress install
+          npm run cypress:run
 
       - name: Upload Cypress Artifacts
         uses: actions/upload-artifact@v4
