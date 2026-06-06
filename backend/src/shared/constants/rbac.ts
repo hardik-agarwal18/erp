@@ -9,6 +9,13 @@ export const SYSTEM_ROLE_NAMES = [
 
 export type SystemRoleName = (typeof SYSTEM_ROLE_NAMES)[number];
 
+export const DEFAULT_PERMISSIONS = Object.values(NEW_PERMISSIONS).map(
+  (permission) => ({
+    name: permission,
+    description: permission,
+  }),
+);
+
 const ownerNew = Object.values(NEW_PERMISSIONS);
 
 export const SYSTEM_ROLE_PERMISSIONS: Record<SystemRoleName, string[]> = {
