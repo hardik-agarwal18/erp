@@ -53,3 +53,15 @@ export const clearMembersPermissionCache = async (memberIds: string[]) => {
 
   await redisClient.del(memberIds.map((memberId) => permissionCacheKey(memberId)));
 };
+
+export const hasPermission = (userPermissions: string[], permission: string) => {
+  return userPermissions.includes(permission);
+};
+
+export const hasAnyPermission = (userPermissions: string[], permissions: string[]) => {
+  return permissions.some((permission) => userPermissions.includes(permission));
+};
+
+export const hasAllPermissions = (userPermissions: string[], permissions: string[]) => {
+  return permissions.every((permission) => userPermissions.includes(permission));
+};

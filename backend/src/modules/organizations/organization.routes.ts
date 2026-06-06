@@ -7,7 +7,7 @@ import {
 } from "../../middleware/tenant.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import asyncHandler from "../../utils/asyncHandler.js";
-import { PERMISSIONS } from "../../shared/constants/rbac.js";
+import { PERMISSIONS } from "../../shared/constants/permissions.js";
 import { organizationController } from "./organization.controller.js";
 import { organizationContextMiddleware } from "./organization.middleware.js";
 import {
@@ -57,35 +57,35 @@ router.get(
   "/:id/members",
   validate(organizationIdParamSchema),
   organizationContextMiddleware,
-  requirePermission(PERMISSIONS.ORGANIZATION_MEMBERS),
+  requirePermission(PERMISSIONS.MEMBER_VIEW),
   asyncHandler(organizationController.listMembers),
 );
 router.get(
   "/:id/audit-logs",
   validate(organizationIdParamSchema),
   organizationContextMiddleware,
-  requirePermission(PERMISSIONS.AUDIT_LOGS_VIEW),
+  requirePermission(PERMISSIONS.AUDIT_READ),
   asyncHandler(organizationController.listAuditLogs),
 );
 router.post(
   "/:id/members/invite",
   validate(inviteMemberSchema),
   organizationContextMiddleware,
-  requirePermission(PERMISSIONS.ORGANIZATION_INVITATIONS),
+  requirePermission(PERMISSIONS.MEMBER_INVITE),
   asyncHandler(organizationController.inviteMember),
 );
 router.patch(
   "/:id/members/:memberId",
   validate(updateMemberSchema),
   organizationContextMiddleware,
-  requirePermission(PERMISSIONS.ORGANIZATION_MEMBERS),
+  requirePermission(PERMISSIONS.MEMBER_UPDATE),
   asyncHandler(organizationController.updateMemberRole),
 );
 router.delete(
   "/:id/members/:memberId",
   validate(organizationMemberParamsSchema),
   organizationContextMiddleware,
-  requirePermission(PERMISSIONS.USERS_DELETE),
+  requirePermission(PERMISSIONS.MEMBER_REMOVE),
   asyncHandler(organizationController.removeMember),
 );
 router.post(
@@ -99,7 +99,7 @@ router.post(
   validate(transferOwnershipSchema),
   organizationContextMiddleware,
   requireRole("owner"),
-  requirePermission(PERMISSIONS.ORGANIZATION_TRANSFER_OWNERSHIP),
+  requirePermission(PERMISSIONS.OWNERSHIP_TRANSFER),
   asyncHandler(organizationController.transferOwnership),
 );
 

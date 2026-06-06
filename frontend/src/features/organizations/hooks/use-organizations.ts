@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMembers, inviteMember, updateMemberRole, removeMember, transferOwnership, getOrganization, updateOrganization, deleteOrganization } from "../service";
+import { getMembers, inviteMember, updateMemberRole, removeMember, transferOwnership, getOrganization, updateOrganization, deleteOrganization, getAuditLogs } from "../service";
 import type { UpdateOrganizationSchema } from "../schema";
 import { useWorkspace } from "@/hooks/use-workspace";
 
@@ -10,6 +10,17 @@ export function useMembers() {
   return useQuery({
     queryKey: ["organizations", organizationId, "members"],
     queryFn: () => getMembers(organizationId),
+    enabled: !!organizationId,
+  });
+}
+
+export function useAuditLogs() {
+  const { workspace } = useWorkspace();
+  const organizationId = workspace.id;
+
+  return useQuery({
+    queryKey: ["organizations", organizationId, "audit-logs"],
+    queryFn: () => getAuditLogs(organizationId),
     enabled: !!organizationId,
   });
 }
@@ -32,6 +43,7 @@ export function useOrganizationMutations() {
 
   const invalidateMembers = () => {
     queryClient.invalidateQueries({ queryKey: ["organizations", organizationId, "members"] });
+    queryClient.invalidateQueries({ queryKey: ["organizations", organizationId, "audit-logs"] });
   };
 
   const invalidateAll = () => {

@@ -1,7 +1,7 @@
 import { apiClient } from "@/api/client";
 import { apiEndpoints } from "@/api/endpoints";
 import type { ApiResponse } from "@/api/types";
-import type { OrganizationMember, MemberRole, OrganizationDTO, InvitationDTO, OrganizationMemberDTO } from "./types";
+import type { OrganizationMember, MemberRole, OrganizationDTO, InvitationDTO, OrganizationMemberDTO, AuditLogDTO } from "./types";
 import type { InviteMemberSchema, UpdateOrganizationSchema } from "./schema";
 
 type BackendMember = {
@@ -72,4 +72,9 @@ export async function transferOwnership(organizationId: string, memberId: string
 
 export async function deleteOrganization(organizationId: string) {
   await apiClient.delete(apiEndpoints.organizations.details(organizationId));
+}
+
+export async function getAuditLogs(organizationId: string) {
+  const response = await apiClient.get<ApiResponse<AuditLogDTO[]>>(apiEndpoints.auditLogs.list(organizationId));
+  return response.data.data;
 }

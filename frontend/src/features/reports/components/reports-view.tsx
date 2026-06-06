@@ -1,81 +1,192 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import { Download, Loader2, Search, Filter, Calendar as CalendarIcon, User as UserIcon } from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
+
 import { PageHeader } from "@/components/layout/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { DataTable } from "@/components/ui/data-table";
+import { Badge } from "@/components/ui/badge";
 import { useExport } from "../hooks/use-export";
 
-function ReportExportCard({ title, description, reportType }: { title: string; description: string; reportType: string }) {
+import { MetricCard } from "@/features/dashboard/components/metric-card";
+import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
+
+type ReportDefinition = {
+  id: string;
+  name: string;
+  description: string;
+  category: "Financial" | "Operations" | "Tax";
+  lastGenerated: string | null;
+  frequency: "Monthly" | "On-Demand" | "Quarterly";
+  type: string;
+};
+
+const REPORTS_CATALOG: ReportDefinition[] = [
+  { id: "sales", name: "Sales Ledger", description: "Export all invoices, grouped by customer, including totals and status.", category: "Financial", lastGenerated: "2026-06-05 14:30", frequency: "Monthly", type: "sales" },
+  { id: "inventory", name: "Inventory Valuation", description: "Export current stock levels, valuation, and low stock items.", category: "Operations", lastGenerated: "2026-06-01 09:00", frequency: "On-Demand", type: "inventory" },
+  { id: "tax", name: "Tax Summary", description: "Export total tax collected vs paid over a period.", category: "Tax", lastGenerated: "2026-05-31 18:45", frequency: "Quarterly", type: "tax" },
+  { id: "expenses", name: "Expense Breakdown", description: "Export categorized business expenses.", category: "Financial", lastGenerated: null, frequency: "Monthly", type: "expenses" },
+];
+
+function ReportActionCell({ reportType }: { reportType: string }) {
   const { requestExport, isRequesting, status, url, reset } = useExport();
 
+  if (status === "completed" && url) {
+    return (
+      <div className="flex items-center justify-end gap-2">
+        <p className="text-xs text-green-600 font-medium">Ready</p>
+        <Button asChild size="sm" variant="default">
+          <a href={url} target="_blank" rel="noreferrer">Download</a>
+        </Button>
+        <Button size="sm" variant="ghost" onClick={reset}>Reset</Button>
+      </div>
+    );
+  }
+
+  if (status === "failed") {
+    return (
+      <div className="flex items-center justify-end gap-2">
+        <p className="text-xs text-rose-600 font-medium">Failed</p>
+        <Button size="sm" variant="outline" onClick={reset}>Retry</Button>
+      </div>
+    );
+  }
+
+  if (isRequesting || (status && status !== "completed")) {
+    return (
+      <div className="flex items-center justify-end gap-2 text-sm text-slate-500">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span className="text-xs capitalize">{status || "queued"}...</span>
+      </div>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {status === "completed" && url ? (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-green-600 font-medium">Export completed successfully.</p>
-            <div className="flex gap-3">
-              <Button asChild>
-                <a href={url} target="_blank" rel="noreferrer">Download CSV</a>
-              </Button>
-              <Button variant="outline" onClick={reset}>Export Another</Button>
-            </div>
-          </div>
-        ) : status === "failed" ? (
-          <div className="flex flex-col gap-3">
-            <p className="text-sm text-rose-600 font-medium">Export failed.</p>
-            <Button variant="outline" onClick={reset}>Try Again</Button>
-          </div>
-        ) : isRequesting || (status && status !== "completed") ? (
-          <div className="flex items-center gap-3 text-sm text-slate-600">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Generating export... ({status || "queued"})
-          </div>
-        ) : (
-          <Button onClick={() => requestExport(reportType)}>
-            <Download className="mr-2 h-4 w-4" />
-            Request Export
-          </Button>
-        )}
-      </CardContent>
-    </Card>
+    <div className="flex justify-end">
+      <Button size="sm" variant="outline" onClick={() => requestExport(reportType)}>
+        <Download className="mr-2 h-3 w-3" />
+        Generate
+      </Button>
+    </div>
   );
 }
 
 export function ReportsView() {
+  const [search, setSearch] = useState("");
+
+  const columns = useMemo<ColumnDef<ReportDefinition>[]>(
+    () => [
+      {
+        accessorKey: "name",
+        header: "Report Name",
+        cell: ({ row }) => (
+          <div>
+            <p className="font-medium text-foreground">{row.original.name}</p>
+            <p className="text-xs text-muted-foreground">{row.original.description}</p>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "category",
+        header: "Category",
+        cell: ({ row }) => <Badge variant="neutral">{row.original.category}</Badge>,
+      },
+      {
+        accessorKey: "lastGenerated",
+        header: "Last Generated",
+        cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.lastGenerated || "Never"}</span>,
+      },
+      {
+        accessorKey: "frequency",
+        header: "Frequency",
+      },
+      {
+        id: "actions",
+        header: "",
+        cell: ({ row }) => <ReportActionCell reportType={row.original.type} />,
+      },
+    ],
+    []
+  );
+
+  const filteredReports = useMemo(() => {
+    return REPORTS_CATALOG.filter(report => 
+      report.name.toLowerCase().includes(search.toLowerCase()) || 
+      report.description.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [search]);
+
+  const recentReports: ActionListItem[] = [
+    { id: "r1", title: "Sales Ledger", detail: "Generated by Ava Nolan", timestamp: "2 hours ago" },
+    { id: "r2", title: "Inventory Valuation", detail: "Generated by System", timestamp: "Yesterday" },
+    { id: "r3", title: "Tax Summary", detail: "Generated by Finance Dept", timestamp: "Last Week" },
+  ];
+
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-5">
       <PageHeader
-        title="Reports & Analytics"
-        description="Generate and export comprehensive CSV reports from your ERP data."
+        title="Reports Dashboard"
+        description="Generate, track, and export comprehensive CSV/PDF reports from your ERP data."
       />
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <ReportExportCard
-          title="Sales Report"
-          description="Export all invoices, grouped by customer, including totals and status."
-          reportType="sales"
-        />
-        <ReportExportCard
-          title="Inventory Report"
-          description="Export current stock levels, valuation, and low stock items."
-          reportType="inventory"
-        />
-        <ReportExportCard
-          title="Tax Report"
-          description="Export total tax collected vs paid over a period."
-          reportType="tax"
-        />
-        <ReportExportCard
-          title="Expense Report"
-          description="Export categorized business expenses."
-          reportType="expenses"
-        />
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+        <MetricCard label="Revenue (MTD)" value="$145,500" detail="Gross Sales" trend={2.1} />
+        <MetricCard label="Expenses (MTD)" value="$64,200" detail="Operational & Payroll" trend={0.8} />
+        <MetricCard label="Net Profit (MTD)" value="$81,300" detail="Operating Profit" trend={4.5} />
+        <MetricCard label="Inventory Value" value="$215,800" detail="Current Warehouse Stock" />
+        <MetricCard label="Purchasing Spend" value="$42,100" detail="Procurement MTD" trend={-1.2} />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <Card className="h-full">
+            <CardHeader className="pb-3 border-b border-border mb-4">
+              <CardTitle>Report Catalog</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3 items-center">
+                <div className="relative flex-1 w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    className="pl-9 bg-background"
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search reports by name or description..."
+                    value={search}
+                  />
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 shrink-0">
+                  <Button variant="outline" size="sm">
+                    Category
+                    <Filter className="ml-2 h-3 w-3 text-muted-foreground" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Date Range
+                    <CalendarIcon className="ml-2 h-3 w-3 text-muted-foreground" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    Owner
+                    <UserIcon className="ml-2 h-3 w-3 text-muted-foreground" />
+                  </Button>
+                </div>
+              </div>
+
+              <DataTable
+                columns={columns}
+                data={filteredReports}
+                density="comfortable"
+                emptyMessage="No reports found matching your criteria."
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="space-y-4">
+          <ActionList title="Recent Exports" items={recentReports} emptyMessage="No recently generated reports." />
+        </div>
       </div>
     </div>
   );

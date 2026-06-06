@@ -11,46 +11,30 @@ import {
   auditService,
 } from "../services/audit/index.js";
 
+import { PERMISSIONS as NEW_PERMISSIONS } from "../shared/constants/permissions.js";
+import { LEGACY_PERMISSIONS, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_NAMES } from "../shared/constants/rbac.js";
+
 const DEFAULT_SUPER_ADMIN_PASSWORD = "ChangeMe123!";
 const DEFAULT_ORGANIZATION_SLUG = "default-organization";
 
-const ROLE_DEFINITIONS = [
+const PLATFORM_ROLES = [
   {
     name: "SUPER_ADMIN",
     description: "Platform bootstrap administrator for the default tenant.",
   },
-  {
-    name: "ORGANIZATION_OWNER",
-    description: "Owns the organization and can manage all ERP modules.",
-  },
-  {
-    name: "ADMIN",
-    description: "Administrative operator with broad ERP access.",
-  },
-  {
-    name: "MANAGER",
-    description: "Operational manager with day-to-day supervisory access.",
-  },
-  {
-    name: "EMPLOYEE",
-    description: "Standard employee role with limited operational access.",
-  },
 ] as const;
 
-const PERMISSIONS = [
-  "CUSTOMER_CREATE",
-  "CUSTOMER_READ",
-  "CUSTOMER_UPDATE",
-  "CUSTOMER_DELETE",
-  "PRODUCT_CREATE",
-  "PRODUCT_READ",
-  "PRODUCT_UPDATE",
-  "PRODUCT_DELETE",
-  "INVOICE_CREATE",
-  "INVOICE_READ",
-  "INVOICE_UPDATE",
-  "INVOICE_DELETE",
+const ORGANIZATION_ROLES = [
+  { name: "owner", description: "Owns the organization and can manage all ERP modules." },
+  { name: "admin", description: "Administrative operator with broad ERP access." },
+  { name: "manager", description: "Operational manager with day-to-day supervisory access." },
+  { name: "member", description: "Standard employee role with limited operational access." },
 ] as const;
+
+const ALL_PERMISSIONS = [
+  ...Object.values(NEW_PERMISSIONS),
+  ...Object.values(LEGACY_PERMISSIONS),
+];
 
 /**
  * Seeds the baseline ERP tenant, RBAC catalog, and bootstrap super admin.
@@ -66,7 +50,7 @@ export async function seedDatabase(): Promise<void> {
   );
 
   await prisma.$transaction(async (tx: DatabaseTransactionClient) => {
-    for (const permissionName of PERMISSIONS) {
+    for (const permissionName of ALL_PERMISSIONS) {
       await tx.permission.upsert({
         where: {
           name: permissionName,
@@ -74,10 +58,7 @@ export async function seedDatabase(): Promise<void> {
         update: {},
         create: {
           name: permissionName,
-          description: permissionName
-            .toLowerCase()
-            .split("_")
-            .join(" "),
+          description: permissionName,
         },
       });
     }
@@ -121,7 +102,7 @@ export async function seedDatabase(): Promise<void> {
     const permissionRecords = await tx.permission.findMany({
       where: {
         name: {
-          in: [...PERMISSIONS],
+          in: ALL_PERMISSIONS,
         },
       },
     });
@@ -130,7 +111,9 @@ export async function seedDatabase(): Promise<void> {
       permissionRecords.map((permission) => [permission.name, permission]),
     );
 
-    for (const roleDefinition of ROLE_DEFINITIONS) {
+    const roleDefinitions = [...PLATFORM_ROLES, ...ORGANIZATION_ROLES];
+    
+    for (const roleDefinition of roleDefinitions) {
       const role = await tx.role.upsert({
         where: {
           organizationId_name: {
@@ -156,13 +139,29 @@ export async function seedDatabase(): Promise<void> {
         },
       });
 
-      await tx.rolePermission.createMany({
-        data: permissionRecords.map((permission) => ({
-          roleId: role.id,
-          permissionId: permission.id,
-        })),
-        skipDuplicates: true,
-      });
+      // Assignment Logic:
+      // SUPER_ADMIN gets all permissions.
+      // Organization roles get permissions explicitly defined in SYSTEM_ROLE_PERMISSIONS.
+      let permissionsToAssign: string[] = [];
+      if (roleDefinition.name === "SUPER_ADMIN") {
+        permissionsToAssign = ALL_PERMISSIONS;
+      } else if (SYSTEM_ROLE_NAMES.includes(roleDefinition.name as any)) {
+        permissionsToAssign = SYSTEM_ROLE_PERMISSIONS[roleDefinition.name as keyof typeof SYSTEM_ROLE_PERMISSIONS] || [];
+      }
+
+      const permissionIdsToAssign = permissionRecords
+        .filter((p) => permissionsToAssign.includes(p.name))
+        .map((p) => p.id);
+
+      if (permissionIdsToAssign.length > 0) {
+        await tx.rolePermission.createMany({
+          data: permissionIdsToAssign.map((permissionId) => ({
+            roleId: role.id,
+            permissionId,
+          })),
+          skipDuplicates: true,
+        });
+      }
     }
 
     const ownerRole = await tx.role.findUniqueOrThrow({
@@ -215,9 +214,9 @@ export async function seedDatabase(): Promise<void> {
         entityType: AUDIT_ENTITY_TYPES.ORGANIZATION,
         entityId: organization.id,
         metadata: {
-          seededRoles: ROLE_DEFINITIONS.map((role) => role.name),
-          seededPermissions: [...PERMISSIONS],
-          customerCreatePermissionId: customerCreatePermission?.id ?? null,
+          seededRoles: roleDefinitions.map((role) => role.name),
+          seededPermissions: ALL_PERMISSIONS,
+          customerCreatePermissionId: permissionsByName.get(NEW_PERMISSIONS.CUSTOMERS_CREATE)?.id ?? null,
         },
       },
       tx,

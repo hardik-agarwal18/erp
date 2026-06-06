@@ -1,54 +1,82 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
+import { ColumnDef } from "@tanstack/react-table";
 
-import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import type { PurchaseOrderDetail } from "../types";
 import { formatCurrency } from "@/utils/formatters";
 import { PurchaseStatusBadge } from "./purchase-status-badge";
 
 export function PurchaseTable({ orders }: { orders: PurchaseOrderDetail[] }) {
+  const columns = useMemo<ColumnDef<PurchaseOrderDetail>[]>(
+    () => [
+      {
+        accessorKey: "vendor",
+        header: "Vendor",
+        cell: ({ row }) => <span className="font-medium text-foreground">{row.original.vendor}</span>,
+      },
+      {
+        accessorKey: "number",
+        header: "PO #",
+      },
+      {
+        accessorKey: "orderDate",
+        header: "Order Date",
+        cell: ({ row }) => <span>{row.original.orderDate ?? "-"}</span>,
+      },
+      {
+        accessorKey: "expectedDate",
+        header: "Expected",
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => <PurchaseStatusBadge status={row.original.status} />,
+      },
+      {
+        accessorKey: "amount",
+        header: () => <div className="text-right">Amount</div>,
+        cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.amount)}</div>,
+      },
+      {
+        accessorKey: "buyer",
+        header: "Buyer",
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => {
+          const order = row.original;
+          return (
+            <div className="flex items-center gap-3 text-sm">
+              <Link
+                className="font-medium text-foreground hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
+                href={`/purchases/${order.id}`}
+              >
+                View
+              </Link>
+              <Link
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                href="/purchases/goods-received-notes"
+              >
+                GRNs
+              </Link>
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
+
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200">
-      <Table>
-        <TableHead>
-          <tr>
-            <TableHeaderCell>Vendor</TableHeaderCell>
-            <TableHeaderCell>PO #</TableHeaderCell>
-            <TableHeaderCell>Order Date</TableHeaderCell>
-            <TableHeaderCell>Expected</TableHeaderCell>
-            <TableHeaderCell>Status</TableHeaderCell>
-            <TableHeaderCell className="text-right">Amount</TableHeaderCell>
-            <TableHeaderCell>Buyer</TableHeaderCell>
-            <TableHeaderCell>Actions</TableHeaderCell>
-          </tr>
-        </TableHead>
-        <TableBody>
-          {orders.map((order) => (
-            <TableRow key={order.id}>
-              <TableCell className="font-medium text-slate-950">{order.vendor}</TableCell>
-              <TableCell>{order.number}</TableCell>
-              <TableCell>{order.orderDate ?? "-"}</TableCell>
-              <TableCell>{order.expectedDate}</TableCell>
-              <TableCell>
-                <PurchaseStatusBadge status={order.status} />
-              </TableCell>
-              <TableCell className="text-right">{formatCurrency(order.amount)}</TableCell>
-              <TableCell>{order.buyer}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-3 text-sm">
-                  <Link className="font-medium text-slate-900 hover:text-blue-700" href={`/purchases/${order.id}`}>
-                    View
-                  </Link>
-                  <Link className="text-slate-600 hover:text-slate-900" href="/purchases/goods-received-notes">
-                    GRNs
-                  </Link>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable
+      columns={columns}
+      data={orders}
+      density="comfortable"
+      emptyMessage="No purchase orders found."
+    />
   );
 }

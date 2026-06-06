@@ -10,7 +10,6 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Invoice } from "@/types/app";
 import { formatCompactCurrency, formatCurrency } from "@/utils/formatters";
 import { useInvoicesQuery } from "../hooks/use-invoices-query";
@@ -22,6 +21,7 @@ import { MetricCard } from "@/features/dashboard/components/metric-card";
 import { TrendChart } from "@/features/dashboard/components/trend-chart";
 import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
 import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
+import { cn } from "@/lib/utils";
 
 const EMPTY_INVOICES: Invoice[] = [];
 
@@ -85,6 +85,10 @@ export function InvoiceListView() {
     timestamp: inv.issueDate || "No date"
   }));
 
+  const handleTabChange = (val: string) => {
+    setFilters(prev => ({ ...prev, status: val as any }));
+  };
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -106,9 +110,9 @@ export function InvoiceListView() {
       />
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <MetricCard label="Outstanding" value={formatCompactCurrency(summary.outstandingBalance)} trend={{ value: 5.2, label: "vs last month", isPositive: true }} />
-        <MetricCard label="Paid This Month" value={formatCompactCurrency(summary.paidThisMonth)} trend={{ value: 12.1, label: "vs last month", isPositive: true }} />
-        <MetricCard label="Overdue" value={String(summary.overdueCount)} trend={{ value: 2.1, label: "vs last month", isPositive: false }} />
+        <MetricCard label="Outstanding" value={formatCompactCurrency(summary.outstandingBalance)} trend={5.2} detail="vs last month" />
+        <MetricCard label="Paid This Month" value={formatCompactCurrency(summary.paidThisMonth)} trend={12.1} detail="vs last month" />
+        <MetricCard label="Overdue" value={String(summary.overdueCount)} trend={-2.1} detail="vs last month" />
         <MetricCard label="Drafts" value={String(summary.draftCount)} />
         <MetricCard label="Total Invoices" value={String(summary.totalInvoices)} />
       </div>
@@ -123,11 +127,11 @@ export function InvoiceListView() {
               { key: "revenue", name: "Revenue", type: "area", color: "hsl(var(--primary))" },
               { key: "target", name: "Target", type: "line", color: "hsl(var(--muted-foreground))" }
             ]}
-            valueFormatter={(val) => `$${(val / 1000).toFixed(1)}k`}
+            valueFormatter={(val: any) => `$${(val / 1000).toFixed(1)}k`}
           />
         </div>
         <div className="space-y-4">
-          <AlertWidget title="Overdue Collections" items={alertItems} emptyMessage="No overdue invoices." />
+          <AlertWidget title="Overdue Collections" items={alertItems} />
           <ActionList title="Drafts Awaiting Review" items={actionItems} emptyMessage="No drafts pending." />
         </div>
       </div>
@@ -136,19 +140,20 @@ export function InvoiceListView() {
         <CardHeader className="pb-3 border-b border-border mb-4">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <CardTitle>Sales Ledgers</CardTitle>
-            <Tabs 
-              value={filters.status} 
-              onValueChange={(val) => setFilters(prev => ({ ...prev, status: val as any }))}
-              className="w-full sm:w-auto"
-            >
-              <TabsList className="grid w-full grid-cols-5 sm:w-auto">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="draft">Draft</TabsTrigger>
-                <TabsTrigger value="sent">Sent</TabsTrigger>
-                <TabsTrigger value="paid">Paid</TabsTrigger>
-                <TabsTrigger value="overdue">Overdue</TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full sm:w-auto">
+              {["all", "draft", "sent", "paid", "overdue"].map((statusValue) => (
+                <button
+                  key={statusValue}
+                  onClick={() => handleTabChange(statusValue)}
+                  className={cn(
+                    "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 capitalize",
+                    filters.status === statusValue ? "bg-background text-foreground shadow" : "hover:text-foreground"
+                  )}
+                >
+                  {statusValue}
+                </button>
+              ))}
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

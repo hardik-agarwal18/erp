@@ -30,5 +30,18 @@ export type InvitationDTO = {
   invitedBy: string;
 };
 
+export type AuditLogDTO = {
+  id: string;
+  organizationId: string;
+  actorUserId: string;
+  actor: {
+    name: string;
+    email: string;
+  };
+  action: string;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+};
+
 export type OrganizationMember = OrganizationMemberDTO;
 export type Organization = OrganizationDTO;

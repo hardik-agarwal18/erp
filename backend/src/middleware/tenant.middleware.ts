@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import prisma from "../config/database.js";
-import { getCachedMemberPermissions } from "../shared/utils/permissions.js";
+import { getCachedMemberPermissions, hasAllPermissions, hasAnyPermission } from "../shared/utils/permissions.js";
 import ApiError from "../utils/ApiError.js";
 import { loggerContext } from "../config/logger.js";
 
@@ -120,11 +120,21 @@ export const requirePermission = (...permissions: string[]) => {
       return next(new ApiError(403, "Organization permissions not loaded"));
     }
 
-    const hasAllPermissions = permissions.every((permission) =>
-      req.permissions?.includes(permission),
-    );
+    if (!hasAllPermissions(req.permissions, permissions)) {
+      return next(new ApiError(403, "Insufficient permissions"));
+    }
 
-    if (!hasAllPermissions) {
+    return next();
+  };
+};
+
+export const requireAnyPermission = (...permissions: string[]) => {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    if (!req.permissions) {
+      return next(new ApiError(403, "Organization permissions not loaded"));
+    }
+
+    if (!hasAnyPermission(req.permissions, permissions)) {
       return next(new ApiError(403, "Insufficient permissions"));
     }
 

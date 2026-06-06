@@ -1,17 +1,54 @@
 "use client";
 
+import { useMemo } from "react";
+import { ColumnDef } from "@tanstack/react-table";
+
 import { EmptyState } from "@/components/states/empty-state";
 import { ModuleError } from "@/components/states/module-error";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import { useCreateGoodsReceivedNoteMutation, useGoodsReceivedNotesQuery } from "../hooks/use-purchases-query";
 import { GoodsReceivedNoteForm } from "./goods-received-note-form";
+import type { GoodsReceivedNote } from "../types";
 
 export function GoodsReceivedNotesView() {
   const query = useGoodsReceivedNotesQuery();
   const mutation = useCreateGoodsReceivedNoteMutation();
+
+  const columns = useMemo<ColumnDef<GoodsReceivedNote>[]>(() => [
+    {
+      accessorKey: "reference",
+      header: "GRN",
+      cell: ({ row }) => <span className="font-medium text-foreground">{row.original.reference}</span>,
+    },
+    {
+      accessorKey: "purchaseOrderNumber",
+      header: "PO #",
+    },
+    {
+      accessorKey: "vendor",
+      header: "Vendor",
+    },
+    {
+      accessorKey: "warehouse",
+      header: "Warehouse",
+    },
+    {
+      accessorKey: "receivedDate",
+      header: "Received Date",
+    },
+    {
+      accessorKey: "itemsReceived",
+      header: () => <div className="text-right">Items</div>,
+      cell: ({ row }) => <div className="text-right">{row.original.itemsReceived}</div>,
+    },
+    {
+      accessorKey: "receivedBy",
+      header: "Received By",
+    },
+  ], []);
 
   if (query.isError) {
     return <ModuleError title="GRNs unavailable" message="We could not load goods received notes for this workspace." retry={() => query.refetch()} />;
@@ -38,34 +75,12 @@ export function GoodsReceivedNotesView() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.8fr)]">
         <Card>
           <CardContent className="p-4">
-            <div className="overflow-hidden rounded-xl border border-slate-200">
-              <Table>
-                <TableHead>
-                  <tr>
-                    <TableHeaderCell>GRN</TableHeaderCell>
-                    <TableHeaderCell>PO #</TableHeaderCell>
-                    <TableHeaderCell>Vendor</TableHeaderCell>
-                    <TableHeaderCell>Warehouse</TableHeaderCell>
-                    <TableHeaderCell>Received Date</TableHeaderCell>
-                    <TableHeaderCell className="text-right">Items</TableHeaderCell>
-                    <TableHeaderCell>Received By</TableHeaderCell>
-                  </tr>
-                </TableHead>
-                <TableBody>
-                  {receipts.map((receipt) => (
-                    <TableRow key={receipt.id}>
-                      <TableCell className="font-medium text-slate-950">{receipt.reference}</TableCell>
-                      <TableCell>{receipt.purchaseOrderNumber}</TableCell>
-                      <TableCell>{receipt.vendor}</TableCell>
-                      <TableCell>{receipt.warehouse}</TableCell>
-                      <TableCell>{receipt.receivedDate}</TableCell>
-                      <TableCell className="text-right">{receipt.itemsReceived}</TableCell>
-                      <TableCell>{receipt.receivedBy}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <DataTable
+              columns={columns}
+              data={receipts}
+              density="comfortable"
+              emptyMessage="No GRNs found."
+            />
           </CardContent>
         </Card>
 
