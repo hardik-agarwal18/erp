@@ -1,10 +1,61 @@
+"use client";
+
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import type { Invoice } from "@/types/app";
 import { formatCurrency } from "@/utils/formatters";
+import { ColumnDef } from "@tanstack/react-table";
 
 export function CustomerInvoices({ invoices }: { invoices: Invoice[] }) {
+  const columns = useMemo<ColumnDef<Invoice>[]>(
+    () => [
+      {
+        accessorKey: "invoiceNumber",
+        header: "Invoice #",
+        cell: ({ row }) => <div className="font-medium text-foreground">{row.getValue("invoiceNumber")}</div>,
+      },
+      {
+        accessorKey: "dueDate",
+        header: "Due Date",
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const status = row.getValue("status") as string;
+          return (
+            <Badge
+              variant={
+                status === "paid"
+                  ? "success"
+                  : status === "overdue"
+                    ? "danger"
+                    : status === "partial"
+                      ? "warning"
+                      : "info"
+              }
+            >
+              {status}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: "amount",
+        header: () => <div className="text-right">Amount</div>,
+        cell: ({ row }) => <div className="text-right">{formatCurrency(row.getValue("amount"))}</div>,
+      },
+      {
+        accessorKey: "balance",
+        header: () => <div className="text-right">Balance</div>,
+        cell: ({ row }) => <div className="text-right">{formatCurrency(row.getValue("balance"))}</div>,
+      },
+    ],
+    []
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -14,45 +65,15 @@ export function CustomerInvoices({ invoices }: { invoices: Invoice[] }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-hidden rounded-xl border border-slate-200">
-          <Table>
-            <TableHead>
-              <tr>
-                <TableHeaderCell>Invoice #</TableHeaderCell>
-                <TableHeaderCell>Due Date</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell className="text-right">Amount</TableHeaderCell>
-                <TableHeaderCell className="text-right">Balance</TableHeaderCell>
-              </tr>
-            </TableHead>
-            <TableBody>
-              {invoices.map((invoice) => (
-                <TableRow key={invoice.id}>
-                  <TableCell className="font-medium text-slate-950">{invoice.invoiceNumber}</TableCell>
-                  <TableCell>{invoice.dueDate}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        invoice.status === "paid"
-                          ? "success"
-                          : invoice.status === "overdue"
-                            ? "danger"
-                            : invoice.status === "partial"
-                              ? "warning"
-                              : "info"
-                      }
-                    >
-                      {invoice.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">{formatCurrency(invoice.amount)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(invoice.balance)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <DataTable
+          columns={columns}
+          data={invoices}
+          density="comfortable"
+          emptyMessage="No invoices found."
+          className="shadow-none border-muted"
+        />
       </CardContent>
     </Card>
   );
 }
+

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMembers, inviteMember, updateMemberRole, removeMember, transferOwnership } from "../service";
+import { getMembers, inviteMember, updateMemberRole, removeMember, transferOwnership, getOrganization, updateOrganization, deleteOrganization } from "../service";
+import type { UpdateOrganizationSchema } from "../schema";
 import { useWorkspace } from "@/hooks/use-workspace";
 
 export function useMembers() {
@@ -13,34 +14,69 @@ export function useMembers() {
   });
 }
 
-export function useOrganizationMutations() {
-  const queryClient = useQueryClient();
+export function useOrganization() {
   const { workspace } = useWorkspace();
   const organizationId = workspace.id;
 
-  const invalidate = () => {
+  return useQuery({
+    queryKey: ["organizations", organizationId],
+    queryFn: () => getOrganization(organizationId),
+    enabled: !!organizationId,
+  });
+}
+
+export function useOrganizationMutations() {
+  const queryClient = useQueryClient();
+  const { workspace, restoreSession } = useWorkspace();
+  const organizationId = workspace.id;
+
+  const invalidateMembers = () => {
     queryClient.invalidateQueries({ queryKey: ["organizations", organizationId, "members"] });
+  };
+
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ["organizations"] });
   };
 
   const invite = useMutation({
     mutationFn: (data: Parameters<typeof inviteMember>[1]) => inviteMember(organizationId, data),
-    onSuccess: invalidate,
+    onSuccess: invalidateMembers,
   });
 
   const updateRole = useMutation({
     mutationFn: ({ memberId, roleId }: { memberId: string; roleId: string }) =>
       updateMemberRole(organizationId, memberId, roleId),
-    onSuccess: invalidate,
+    onSuccess: invalidateMembers,
   });
 
   const remove = useMutation({
     mutationFn: (memberId: string) => removeMember(organizationId, memberId),
-    onSuccess: invalidate,
+    onSuccess: invalidateMembers,
   });
 
   const transfer = useMutation({
     mutationFn: (memberId: string) => transferOwnership(organizationId, memberId),
-    onSuccess: invalidate,
+    onSuccess: async () => {
+      invalidateAll();
+      await restoreSession();
+    },
+  });
+
+  const updateOrg = useMutation({
+    mutationFn: (data: UpdateOrganizationSchema) => updateOrganization(organizationId, data),
+    onSuccess: async () => {
+      invalidateAll();
+      await restoreSession();
+    },
+  });
+
+  const deleteOrg = useMutation({
+    mutationFn: () => deleteOrganization(organizationId),
+    onSuccess: async () => {
+      invalidateAll(); // Invalidate ["organizations"] before removing deleted
+      queryClient.removeQueries({ queryKey: ["organizations", organizationId] });
+      await restoreSession();
+    },
   });
 
   return {
@@ -48,5 +84,7 @@ export function useOrganizationMutations() {
     updateMemberRole: updateRole,
     removeMember: remove,
     transferOwnership: transfer,
+    updateOrganization: updateOrg,
+    deleteOrganization: deleteOrg,
   };
 }

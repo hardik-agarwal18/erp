@@ -21,7 +21,7 @@ export const createQueue = <DataType, ResultType = any, NameType extends string 
   queueName: string,
 ): Queue<DataType, ResultType, NameType> => {
   const queue = new Queue<DataType, ResultType, NameType>(queueName, {
-    connection: queueConnection as any,
+    connection: queueConnection.duplicate() as any,
     defaultJobOptions,
     prefix: env.NODE_ENV === "test" ? "{test-bull}" : "{bull}",
   });

@@ -1,20 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Search, Filter, Box } from "lucide-react";
 
 import { EmptyState } from "@/components/states/empty-state";
 import { ModuleError } from "@/components/states/module-error";
 import { PageHeader } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useInventoryManagementQuery } from "../hooks/use-inventory-query";
 import { InventoryFormPanel } from "./inventory-form-panel";
 import { InventoryItemsTable } from "./inventory-items-table";
-import { InventoryKpiGrid } from "./inventory-kpi-grid";
 import { InventoryModuleNav } from "./inventory-module-nav";
+
+// Phase 4 Components
+import { MetricCard } from "@/features/dashboard/components/metric-card";
+import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
+import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
 
 export function InventoryDashboardView() {
   const query = useInventoryManagementQuery();
@@ -29,122 +32,111 @@ export function InventoryDashboardView() {
 
   const { alerts, items, summary, transfers, audits } = query.data;
 
+  // Mapping Phase 4 Components
+  const alertItems: AlertWidgetItem[] = alerts.map((alert: any) => ({
+    id: alert.id,
+    title: alert.title,
+    subtitle: alert.detail,
+    badgeLabel: alert.severity,
+    badgeVariant: alert.severity === "critical" ? "danger" : alert.severity === "warning" ? "warning" : "info",
+  }));
+
+  const transferItems: ActionListItem[] = transfers.map((t: any) => ({
+    id: t.id,
+    title: t.reference,
+    detail: `${t.fromWarehouse} to ${t.toWarehouse} · ETA ${t.eta}`,
+    timestamp: t.status.replace("_", " "),
+  }));
+
+  const auditItems: ActionListItem[] = audits.map((a: any) => ({
+    id: a.id,
+    title: a.warehouse,
+    detail: `${a.scope} · ${a.cycle} cycle`,
+    timestamp: a.status.replace("_", " "),
+  }));
+
   return (
     <div className="space-y-5">
       <PageHeader
         title="Inventory Dashboard"
         description="A live operating view for stock health, open movements, warehouse pressure, and audit readiness."
         actions={
-          <>
+          <div className="flex gap-2">
             <Button asChild size="sm" variant="outline">
               <Link href="/inventory/audit">Open Audit Plan</Link>
             </Button>
             <Button asChild size="sm">
               <Link href="/inventory/adjustments">Post Adjustment</Link>
             </Button>
-          </>
+          </div>
         }
       />
 
       <InventoryModuleNav activePath="/inventory" />
-      <InventoryKpiGrid items={summary} />
+      
+      {/* KPI Grid replaces InventoryKpiGrid */}
+      <section className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+        {summary.map((metric: any) => (
+          <MetricCard 
+            key={metric.label}
+            label={metric.label}
+            value={metric.value}
+            trend={metric.trend}
+          />
+        ))}
+      </section>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(360px,0.75fr)]">
-        <Card>
-          <CardContent className="space-y-4 p-4">
-            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3">
-              <Search className="h-4 w-4 text-slate-400" />
-              <Input className="border-0 bg-transparent px-0" placeholder="Search items, SKUs, categories, warehouses..." />
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle>Inventory Items</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Filter Bar Design */}
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input className="pl-9 bg-background" placeholder="Search items, SKUs, categories, warehouses..." />
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 shrink-0">
+                <Button variant="outline" size="sm">
+                  Category
+                  <Filter className="ml-2 h-3 w-3 text-muted-foreground" />
+                </Button>
+                <Button variant="outline" size="sm">
+                  Warehouse
+                  <Filter className="ml-2 h-3 w-3 text-muted-foreground" />
+                </Button>
+                <Button variant="outline" size="sm">
+                  Status
+                  <Filter className="ml-2 h-3 w-3 text-muted-foreground" />
+                </Button>
+              </div>
             </div>
+            
+            {/* Migrated DataTable */}
             <InventoryItemsTable items={items} />
           </CardContent>
         </Card>
 
         <div className="space-y-4">
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-sm font-semibold text-slate-950">Operational Alerts</p>
-              <div className="mt-3 space-y-3">
-                {alerts.map((alert) => (
-                  <div key={alert.id} className="rounded-lg border border-slate-200 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-slate-950">{alert.title}</p>
-                      <Badge variant={alert.severity === "critical" ? "danger" : alert.severity === "warning" ? "warning" : "info"}>
-                        {alert.severity}
-                      </Badge>
-                    </div>
-                    <p className="mt-2 text-sm text-slate-500">{alert.detail}</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <AlertWidget 
+            title="Operational Alerts"
+            items={alertItems}
+          />
           <InventoryFormPanel />
         </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-slate-950">Transfer Queue</p>
-              <Button asChild size="sm" variant="ghost">
-                <Link href="/inventory/transfers">View all</Link>
-              </Button>
-            </div>
-            <div className="mt-3 space-y-3">
-              {transfers.map((transfer) => (
-                <div key={transfer.id} className="rounded-lg border border-slate-200 p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">{transfer.reference}</p>
-                      <p className="text-sm text-slate-500">
-                        {transfer.itemName} · {transfer.quantity} units
-                      </p>
-                    </div>
-                    <Badge variant={transfer.status === "received" ? "success" : transfer.status === "in_transit" ? "info" : "warning"}>
-                      {transfer.status.replace("_", " ")}
-                    </Badge>
-                  </div>
-                  <p className="mt-2 text-sm text-slate-500">
-                    {transfer.fromWarehouse} to {transfer.toWarehouse} · ETA {transfer.eta}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-semibold text-slate-950">Audit Queue</p>
-              <Button asChild size="sm" variant="ghost">
-                <Link href="/inventory/audit">Review audits</Link>
-              </Button>
-            </div>
-            <div className="mt-3 space-y-3">
-              {audits.map((audit) => (
-                <div key={audit.id} className="rounded-lg border border-slate-200 p-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-950">{audit.warehouse}</p>
-                      <p className="text-sm text-slate-500">
-                        {audit.scope} · {audit.cycle} cycle
-                      </p>
-                    </div>
-                    <Badge variant={audit.status === "completed" ? "success" : audit.status === "in_progress" ? "info" : "warning"}>
-                      {audit.status.replace("_", " ")}
-                    </Badge>
-                  </div>
-                  <p className="mt-2 text-sm text-slate-500">
-                    Scheduled {audit.scheduledDate} · Variance {audit.varianceUnits} units
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <ActionList 
+          title="Transfer Queue"
+          items={transferItems}
+        />
+        <ActionList 
+          title="Audit Queue"
+          items={auditItems}
+        />
       </div>
     </div>
   );

@@ -16,24 +16,25 @@ export function TopNavbar({ activePath }: { activePath: string }) {
 
   return (
     <>
-      <header className="border-b border-slate-200 bg-white/92 px-5 py-3 backdrop-blur">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 space-y-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <WorkspaceSwitcher />
-              <SearchBar />
-            </div>
-            <Breadcrumb activePath={activePath} />
-          </div>
+      <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/92 px-5 backdrop-blur dark:bg-slate-950/92 dark:border-slate-800 lg:px-8">
+        <div className="flex flex-1 items-center min-w-0">
+          <Breadcrumb activePath={activePath} />
+        </div>
 
-          <div className="flex items-center gap-3">
-            <Button size="sm" onClick={() => setCommandOpen(true)}>
-              <PlusSquare className="mr-2 h-4 w-4" />
-              Quick Create
-            </Button>
-            <NotificationCenter />
-            <ProfileMenu />
+        <div className="flex flex-1 items-center justify-center max-w-xl mx-auto hidden md:flex">
+          <SearchBar />
+        </div>
+
+        <div className="flex flex-1 items-center justify-end gap-3 shrink-0">
+          <div className="hidden lg:block">
+            <WorkspaceSwitcher />
           </div>
+          <Button size="sm" variant="outline" className="hidden sm:flex dark:border-slate-800 dark:hover:bg-slate-800" onClick={() => setCommandOpen(true)}>
+            <PlusSquare className="mr-2 h-4 w-4 text-slate-500" />
+            Create
+          </Button>
+          <NotificationCenter />
+          <ProfileMenu />
         </div>
       </header>
       <CommandPalette />

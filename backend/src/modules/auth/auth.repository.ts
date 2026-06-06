@@ -129,6 +129,15 @@ export const authRepository = {
   deleteEmailVerificationToken: (token: string) => {
     return prisma.emailVerificationToken.delete({ where: { token } });
   },
+  findValidEmailVerificationTokenForUser: (userId: string) => {
+    return prisma.emailVerificationToken.findFirst({
+      where: {
+        userId,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { expiresAt: "desc" },
+    });
+  },
   deleteEmailVerificationTokensForUser: (userId: string) => {
     return prisma.emailVerificationToken.deleteMany({ where: { userId } });
   },

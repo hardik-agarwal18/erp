@@ -33,14 +33,17 @@ export function AppShell({ activePath, children }: { activePath: string; childre
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.05),transparent_22%),linear-gradient(to_bottom,rgba(255,255,255,0.88),rgba(248,250,252,0.98))]">
-      <div className="mx-auto flex min-h-screen max-w-[1440px] border-x border-slate-200 bg-white/70 shadow-[0_20px_80px_rgba(15,23,42,0.08)]">
+    <main className="min-h-screen bg-background">
+      <div className="grid min-h-screen w-full grid-cols-1 xl:grid-cols-[auto_minmax(0,1fr)]">
         <Sidebar activePath={activePath} />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-col">
           <TopNavbar activePath={activePath} />
-          <div className="flex-1 px-5 py-5">{children}</div>
+          <div className="flex-1 p-5 lg:p-8">
+            {children}
+          </div>
         </div>
       </div>
     </main>
   );
 }
+

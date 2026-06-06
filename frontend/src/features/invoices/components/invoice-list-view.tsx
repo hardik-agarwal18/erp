@@ -2,22 +2,38 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { FileSpreadsheet, Plus, Search } from "lucide-react";
+import { Plus, Search, Filter, Calendar as CalendarIcon, User as UserIcon } from "lucide-react";
 
 import { EmptyState } from "@/components/states/empty-state";
 import { ModuleError } from "@/components/states/module-error";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Invoice } from "@/types/app";
-import { formatCompactCurrency } from "@/utils/formatters";
+import { formatCompactCurrency, formatCurrency } from "@/utils/formatters";
 import { useInvoicesQuery } from "../hooks/use-invoices-query";
 import type { InvoiceFiltersState } from "../types";
-import { InvoiceSummary } from "./invoice-summary";
 import { InvoiceTable } from "./invoice-table";
 
+// Phase 4 Components
+import { MetricCard } from "@/features/dashboard/components/metric-card";
+import { TrendChart } from "@/features/dashboard/components/trend-chart";
+import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
+import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
+
 const EMPTY_INVOICES: Invoice[] = [];
+
+// Placeholder data for TrendChart until API supports revenue trends
+const MOCK_REVENUE_TREND = [
+  { month: "Jan", revenue: 12000, target: 10000 },
+  { month: "Feb", revenue: 15000, target: 11000 },
+  { month: "Mar", revenue: 14000, target: 12000 },
+  { month: "Apr", revenue: 18000, target: 13000 },
+  { month: "May", revenue: 22000, target: 14000 },
+  { month: "Jun", revenue: 25000, target: 15000 },
+];
 
 export function InvoiceListView() {
   const query = useInvoicesQuery();
@@ -50,13 +66,32 @@ export function InvoiceListView() {
 
   const { summary } = data;
 
+  // Derive Alerts (Overdue Invoices)
+  const overdueInvoices = invoices.filter(i => i.status === "overdue" && i.balance > 0);
+  const alertItems: AlertWidgetItem[] = overdueInvoices.slice(0, 5).map(inv => ({
+    id: inv.id,
+    title: inv.customer,
+    subtitle: `${inv.invoiceNumber} - ${formatCurrency(inv.balance, inv.currency || "USD")}`,
+    badgeLabel: "Overdue",
+    badgeVariant: "danger"
+  }));
+
+  // Derive Action List (Drafts)
+  const draftInvoices = invoices.filter(i => i.status === "draft");
+  const actionItems: ActionListItem[] = draftInvoices.slice(0, 5).map(inv => ({
+    id: inv.id,
+    title: inv.invoiceNumber,
+    detail: inv.customer,
+    timestamp: inv.issueDate || "No date"
+  }));
+
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Invoice Management"
+        title="Sales Dashboard"
         description="Full invoice operations with drafting, review, customer billing, and follow-up visibility."
         actions={
-          <>
+          <div className="flex gap-2">
             <Button asChild size="sm" variant="outline">
               <Link href="/customers">Customer Accounts</Link>
             </Button>
@@ -66,70 +101,84 @@ export function InvoiceListView() {
                 New Invoice
               </Link>
             </Button>
-          </>
+          </div>
         }
       />
 
-      <InvoiceSummary
-        items={[
-          { label: "Total Invoices", value: String(summary.totalInvoices), detail: "All receivable documents across the workspace." },
-          { label: "Overdue", value: String(summary.overdueCount), detail: "Open invoices that have crossed the due date." },
-          { label: "Paid This Month", value: String(summary.paidThisMonth), detail: "Invoices fully settled in the current month." },
-          { label: "Drafts", value: String(summary.draftCount), detail: "Invoices still waiting for issue or review." },
-          { label: "Outstanding", value: formatCompactCurrency(summary.outstandingBalance), detail: "Remaining collectible balance across invoices." },
-        ]}
-      />
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+        <MetricCard label="Outstanding" value={formatCompactCurrency(summary.outstandingBalance)} trend={{ value: 5.2, label: "vs last month", isPositive: true }} />
+        <MetricCard label="Paid This Month" value={formatCompactCurrency(summary.paidThisMonth)} trend={{ value: 12.1, label: "vs last month", isPositive: true }} />
+        <MetricCard label="Overdue" value={String(summary.overdueCount)} trend={{ value: 2.1, label: "vs last month", isPositive: false }} />
+        <MetricCard label="Drafts" value={String(summary.draftCount)} />
+        <MetricCard label="Total Invoices" value={String(summary.totalInvoices)} />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <TrendChart 
+            title="Revenue Performance" 
+            description="Monthly invoiced revenue vs target"
+            data={MOCK_REVENUE_TREND}
+            dataKeys={[
+              { key: "revenue", name: "Revenue", type: "area", color: "hsl(var(--primary))" },
+              { key: "target", name: "Target", type: "line", color: "hsl(var(--muted-foreground))" }
+            ]}
+            valueFormatter={(val) => `$${(val / 1000).toFixed(1)}k`}
+          />
+        </div>
+        <div className="space-y-4">
+          <AlertWidget title="Overdue Collections" items={alertItems} emptyMessage="No overdue invoices." />
+          <ActionList title="Drafts Awaiting Review" items={actionItems} emptyMessage="No drafts pending." />
+        </div>
+      </div>
 
       <Card>
-        <CardContent className="space-y-4 p-4">
-          <div className="flex flex-col gap-3 lg:flex-row">
-            <div className="flex flex-1 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3">
-              <Search className="h-4 w-4 text-slate-400" />
+        <CardHeader className="pb-3 border-b border-border mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <CardTitle>Sales Ledgers</CardTitle>
+            <Tabs 
+              value={filters.status} 
+              onValueChange={(val) => setFilters(prev => ({ ...prev, status: val as any }))}
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="grid w-full grid-cols-5 sm:w-auto">
+                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="draft">Draft</TabsTrigger>
+                <TabsTrigger value="sent">Sent</TabsTrigger>
+                <TabsTrigger value="paid">Paid</TabsTrigger>
+                <TabsTrigger value="overdue">Overdue</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-col sm:flex-row gap-3 items-center">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                className="border-0 bg-transparent px-0"
+                className="pl-9 bg-background"
                 onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
                 placeholder="Search invoice number, customer, or rep..."
                 value={filters.search}
               />
             </div>
-            <select
-              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 lg:w-[220px]"
-              onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value as InvoiceFiltersState["status"] }))}
-              value={filters.status}
-            >
-              <option value="all">All statuses</option>
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="partial">Partial</option>
-              <option value="paid">Paid</option>
-              <option value="overdue">Overdue</option>
-            </select>
-          </div>
-
-          {filteredInvoices.length ? (
-            <InvoiceTable invoices={filteredInvoices} />
-          ) : (
-            <EmptyState title="No matching invoices" description="Adjust your search or status filter to widen the visible results." />
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent className="flex items-center justify-between gap-4 p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-700">
-              <FileSpreadsheet className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-950">Collections Focus</p>
-              <p className="text-sm text-slate-500">
-                {invoices.filter((invoice) => invoice.balance > 0).length} invoices currently require collections follow-up or settlement.
-              </p>
+            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 shrink-0">
+              <Button variant="outline" size="sm">
+                Sales Rep
+                <UserIcon className="ml-2 h-3 w-3 text-muted-foreground" />
+              </Button>
+              <Button variant="outline" size="sm">
+                Date Range
+                <CalendarIcon className="ml-2 h-3 w-3 text-muted-foreground" />
+              </Button>
+              <Button variant="outline" size="sm">
+                Status
+                <Filter className="ml-2 h-3 w-3 text-muted-foreground" />
+              </Button>
             </div>
           </div>
-          <Button asChild size="sm" variant="outline">
-            <Link href="/dashboard">Open Dashboard</Link>
-          </Button>
+
+          <InvoiceTable invoices={filteredInvoices} />
         </CardContent>
       </Card>
     </div>

@@ -1,10 +1,64 @@
+"use client";
+
+import { useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeaderCell, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import type { PurchaseOrder } from "@/types/app";
 import { formatCurrency } from "@/utils/formatters";
+import { ColumnDef } from "@tanstack/react-table";
 
 export function VendorPurchaseOrders({ orders }: { orders: PurchaseOrder[] }) {
+  const columns = useMemo<ColumnDef<PurchaseOrder>[]>(
+    () => [
+      {
+        accessorKey: "number",
+        header: "PO #",
+        cell: ({ row }) => <div className="font-medium text-foreground">{row.getValue("number")}</div>,
+      },
+      {
+        accessorKey: "expectedDate",
+        header: "Expected Date",
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const status = row.getValue("status") as string;
+          return (
+            <Badge
+              variant={
+                status === "approved" || status === "received"
+                  ? "success"
+                  : status === "pending_approval"
+                    ? "warning"
+                    : status === "billed"
+                      ? "info"
+                      : "neutral"
+              }
+            >
+              {status.replace("_", " ")}
+            </Badge>
+          );
+        },
+      },
+      {
+        accessorKey: "warehouse",
+        header: "Warehouse",
+      },
+      {
+        accessorKey: "amount",
+        header: () => <div className="text-right">Amount</div>,
+        cell: ({ row }) => <div className="text-right">{formatCurrency(row.getValue("amount"))}</div>,
+      },
+      {
+        accessorKey: "approvalStage",
+        header: "Approval",
+      },
+    ],
+    []
+  );
+
   return (
     <Card>
       <CardHeader>
@@ -14,47 +68,15 @@ export function VendorPurchaseOrders({ orders }: { orders: PurchaseOrder[] }) {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-hidden rounded-xl border border-slate-200">
-          <Table>
-            <TableHead>
-              <tr>
-                <TableHeaderCell>PO #</TableHeaderCell>
-                <TableHeaderCell>Expected Date</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell>Warehouse</TableHeaderCell>
-                <TableHeaderCell className="text-right">Amount</TableHeaderCell>
-                <TableHeaderCell>Approval</TableHeaderCell>
-              </tr>
-            </TableHead>
-            <TableBody>
-              {orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium text-slate-950">{order.number}</TableCell>
-                  <TableCell>{order.expectedDate}</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        order.status === "approved" || order.status === "received"
-                          ? "success"
-                          : order.status === "pending_approval"
-                            ? "warning"
-                            : order.status === "billed"
-                              ? "info"
-                              : "neutral"
-                      }
-                    >
-                      {order.status.replace("_", " ")}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{order.warehouse}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(order.amount)}</TableCell>
-                  <TableCell>{order.approvalStage}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <DataTable
+          columns={columns}
+          data={orders}
+          density="comfortable"
+          emptyMessage="No purchase orders found."
+          className="shadow-none border-muted"
+        />
       </CardContent>
     </Card>
   );
 }
+

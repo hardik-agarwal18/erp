@@ -6,7 +6,7 @@ import { storageService } from "../../lib/storage/storage.service.js";
 import logger from "../../config/logger.js";
 import { queueConnection } from "../connection.js";
 
-const mailQueue = new Queue(QueueNames.MAIL, { connection: queueConnection as any });
+const mailQueue = new Queue(QueueNames.MAIL, { connection: queueConnection.duplicate() as any });
 
 export const processPdfGenerationJob = async (job: Job<PdfGenerationJobPayload>) => {
   const { documentId, documentType, organizationId } = job.data;

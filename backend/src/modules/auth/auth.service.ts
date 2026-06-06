@@ -552,24 +552,38 @@ export const authService = {
       return;
     }
 
-    const tokenId = randomUUID();
-    const emailToken = generateEmailVerificationToken(user.id, tokenId);
-    const expiresAt = new Date(
-      Date.now() + EMAIL_VERIFY_TOKEN_EXPIRES_IN * 1000,
-    );
+    const existingToken = await authRepository.findValidEmailVerificationTokenForUser(user.id);
 
-    await authRepository.deleteEmailVerificationTokensForUser(user.id);
-    await authRepository.createEmailVerificationToken({
-      userId: user.id,
-      token: tokenId,
-      expiresAt,
-    });
+    let tokenId: string;
+    let emailToken: string;
+    let expiresInMinutes: number;
+
+    if (existingToken) {
+      tokenId = existingToken.token;
+      emailToken = generateEmailVerificationToken(user.id, tokenId);
+      expiresInMinutes = Math.ceil((existingToken.expiresAt.getTime() - Date.now()) / 1000 / 60);
+    } else {
+      await authRepository.deleteEmailVerificationTokensForUser(user.id);
+
+      tokenId = randomUUID();
+      emailToken = generateEmailVerificationToken(user.id, tokenId);
+      const expiresAt = new Date(
+        Date.now() + EMAIL_VERIFY_TOKEN_EXPIRES_IN * 1000,
+      );
+
+      await authRepository.createEmailVerificationToken({
+        userId: user.id,
+        token: tokenId,
+        expiresAt,
+      });
+      expiresInMinutes = Math.ceil(EMAIL_VERIFY_TOKEN_EXPIRES_IN / 60);
+    }
 
     await sendVerificationEmail(
       user.email,
       user.name,
       buildVerificationUrl(emailToken),
-      Math.ceil(EMAIL_VERIFY_TOKEN_EXPIRES_IN / 60),
+      expiresInMinutes,
     );
   },
 
