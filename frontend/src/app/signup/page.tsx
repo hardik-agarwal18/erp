@@ -45,15 +45,18 @@ export default function SignupPage() {
           >
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" {...register("name", { required: true })} />
+              <Input id="name" {...register("name", { required: "Name is required" })} />
+              {formState.errors.name && <p className="text-sm text-rose-600">{formState.errors.name.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email", { required: true })} />
+              <Input id="email" type="email" {...register("email", { required: "Email is required", pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" } })} />
+              {formState.errors.email && <p className="text-sm text-rose-600">{formState.errors.email.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register("password", { required: true, minLength: 8 })} />
+              <Input id="password" type="password" {...register("password", { required: "Password is required", minLength: { value: 8, message: "Password must be at least 8 characters" } })} />
+              {formState.errors.password && <p className="text-sm text-rose-600">{formState.errors.password.message}</p>}
             </div>
             {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
             {error ? <p className="text-sm text-rose-600">{error}</p> : null}

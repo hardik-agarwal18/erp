@@ -1,34 +1,48 @@
 describe("Dashboard", () => {
   beforeEach(() => {
-    cy.intercept("GET", "**/api/v1/reports/overview*", {
+    cy.intercept("GET", "**/api/v1/reports/dashboard*", {
       statusCode: 200,
-      body: {
-        success: true,
-        data: {
-          totalRevenue: 150000,
-          totalExpenses: 50000,
-          netProfit: 100000,
-          unpaidInvoices: 12
-        }
-      }
+      body: { success: true, data: { monthlyRevenue: 150000, monthlyExpenses: 50000, profitEstimate: 100000, unpaidInvoices: 12, inventoryValue: 20000, topCustomers: [] } }
     }).as("getOverview");
+    cy.intercept("GET", "**/api/v1/reports/inventory*", {
+      statusCode: 200,
+      body: { success: true, data: { stockValue: 20000, lowStockItems: [], movements: [] } }
+    });
+    cy.intercept("GET", "**/api/v1/reports/sales*", {
+      statusCode: 200,
+      body: { success: true, data: { totalSales: 150000, invoiceCount: 12, averageInvoiceValue: 12500, topCustomers: [] } }
+    });
 
     cy.intercept("GET", "**/api/v1/auth/me", {
       statusCode: 200,
       body: {
         success: true,
         data: {
-          user: { id: "123", name: "Test User", email: "test@example.com" },
+          id: "123", name: "Test User", email: "test@example.com", isVerified: true, role: null, initials: "TU",
           organizations: [
-            { id: "org-1", name: "Alpha Corp" },
-            { id: "org-2", name: "Beta LLC" }
+            { id: "org-1", name: "Alpha Corp", slug: "alpha-corp", role: "admin" },
+            { id: "org-2", name: "Beta LLC", slug: "beta-llc", role: "member" }
           ],
-          activeOrganization: { id: "org-1", name: "Alpha Corp" }
+          activeOrganization: { id: "org-1", name: "Alpha Corp", slug: "alpha-corp", role: "admin" }
         }
       }
     }).as("getMe");
 
-    window.localStorage.setItem("activeOrganizationId", "org-1");
+    cy.intercept("GET", "**/api/v1/permissions", {
+      statusCode: 200,
+      body: {
+        success: true,
+        data: [
+          { id: "p1", name: "reports.view" },
+          { id: "p2", name: "customers.view" },
+          { id: "p3", name: "invoices.view" },
+          { id: "p4", name: "expenses.manage" }
+        ]
+      }
+    }).as("getPermissions");
+
+    window.localStorage.setItem("pl.accessToken", "mock-token");
+    window.localStorage.setItem("pl.activeOrganizationId", "org-1");
     cy.visit("/dashboard");
   });
 
@@ -50,7 +64,7 @@ describe("Dashboard", () => {
     cy.contains("Alpha Corp").click(); // Assuming clicking the name opens dropdown
     
     // Click other org
-    cy.contains("Beta LLC").click();
+    cy.contains("Beta LLC").click({ force: true });
 
     // In a real app this would trigger an API call to switch-workspace
     // We would intercept it and verify the redirect

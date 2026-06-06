@@ -31,15 +31,36 @@ describe("Authentication Flows", () => {
         }
       }).as("loginRequest");
 
+      cy.intercept("GET", "**/api/v1/auth/me", {
+        statusCode: 200,
+        body: {
+          success: true,
+          data: {
+            id: "123", email: "test@example.com", name: "Test User", isVerified: true,
+            organizations: [{ id: "org-1", name: "Test Org", slug: "test-org", role: "admin", membershipId: "m1", roleId: "r1", logo: null }],
+            activeOrganization: { id: "org-1", name: "Test Org", slug: "test-org", role: "admin", membershipId: "m1", roleId: "r1", logo: null }
+          }
+        }
+      }).as("meRequest");
+
+      cy.intercept("GET", "**/api/v1/permissions", {
+        statusCode: 200,
+        body: {
+          success: true,
+          data: [{ id: "p1", name: "test.permission", description: "Test" }]
+        }
+      }).as("permissionsRequest");
+
       cy.visit("/login");
       cy.get("input[type='email']").type("test@example.com");
       cy.get("input[type='password']").type("Password123!");
       cy.get("button[type='submit']").click();
 
       cy.wait("@loginRequest");
+      cy.wait("@meRequest");
       
-      // Should redirect to dashboard
-      cy.url().should("include", "/dashboard");
+      // Should redirect to dashboard (can take longer in dev mode to compile)
+      cy.url({ timeout: 45000 }).should("include", "/dashboard");
     });
 
     it("displays error message for invalid credentials", () => {

@@ -57,11 +57,13 @@ function LoginContent() {
           >
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email", { required: true })} />
+              <Input id="email" type="email" {...register("email", { required: "Email is required", pattern: { value: /\S+@\S+\.\S+/, message: "Invalid email" } })} />
+              {formState.errors.email && <p className="text-sm text-rose-600">{formState.errors.email.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register("password", { required: true })} />
+              <Input id="password" type="password" {...register("password", { required: "Password is required" })} />
+              {formState.errors.password && <p className="text-sm text-rose-600">{formState.errors.password.message}</p>}
             </div>
             {error ? <p className="text-sm text-rose-600">{error}</p> : null}
             <Button className="w-full" disabled={formState.isSubmitting} type="submit">
