@@ -1,9 +1,15 @@
 import prisma from "../../config/database.js";
 
 export const roleRepository = {
-  listRoles: (organizationId: string) => {
+  listRoles: (
+    organizationId: string,
+    options: { includeArchived?: boolean } = {},
+  ) => {
     return prisma.role.findMany({
-      where: { organizationId },
+      where: {
+        organizationId,
+        ...(options.includeArchived ? {} : { archivedAt: null }),
+      },
       orderBy: [{ isSystem: "desc" }, { createdAt: "asc" }],
       include: {
         rolePermissions: {
@@ -16,6 +22,9 @@ export const roleRepository = {
               },
             },
           },
+        },
+        _count: {
+          select: { members: true },
         },
       },
     });
@@ -34,6 +43,9 @@ export const roleRepository = {
               },
             },
           },
+        },
+        _count: {
+          select: { members: true },
         },
       },
     });

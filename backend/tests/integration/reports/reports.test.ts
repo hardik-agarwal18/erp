@@ -15,7 +15,7 @@ const switchAndGetToken = async (auth: any, orgId: string) => {
 };
 
 describe("Reports — scenario tests", () => {
-  describe("GET /api/v1/reports/overview", () => {
+  describe("GET /api/v1/reports/dashboard", () => {
     it("returns overview metrics for the authenticated org", async () => {
       const auth = await createAuthenticatedUser(app, { email: "rpt.overview@example.com" });
       const org = await createOrganization(auth.user.id, { name: "Rpt Overview Org" });
@@ -23,7 +23,7 @@ describe("Reports — scenario tests", () => {
       await seedReportData(org.id);
 
       const res = await request(app)
-        .get("/api/v1/reports/overview")
+        .get("/api/v1/reports/dashboard")
         .set("Authorization", `Bearer ${token}`);
 
       expect(res.status).toBe(200);
@@ -38,7 +38,7 @@ describe("Reports — scenario tests", () => {
     });
 
     it("returns 401 when unauthenticated", async () => {
-      const res = await request(app).get("/api/v1/reports/overview");
+      const res = await request(app).get("/api/v1/reports/dashboard");
       expect(res.status).toBe(401);
     });
   });

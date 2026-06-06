@@ -21,7 +21,7 @@ const MockWorker = jest.fn().mockImplementation(() => ({
 jest.mock("bullmq", () => ({ Worker: MockWorker }));
 
 jest.mock("../../../src/queue/connection.js", () => ({
-  queueConnection: { host: "localhost" },
+  queueConnection: { host: "localhost", duplicate: jest.fn().mockReturnThis() },
 }));
 
 jest.mock("../../../src/queue/jobs/mail.job.js", () => ({ processMailJob: jest.fn() }));

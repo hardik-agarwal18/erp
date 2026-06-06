@@ -28,8 +28,8 @@ describe("Mail Queue", () => {
   beforeAll(async () => {
 
     const prefix = env.NODE_ENV === "test" ? "{test-bull}" : "bull";
-    queueEvents = new QueueEvents(QueueNames.MAIL, { connection: queueConnection as any, prefix });
-    worker = new Worker<MailJobPayload>(QueueNames.MAIL, processMailJob, { connection: queueConnection as any, prefix });
+    queueEvents = new QueueEvents(QueueNames.MAIL, { connection: queueConnection.duplicate() as any, prefix });
+    worker = new Worker<MailJobPayload>(QueueNames.MAIL, processMailJob, { connection: queueConnection.duplicate() as any, prefix });
     await worker.waitUntilReady();
   });
 

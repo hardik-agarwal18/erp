@@ -51,6 +51,7 @@ jest.mock("../../../src/modules/auth/auth.repository.js", () => ({
     findPasswordResetToken: jest.fn(),
     deletePasswordResetToken: jest.fn(),
     deletePasswordResetTokensForUser: jest.fn(),
+    findValidEmailVerificationTokenForUser: jest.fn(),
     markUserVerified: jest.fn(),
   },
 }));

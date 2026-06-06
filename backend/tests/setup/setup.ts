@@ -21,7 +21,26 @@ if (!isIntegrationTestFile()) {
         on: jest.fn(),
         quit: jest.fn().mockResolvedValue("OK"),
         ping: jest.fn().mockResolvedValue("PONG"),
+        duplicate: jest.fn().mockReturnThis(),
+        bgsave: jest.fn(),
+        disconnect: jest.fn(),
+        status: "ready",
       })),
+    };
+  });
+
+  jest.mock("bullmq", () => {
+    return {
+      Queue: jest.fn().mockImplementation(() => ({
+        add: jest.fn().mockResolvedValue({ id: "mock-job-id" }),
+        on: jest.fn(),
+        close: jest.fn().mockResolvedValue(undefined),
+      })),
+      Worker: jest.fn().mockImplementation(() => ({
+        on: jest.fn(),
+        close: jest.fn().mockResolvedValue(undefined),
+      })),
+      QueueScheduler: jest.fn(),
     };
   });
 }

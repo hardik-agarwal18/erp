@@ -26,7 +26,7 @@ const MockQueue = jest.fn().mockImplementation((name: string) => {
 jest.mock("bullmq", () => ({ Queue: MockQueue }));
 
 jest.mock("../../../src/queue/connection.js", () => ({
-  queueConnection: { host: "localhost", port: 6379 },
+  queueConnection: { host: "localhost", port: 6379, duplicate: jest.fn().mockReturnThis() },
 }));
 
 jest.mock("../../../src/config/logger.js", () => ({

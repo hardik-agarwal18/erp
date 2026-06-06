@@ -11,7 +11,7 @@ import { generateAccessToken, generateEmailVerificationToken, generatePasswordRe
 
 jest.mock("../../../src/modules/auth/auth.repository.js");
 jest.mock("../../../src/queue/connection.js", () => ({
-  queueConnection: {},
+  queueConnection: { duplicate: jest.fn().mockReturnThis() },
 }));
 jest.mock("../../../src/queue/queue.service.js", () => ({
   mailQueue: { add: jest.fn() },

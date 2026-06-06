@@ -37,7 +37,7 @@ jest.mock("bullmq", () => ({
 }));
 
 jest.mock("../../../src/queue/connection.js", () => ({
-  queueConnection: {},
+  queueConnection: { duplicate: jest.fn().mockReturnThis() },
 }));
 
 jest.mock("../../../src/queue/types.js", () => ({

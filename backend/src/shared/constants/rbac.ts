@@ -16,6 +16,20 @@ export const DEFAULT_PERMISSIONS = Object.values(NEW_PERMISSIONS).map(
   }),
 );
 
+/**
+ * Permissions that cannot be assigned to custom roles.
+ * These permissions are reserved for system roles and ownership workflows.
+ */
+export const PROTECTED_PERMISSIONS: readonly PermissionType[] = [
+  NEW_PERMISSIONS.OWNERSHIP_TRANSFER,
+  NEW_PERMISSIONS.ORGANIZATION_DELETE,
+] as const;
+
+/**
+ * Maximum number of custom roles an organization can create.
+ */
+export const MAX_CUSTOM_ROLES_PER_ORGANIZATION = 50;
+
 const ownerNew = Object.values(NEW_PERMISSIONS);
 
 export const SYSTEM_ROLE_PERMISSIONS: Record<SystemRoleName, string[]> = {

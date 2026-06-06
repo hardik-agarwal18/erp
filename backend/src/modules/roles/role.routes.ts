@@ -9,7 +9,7 @@ import { validate } from "../../middleware/validate.middleware.js";
 import { PERMISSIONS } from "../../shared/constants/permissions.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import { roleController } from "./role.controller.js";
-import { createRoleSchema, updateRoleSchema } from "./role.validators.js";
+import { createRoleSchema, updateRoleSchema, roleIdParamSchema } from "./role.validators.js";
 
 const router = Router();
 
@@ -33,6 +33,7 @@ router.get(
 );
 router.get(
   "/:id",
+  validate(roleIdParamSchema),
   requirePermission(PERMISSIONS.ROLES_VIEW),
   asyncHandler(roleController.getRole),
 );
@@ -42,8 +43,21 @@ router.patch(
   requirePermission(PERMISSIONS.ROLES_UPDATE),
   asyncHandler(roleController.updateRole),
 );
+router.post(
+  "/:id/archive",
+  validate(roleIdParamSchema),
+  requirePermission(PERMISSIONS.ROLES_UPDATE),
+  asyncHandler(roleController.archiveRole),
+);
+router.post(
+  "/:id/restore",
+  validate(roleIdParamSchema),
+  requirePermission(PERMISSIONS.ROLES_UPDATE),
+  asyncHandler(roleController.restoreRole),
+);
 router.delete(
   "/:id",
+  validate(roleIdParamSchema),
   requirePermission(PERMISSIONS.ROLES_DELETE),
   asyncHandler(roleController.deleteRole),
 );

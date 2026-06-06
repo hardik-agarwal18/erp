@@ -16,7 +16,8 @@ describe("roleController", () => {
     req = {
       body: {},
       params: {},
-      member: { organizationId: "o1" } as any,
+      query: {},
+      member: { organizationId: "o1", userId: "u1" } as any,
     };
 
     res = {
@@ -31,7 +32,7 @@ describe("roleController", () => {
 
     await roleController.createRole(req as Request, res as Response);
 
-    expect(roleService.createRole).toHaveBeenCalledWith("o1", req.body);
+    expect(roleService.createRole).toHaveBeenCalledWith("o1", "u1", req.body);
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: { id: "r1", name: "Custom" } }));
   });
 
@@ -40,7 +41,7 @@ describe("roleController", () => {
 
     await roleController.listRoles(req as Request, res as Response);
 
-    expect(roleService.listRoles).toHaveBeenCalledWith("o1");
+    expect(roleService.listRoles).toHaveBeenCalledWith("o1", { includeArchived: false });
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: [{ id: "r1" }] }));
   });
 
@@ -51,7 +52,7 @@ describe("roleController", () => {
 
     await roleController.updateRole(req as Request, res as Response);
 
-    expect(roleService.updateRole).toHaveBeenCalledWith("o1", "r1", req.body);
+    expect(roleService.updateRole).toHaveBeenCalledWith("o1", "r1", "u1", req.body);
   });
 
   it("should delete a role", async () => {
@@ -59,6 +60,6 @@ describe("roleController", () => {
 
     await roleController.deleteRole(req as Request, res as Response);
 
-    expect(roleService.deleteRole).toHaveBeenCalledWith("o1", "r1");
+    expect(roleService.deleteRole).toHaveBeenCalledWith("o1", "r1", "u1");
   });
 });

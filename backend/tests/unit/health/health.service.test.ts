@@ -26,6 +26,7 @@ jest.mock("../../../src/lib/storage/storage.service.js", () => ({
 jest.mock("../../../src/queue/connection.js", () => ({
   queueConnection: {
     ping: jest.fn(),
+    duplicate: jest.fn().mockReturnThis(),
   },
 }));
 

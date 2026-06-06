@@ -22,7 +22,12 @@ describe("permissionService", () => {
 
     const result = await permissionService.listPermissions();
 
-    expect(prisma.permission.findMany).toHaveBeenCalledWith({ orderBy: { name: "asc" } });
+    expect(prisma.permission.findMany).toHaveBeenCalledWith({
+      where: {
+        NOT: { name: { contains: "_legacy" } },
+      },
+      orderBy: { name: "asc" }
+    });
     expect(result).toHaveLength(1);
     expect(result[0].name).toBe("admin.full");
   });

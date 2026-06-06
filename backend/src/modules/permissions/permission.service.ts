@@ -1,7 +1,8 @@
 import prisma from "../../config/database.js";
+import { PROTECTED_PERMISSIONS } from "../../shared/constants/rbac.js";
 
 export const permissionService = {
-  listPermissions: () => {
+  listPermissions: (options?: { assignable?: boolean }) => {
     return prisma.permission.findMany({
       where: {
         NOT: {
@@ -9,6 +10,13 @@ export const permissionService = {
             contains: "_legacy",
           },
         },
+        ...(options?.assignable
+          ? {
+              name: {
+                notIn: [...PROTECTED_PERMISSIONS],
+              },
+            }
+          : {}),
       },
       orderBy: { name: "asc" },
     });

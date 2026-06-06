@@ -18,3 +18,9 @@ export const updateRoleSchema = z.object({
     permissionNames: z.array(z.string().min(3)).min(1).optional(),
   }),
 });
+
+export const roleIdParamSchema = z.object({
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+});

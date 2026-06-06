@@ -13,7 +13,7 @@ describe("permissionController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    req = {};
+    req = { query: {} };
     res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn().mockReturnThis(),
@@ -27,6 +27,6 @@ describe("permissionController", () => {
     await permissionController.listPermissions(req as Request, res as Response);
 
     expect(permissionService.listPermissions).toHaveBeenCalled();
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: mockPermissions }));
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ data: [{ permission: "admin.full", domain: "admin", action: "full" }] }));
   });
 });

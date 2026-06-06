@@ -23,7 +23,7 @@ describe("Roles — scenario tests", () => {
       const res = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "accountant", description: "Can manage finances", permissionNames: ["permissions.view"] });
+        .send({ name: "accountant", description: "Can manage finances", permissionNames: ["roles.view"] });
 
       expect(res.status).toBe(201);
       expect(res.body.data.name).toBe("accountant");
@@ -91,7 +91,7 @@ describe("Roles — scenario tests", () => {
       const created = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "editor", description: "Old description", permissionNames: ["permissions.view"] });
+        .send({ name: "editor", description: "Old description", permissionNames: ["roles.view"] });
 
       const res = await request(app)
         .patch(`/api/v1/roles/${created.body.data.id}`)
@@ -113,7 +113,7 @@ describe("Roles — scenario tests", () => {
       const roleRes = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "custom-viewer", permissionNames: ["permissions.view"] });
+        .send({ name: "custom-viewer", permissionNames: ["roles.view"] });
       const roleId = roleRes.body.data.id;
 
       // Get available permissions
@@ -146,7 +146,7 @@ describe("Roles — scenario tests", () => {
       const created = await request(app)
         .post("/api/v1/roles")
         .set("Authorization", `Bearer ${token}`)
-        .send({ name: "to-delete-role", permissionNames: ["permissions.view"] });
+        .send({ name: "to-delete-role", permissionNames: ["roles.view"] });
 
       const del = await request(app)
         .delete(`/api/v1/roles/${created.body.data.id}`)
