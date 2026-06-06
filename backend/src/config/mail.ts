@@ -26,30 +26,32 @@ export const mailFrom = env.MAIL_FROM;
 
 export const transporter: Transporter = nodemailer.createTransport(mailConfig);
 
-/**
- * Verify SMTP Connection
- */
-export const verifyMailConnection = async (): Promise<boolean> => {
-  if (env.NODE_ENV === "test") {
+export const checkMailHealth = async (): Promise<boolean> => {
+  if (env.NODE_ENV === "test" || !env.MAIL_ENABLED) {
     return true;
   }
 
   try {
     await transporter.verify();
-
-    logger.info("SMTP connection verified");
-
     return true;
   } catch (error) {
-    logger.error(
-      {
-        error,
-      },
-      "SMTP connection verification failed",
-    );
-
     return false;
   }
+};
+
+/**
+ * Verify SMTP Connection
+ */
+export const verifyMailConnection = async (): Promise<boolean> => {
+  const isHealthy = await checkMailHealth();
+  
+  if (isHealthy && env.MAIL_ENABLED && env.NODE_ENV !== "test") {
+    logger.info("SMTP connection verified");
+  } else if (!isHealthy) {
+    logger.error("SMTP connection verification failed");
+  }
+
+  return isHealthy;
 };
 
 /**

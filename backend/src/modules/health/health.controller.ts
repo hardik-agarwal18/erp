@@ -25,6 +25,7 @@ export const getReadiness = async (_req: Request, res: Response) => {
         redis: "error",
         storage: "error",
         queues: "error",
+        mail: "error",
       }
     });
   }

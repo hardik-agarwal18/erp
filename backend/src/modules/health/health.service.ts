@@ -2,6 +2,7 @@ import { prisma } from "../../database/prisma.js";
 import { checkRedisHealth } from "../../redis/redisClient.js";
 import { storageService } from "../../lib/storage/storage.service.js";
 import { queueConnection } from "../../queue/connection.js";
+import { checkMailHealth } from "../../config/mail.js";
 
 export const checkDatabaseHealth = async (): Promise<boolean> => {
   try {
@@ -34,11 +35,12 @@ export const checkQueueHealth = async (): Promise<boolean> => {
 };
 
 export const getSystemHealth = async () => {
-  const [database, redis, storage, queues] = await Promise.all([
+  const [database, redis, storage, queues, mail] = await Promise.all([
     checkDatabaseHealth(),
     checkRedisHealth(),
     checkStorageHealth(),
     checkQueueHealth(),
+    checkMailHealth(),
   ]);
 
   return {
@@ -46,5 +48,6 @@ export const getSystemHealth = async () => {
     redis: redis ? "ok" : "error",
     storage: storage ? "ok" : "error",
     queues: queues ? "ok" : "error",
+    mail: mail ? "ok" : "error",
   };
 };
