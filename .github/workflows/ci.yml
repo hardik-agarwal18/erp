@@ -24,7 +24,7 @@ env:
   SMTP_PASS: test
   MAIL_FROM: test@example.com
   PORT: 5000
-  NEXT_PUBLIC_API_URL: http://localhost:5000
+  NEXT_PUBLIC_API_URL: http://localhost:5000/api/v1
   NODE_ENV: test
 
 jobs:
