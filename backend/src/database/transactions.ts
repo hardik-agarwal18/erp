@@ -75,6 +75,7 @@ export type CreateOrganizationAndOwnerInput = {
     name: string;
     settings?: Prisma.InputJsonValue;
     slug: string;
+    joinCode: string;
   };
   owner: {
     email: string;
@@ -283,6 +284,7 @@ export async function createOrganizationAndOwner(
       data: {
         name: input.organization.name,
         slug: input.organization.slug,
+        joinCode: input.organization.joinCode,
         logo: input.organization.logo,
         settings: input.organization.settings,
         ownerId: owner.id,

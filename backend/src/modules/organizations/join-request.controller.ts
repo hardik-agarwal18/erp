@@ -13,14 +13,14 @@ export const joinRequestController = {
   },
 
   listJoinRequests: async (req: Request, res: Response) => {
-    const requests = await joinRequestService.listJoinRequests(req.params.id);
+    const requests = await joinRequestService.listJoinRequests(req.params.id as string);
     res.status(200).json({ data: requests });
   },
 
   approveJoinRequest: async (req: Request, res: Response) => {
     const request = await joinRequestService.approveJoinRequest(
-      req.params.id,
-      req.params.requestId,
+      req.params.id as string,
+      req.params.requestId as string,
       req.user!.id
     );
     res.status(200).json({ data: request });
@@ -28,8 +28,8 @@ export const joinRequestController = {
 
   rejectJoinRequest: async (req: Request, res: Response) => {
     const request = await joinRequestService.rejectJoinRequest(
-      req.params.id,
-      req.params.requestId,
+      req.params.id as string,
+      req.params.requestId as string,
       req.user!.id
     );
     res.status(200).json({ data: request });

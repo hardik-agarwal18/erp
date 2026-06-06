@@ -88,6 +88,7 @@ export async function seedDatabase(): Promise<void> {
       create: {
         name: process.env.SEED_DEFAULT_ORGANIZATION_NAME ?? "Default Organization",
         slug: process.env.SEED_DEFAULT_ORGANIZATION_SLUG ?? DEFAULT_ORGANIZATION_SLUG,
+        joinCode: "DEFAULT123",
         ownerId: superAdmin.id,
         settings: {
           currency: "USD",
