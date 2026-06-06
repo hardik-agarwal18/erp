@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Check, X, Inbox } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { Button } from "@/components/ui/button";
@@ -89,13 +89,7 @@ export function JoinRequestsView() {
         density="comfortable"
         isLoading={isLoading}
         isError={isError}
-        emptyMessage={
-          <div className="flex flex-col items-center justify-center text-center py-6">
-            <Inbox className="h-10 w-10 text-slate-300 mb-4" />
-            <p className="text-lg font-medium text-slate-900">No pending requests</p>
-            <p className="text-sm text-slate-500">When users request to join, they will appear here.</p>
-          </div>
-        }
+        emptyMessage="No pending requests. When users request to join, they will appear here."
       />
     </div>
   );

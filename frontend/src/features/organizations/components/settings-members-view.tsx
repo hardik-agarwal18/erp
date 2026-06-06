@@ -135,7 +135,7 @@ export function SettingsMembersView() {
       <Tabs defaultValue="members" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="members">Active Members</TabsTrigger>
-          {hasRole("owner", "admin") && (
+          {(hasRole("owner") || hasRole("admin")) && (
             <TabsTrigger value="requests">Join Requests</TabsTrigger>
           )}
         </TabsList>
@@ -172,7 +172,7 @@ export function SettingsMembersView() {
       )}
         </TabsContent>
 
-        {hasRole("owner", "admin") && (
+        {(hasRole("owner") || hasRole("admin")) && (
           <TabsContent value="requests">
             <JoinRequestsView />
           </TabsContent>
