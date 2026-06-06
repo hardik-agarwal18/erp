@@ -42,7 +42,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <Slot
           className={cn(buttonVariants({ variant, size, className }))}
           ref={ref}
-          disabled={disabled || isLoading}
+          {...( { disabled: disabled || isLoading } as any )}
           {...props}
         >
           {children}
