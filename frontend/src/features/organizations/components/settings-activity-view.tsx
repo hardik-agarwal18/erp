@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { useAuditLogs } from "../hooks/use-organizations";
 import { AuditLogDTO } from "../types";
+import { PermissionGuard } from "@/components/ui/permission-guard";
 import {
   Dialog,
   DialogContent,
@@ -54,14 +55,10 @@ function generateDescription(log: AuditLogDTO): string {
 }
 
 export function SettingsActivityView() {
-  const { hasRole, hasPermission } = useWorkspace();
   const { data: auditLogs, isLoading, isError } = useAuditLogs();
-
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<"all" | "today" | "7days" | "30days">("all");
   const [selectedLog, setSelectedLog] = useState<AuditLogDTO | null>(null);
-
-  const canView = hasPermission("audit.read") || hasRole("owner") || hasRole("admin");
 
   const filteredLogs = useMemo(() => {
     if (!auditLogs) return [];
@@ -159,18 +156,17 @@ export function SettingsActivityView() {
     []
   );
 
-  if (!canView) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center border rounded-lg bg-slate-50 dark:bg-slate-900/50">
-        <AlertCircle className="h-8 w-8 text-muted-foreground mb-4" />
-        <h3 className="font-semibold text-lg text-foreground">Access Denied</h3>
-        <p className="text-muted-foreground">You do not have permission to view the activity history.</p>
-      </div>
-    );
-  }
+  const fallbackUI = (
+    <div className="flex flex-col items-center justify-center py-12 px-4 text-center border rounded-lg bg-slate-50 dark:bg-slate-900/50">
+      <AlertCircle className="h-8 w-8 text-muted-foreground mb-4" />
+      <h3 className="font-semibold text-lg text-foreground">Access Denied</h3>
+      <p className="text-muted-foreground">You do not have permission to view the activity history.</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-6 max-w-6xl">
+    <PermissionGuard permission="audit.read" fallback={fallbackUI}>
+      <div className="space-y-6 max-w-6xl">
       <PageHeader
         title="Activity History"
         description="Review organization-level actions and changes."
@@ -227,5 +223,6 @@ export function SettingsActivityView() {
         </DialogContent>
       </Dialog>
     </div>
+    </PermissionGuard>
   );
 }

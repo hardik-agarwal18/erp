@@ -8,6 +8,7 @@ import { isAxiosError } from "axios";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { usePermissions } from "@/hooks/use-permissions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,11 +22,12 @@ import { DeleteOrganizationDialog } from "./delete-organization-dialog";
 
 export function SettingsOrganizationView() {
   const { hasRole } = useWorkspace();
+  const { hasPermission } = usePermissions();
   const { data: organization, isLoading, isError } = useOrganization();
   const { updateOrganization } = useOrganizationMutations();
   const { toast } = useToast();
 
-  const canEdit = hasRole("owner") || hasRole("admin");
+  const canEdit = hasPermission("organization.update");
   const isOwner = hasRole("owner");
   const [timezones, setTimezones] = useState<string[]>([]);
   const [deleteOpen, setDeleteOpen] = useState(false);

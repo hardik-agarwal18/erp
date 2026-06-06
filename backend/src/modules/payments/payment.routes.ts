@@ -7,7 +7,7 @@ import {
 } from "../../middleware/tenant.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import asyncHandler from "../../utils/asyncHandler.js";
-import { PERMISSIONS } from "../../shared/constants/rbac.js";
+import { PERMISSIONS } from "../../shared/constants/permissions.js";
 import { paymentController } from "./payment.controller.js";
 import {
   createPaymentSchema,
@@ -21,19 +21,19 @@ router.use(tenantContextMiddleware());
 
 router.post(
   "/",
-  requirePermission(PERMISSIONS.PAYMENTS_CREATE),
+  requirePermission(PERMISSIONS.FINANCE_CREATE),
   validate(createPaymentSchema),
   asyncHandler(paymentController.createPayment),
 );
 router.get(
   "/",
-  requirePermission(PERMISSIONS.PAYMENTS_VIEW),
+  requirePermission(PERMISSIONS.FINANCE_VIEW),
   validate(listPaymentsSchema),
   asyncHandler(paymentController.listPayments),
 );
 router.delete(
   "/:id",
-  requirePermission(PERMISSIONS.PAYMENTS_CREATE),
+  requirePermission(PERMISSIONS.FINANCE_DELETE),
   asyncHandler(paymentController.deletePayment),
 );
 

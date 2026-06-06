@@ -38,7 +38,7 @@ export function useOrganization() {
 
 export function useOrganizationMutations() {
   const queryClient = useQueryClient();
-  const { workspace, restoreSession } = useWorkspace();
+  const { workspace, session, restoreSession } = useWorkspace();
   const organizationId = workspace.id;
 
   const invalidateMembers = () => {
@@ -58,7 +58,12 @@ export function useOrganizationMutations() {
   const updateRole = useMutation({
     mutationFn: ({ memberId, roleId }: { memberId: string; roleId: string }) =>
       updateMemberRole(organizationId, memberId, roleId),
-    onSuccess: invalidateMembers,
+    onSuccess: async (_, variables) => {
+      invalidateMembers();
+      if (variables.memberId === session.id) {
+        await restoreSession();
+      }
+    },
   });
 
   const remove = useMutation({

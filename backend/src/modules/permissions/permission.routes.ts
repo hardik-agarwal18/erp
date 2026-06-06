@@ -5,7 +5,7 @@ import {
   requirePermission,
   tenantContextMiddleware,
 } from "../../middleware/tenant.middleware.js";
-import { PERMISSIONS } from "../../shared/constants/rbac.js";
+import { PERMISSIONS } from "../../shared/constants/permissions.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import { permissionController } from "./permission.controller.js";
 
@@ -15,7 +15,7 @@ router.get(
   "/",
   authMiddleware,
   tenantContextMiddleware({ allowRouteParam: false }),
-  requirePermission(PERMISSIONS.PERMISSIONS_VIEW),
+  requirePermission(PERMISSIONS.ROLES_VIEW),
   asyncHandler(permissionController.listPermissions),
 );
 

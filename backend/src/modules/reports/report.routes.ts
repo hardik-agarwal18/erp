@@ -7,7 +7,7 @@ import {
 } from "../../middleware/tenant.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import asyncHandler from "../../utils/asyncHandler.js";
-import { PERMISSIONS } from "../../shared/constants/rbac.js";
+import { PERMISSIONS } from "../../shared/constants/permissions.js";
 import { reportController } from "./report.controller.js";
 import { reportRangeSchema } from "./report.validators.js";
 
@@ -46,12 +46,12 @@ router.get(
 );
 router.post(
   "/export",
-  requirePermission(PERMISSIONS.REPORTS_VIEW),
+  requirePermission(PERMISSIONS.REPORTS_EXPORT),
   asyncHandler(reportController.exportReport),
 );
 router.get(
   "/export/:jobId",
-  requirePermission(PERMISSIONS.REPORTS_VIEW),
+  requirePermission(PERMISSIONS.REPORTS_EXPORT),
   asyncHandler(reportController.getExportStatus),
 );
 

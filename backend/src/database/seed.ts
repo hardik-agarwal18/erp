@@ -11,8 +11,8 @@ import {
   auditService,
 } from "../services/audit/index.js";
 
-import { PERMISSIONS as NEW_PERMISSIONS } from "../shared/constants/permissions.js";
-import { LEGACY_PERMISSIONS, SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_NAMES } from "../shared/constants/rbac.js";
+import { PERMISSIONS } from "../shared/constants/permissions.js";
+import { SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_NAMES } from "../shared/constants/rbac.js";
 
 const DEFAULT_SUPER_ADMIN_PASSWORD = "ChangeMe123!";
 const DEFAULT_ORGANIZATION_SLUG = "default-organization";
@@ -31,10 +31,7 @@ const ORGANIZATION_ROLES = [
   { name: "member", description: "Standard employee role with limited operational access." },
 ] as const;
 
-const ALL_PERMISSIONS = [
-  ...Object.values(NEW_PERMISSIONS),
-  ...Object.values(LEGACY_PERMISSIONS),
-];
+const ALL_PERMISSIONS = Object.values(PERMISSIONS);
 
 /**
  * Seeds the baseline ERP tenant, RBAC catalog, and bootstrap super admin.
@@ -216,7 +213,7 @@ export async function seedDatabase(): Promise<void> {
         metadata: {
           seededRoles: roleDefinitions.map((role) => role.name),
           seededPermissions: ALL_PERMISSIONS,
-          customerCreatePermissionId: permissionsByName.get(NEW_PERMISSIONS.CUSTOMERS_CREATE)?.id ?? null,
+          customerCreatePermissionId: permissionsByName.get(PERMISSIONS.CUSTOMERS_CREATE)?.id ?? null,
         },
       },
       tx,

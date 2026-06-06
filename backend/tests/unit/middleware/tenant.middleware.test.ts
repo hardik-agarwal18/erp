@@ -12,6 +12,8 @@ jest.mock("../../../src/config/database.js", () => ({
 
 jest.mock("../../../src/shared/utils/permissions.js", () => ({
   getCachedMemberPermissions: jest.fn(),
+  hasAllPermissions: jest.fn((userPerms: string[], reqPerms: string[]) => reqPerms.every(p => userPerms.includes(p))),
+  hasAnyPermission: jest.fn((userPerms: string[], reqPerms: string[]) => reqPerms.some(p => userPerms.includes(p))),
 }));
 
 import prisma from "../../../src/config/database.js";

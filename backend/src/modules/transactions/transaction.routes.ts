@@ -7,7 +7,7 @@ import {
 } from "../../middleware/tenant.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import asyncHandler from "../../utils/asyncHandler.js";
-import { PERMISSIONS } from "../../shared/constants/rbac.js";
+import { PERMISSIONS } from "../../shared/constants/permissions.js";
 import { transactionController } from "./transaction.controller.js";
 import { listTransactionsSchema } from "./transaction.validators.js";
 
@@ -18,14 +18,14 @@ router.use(tenantContextMiddleware());
 
 router.get(
   "/",
-  requirePermission(PERMISSIONS.TRANSACTIONS_VIEW),
+  requirePermission(PERMISSIONS.FINANCE_VIEW),
   validate(listTransactionsSchema),
   asyncHandler(transactionController.listTransactions),
 );
 
 router.get(
   "/:id",
-  requirePermission(PERMISSIONS.TRANSACTIONS_VIEW),
+  requirePermission(PERMISSIONS.FINANCE_VIEW),
   asyncHandler(transactionController.getTransaction),
 );
 

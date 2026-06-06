@@ -7,7 +7,7 @@ import {
 } from "../../middleware/tenant.middleware.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import asyncHandler from "../../utils/asyncHandler.js";
-import { PERMISSIONS } from "../../shared/constants/rbac.js";
+import { PERMISSIONS } from "../../shared/constants/permissions.js";
 import { invoiceController } from "./invoice.controller.js";
 import {
   createInvoiceSchema,
@@ -23,31 +23,31 @@ router.use(tenantContextMiddleware());
 
 router.post(
   "/",
-  requirePermission(PERMISSIONS.INVOICES_CREATE),
+  requirePermission(PERMISSIONS.SALES_CREATE),
   validate(createInvoiceSchema),
   asyncHandler(invoiceController.createInvoice),
 );
 router.get(
   "/",
-  requirePermission(PERMISSIONS.INVOICES_VIEW),
+  requirePermission(PERMISSIONS.SALES_VIEW),
   validate(listInvoicesSchema),
   asyncHandler(invoiceController.listInvoices),
 );
 router.get(
   "/:id",
-  requirePermission(PERMISSIONS.INVOICES_VIEW),
+  requirePermission(PERMISSIONS.SALES_VIEW),
   validate(invoiceIdParamSchema),
   asyncHandler(invoiceController.getInvoice),
 );
 router.patch(
   "/:id",
-  requirePermission(PERMISSIONS.INVOICES_UPDATE),
+  requirePermission(PERMISSIONS.SALES_UPDATE),
   validate(updateInvoiceSchema),
   asyncHandler(invoiceController.updateInvoice),
 );
 router.delete(
   "/:id",
-  requirePermission(PERMISSIONS.INVOICES_DELETE),
+  requirePermission(PERMISSIONS.SALES_DELETE),
   validate(invoiceIdParamSchema),
   asyncHandler(invoiceController.deleteInvoice),
 );
