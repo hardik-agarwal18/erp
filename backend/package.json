@@ -19,7 +19,8 @@
     "test:load:customers": "tsx scripts/scenarios/customer.scenario.ts",
     "test:load:categories": "tsx scripts/scenarios/category.scenario.ts",
     "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "check:config": "tsx scripts/check_config.ts"
   },
   "keywords": [],
   "author": "",
