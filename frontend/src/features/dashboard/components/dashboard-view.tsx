@@ -3,7 +3,7 @@
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { useDashboardQuery } from "../hooks/use-dashboard-query";
-import { formatCurrency } from "@/utils/formatters";
+import { formatCurrency, formatCompactCurrency } from "@/utils/formatters";
 
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { MetricCard } from "./metric-card";
@@ -95,15 +95,20 @@ export function DashboardView() {
 
       {/* Row 1: KPI Grid */}
       <section className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {data.kpis.map((metric: any) => (
-          <MetricCard 
-            key={metric.label} 
-            label={metric.label} 
-            value={metric.value >= 1000 ? `$${(metric.value / 1000).toFixed(1)}k` : metric.value.toString()} 
-            trend={metric.trend} 
-            detail={metric.detail} 
-          />
-        ))}
+        {data.kpis.map((metric: any) => {
+          const isCurrency = ["Revenue", "Expenses", "Profit", "Tax Collected", "Inventory Value", "Avg Invoice"].includes(metric.label);
+          const displayValue = isCurrency ? formatCompactCurrency(metric.value) : metric.value >= 1000 ? `${(metric.value / 1000).toFixed(1)}k` : metric.value.toString();
+          
+          return (
+            <MetricCard 
+              key={metric.label} 
+              label={metric.label} 
+              value={displayValue} 
+              trend={metric.trend} 
+              detail={metric.detail} 
+            />
+          );
+        })}
       </section>
 
       {/* Row 2: Financial Trends */}
@@ -116,7 +121,7 @@ export function DashboardView() {
           dataKeys={[
             { key: "revenue", name: "Revenue", type: "line", color: "hsl(var(--primary))" }
           ]}
-          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+          valueFormatter={(val) => formatCompactCurrency(val)}
         />
         <TrendChart 
           title="Expenses"
@@ -126,7 +131,7 @@ export function DashboardView() {
           dataKeys={[
             { key: "expenses", name: "Expenses", type: "bar", color: "hsl(var(--foreground))" }
           ]}
-          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+          valueFormatter={(val) => formatCompactCurrency(val)}
         />
       </section>
 
@@ -141,7 +146,7 @@ export function DashboardView() {
             { key: "inflow", name: "Inflow", type: "area", color: "hsl(142.1 76.2% 36.3%)" },
             { key: "outflow", name: "Outflow", type: "area", color: "hsl(0 84.2% 60.2%)" }
           ]}
-          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+          valueFormatter={(val) => formatCompactCurrency(val)}
         />
         <TrendChart 
           title="Top Customers"
@@ -151,7 +156,7 @@ export function DashboardView() {
           dataKeys={[
             { key: "revenue", name: "Revenue", type: "bar", color: "hsl(var(--primary))" }
           ]}
-          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+          valueFormatter={(val) => formatCompactCurrency(val)}
         />
         <TrendChart 
           title="Expenses by Category"
@@ -161,7 +166,7 @@ export function DashboardView() {
           dataKeys={[
             { key: "total", name: "Total", type: "bar", color: "hsl(var(--muted-foreground))" }
           ]}
-          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+          valueFormatter={(val) => formatCompactCurrency(val)}
         />
       </section>
 
