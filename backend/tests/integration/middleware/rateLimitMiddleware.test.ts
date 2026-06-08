@@ -6,7 +6,7 @@ import { createApiRateLimiter } from "../../../src/middleware/rateLimit.middlewa
 describe("rate limit middleware", () => {
   it("returns 429 after the configured request limit is exceeded", async () => {
     const testApp = express();
-    testApp.use(createApiRateLimiter({ max: 2, windowMs: 60_000 }));
+    testApp.use(createApiRateLimiter({ max: 2, windowMs: 60_000, enabled: true }));
     testApp.get("/probe", (_req, res) => {
       res.json({ success: true });
     });

@@ -89,7 +89,7 @@ export function TrendChart({
               <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey={xAxisKey} {...axisProps} />
               <YAxis {...axisProps} tickFormatter={valueFormatter} />
-              <Tooltip {...tooltipProps} />
+              <Tooltip {...tooltipProps} formatter={(val: any) => valueFormatter(val)} />
               <Legend />
               {renderBars()}
             </BarChart>
@@ -106,7 +106,7 @@ export function TrendChart({
               <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey={xAxisKey} {...axisProps} />
               <YAxis {...axisProps} tickFormatter={valueFormatter} />
-              <Tooltip {...tooltipProps} />
+              <Tooltip {...tooltipProps} formatter={(val: any) => valueFormatter(val)} />
               <Legend />
               {renderAreas()}
             </AreaChart>
@@ -115,7 +115,7 @@ export function TrendChart({
               <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey={xAxisKey} {...axisProps} />
               <YAxis {...axisProps} tickFormatter={valueFormatter} />
-              <Tooltip {...tooltipProps} />
+              <Tooltip {...tooltipProps} formatter={(val: any) => valueFormatter(val)} />
               <Legend />
               {renderLines()}
             </LineChart>

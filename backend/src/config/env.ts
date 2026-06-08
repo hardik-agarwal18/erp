@@ -58,6 +58,10 @@ const envSchemaBase = z.object({
     .default(true),
 
   // Rate Limiting
+  RATE_LIMIT_ENABLED: z.preprocess((value) => {
+    if (value === "false" || value === false) return false;
+    return true;
+  }, z.boolean()).optional().default(true),
   RATE_LIMIT_MAX: z.preprocess(
     (value) => (value ? Number(value) : 100),
     z.number().int().positive()

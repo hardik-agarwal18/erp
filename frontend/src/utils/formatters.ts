@@ -2,7 +2,8 @@ export function formatCurrency(amount: number, currency = "INR") {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
-    maximumFractionDigits: amount >= 1000 ? 0 : 2,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 
@@ -11,7 +12,8 @@ export function formatCompactCurrency(amount: number, currency = "INR") {
     style: "currency",
     currency,
     notation: "compact",
-    maximumFractionDigits: 1,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 

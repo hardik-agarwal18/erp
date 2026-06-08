@@ -19,6 +19,9 @@ describe("reportService", () => {
         { customerId: "c1", _sum: { totalAmount: 1000 }, _count: { _all: 5 } }
       ]);
       (reportRepository.findCustomersByIds as jest.Mock).mockResolvedValue([{ id: "c1", name: "Test Cust" }]);
+      (reportRepository.listInvoiceDatesAndAmounts as jest.Mock).mockResolvedValue([
+        { issueDate: new Date("2026-01-15T00:00:00Z"), totalAmount: 1000 }
+      ]);
 
       const result = await reportService.salesReport("o1", {});
       expect(result.totalSales).toBe(1000);
@@ -75,6 +78,7 @@ describe("reportService", () => {
       (reportRepository.aggregateInvoiceSales as jest.Mock).mockResolvedValue({ _sum: { totalAmount: 1000 }, _count: { _all: 5 } });
       (reportRepository.groupInvoiceSalesByCustomer as jest.Mock).mockResolvedValue([]);
       (reportRepository.findCustomersByIds as jest.Mock).mockResolvedValue([]);
+      (reportRepository.listInvoiceDatesAndAmounts as jest.Mock).mockResolvedValue([]);
       
       (reportRepository.aggregateExpenses as jest.Mock).mockResolvedValue({ _sum: { amount: 500 } });
       (reportRepository.groupExpensesByCategory as jest.Mock).mockResolvedValue([]);

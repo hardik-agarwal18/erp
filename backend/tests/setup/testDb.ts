@@ -53,9 +53,23 @@ export const clearDatabase = async () => {
     .map(({ tablename }) => `"public"."${tablename}"`)
     .join(", ");
 
-  await prisma.$executeRawUnsafe(
-    `TRUNCATE TABLE ${quotedTables} RESTART IDENTITY CASCADE;`,
-  );
+  let retries = 5;
+  while (retries > 0) {
+    try {
+      await prisma.$executeRawUnsafe(
+        `TRUNCATE TABLE ${quotedTables} RESTART IDENTITY CASCADE;`,
+      );
+      break;
+    } catch (error: any) {
+      if (error.code === "40P01" || (error.message && error.message.includes("deadlock"))) {
+        retries--;
+        if (retries === 0) throw error;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      } else {
+        throw error;
+      }
+    }
+  }
 };
 
 export const clearRedis = async () => {

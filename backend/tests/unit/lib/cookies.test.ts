@@ -56,7 +56,7 @@ describe("cookies library", () => {
           secure: true,
           sameSite: "strict",
           maxAge: 604800 * 1000,
-          path: "/api/v1/auth",
+          path: "/",
         }),
       );
     });
@@ -82,7 +82,7 @@ describe("cookies library", () => {
 
       clearAuthCookies(res as Response);
 
-      expect(res.clearCookie).toHaveBeenCalledWith("csrfToken", { path: "/api/v1/auth" });
+      expect(res.clearCookie).toHaveBeenCalledWith("csrfToken", { path: "/" });
     });
 
     it("should call res.clearCookie exactly twice", () => {
