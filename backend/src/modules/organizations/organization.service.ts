@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 import prisma, {
   type DatabaseTransactionClient,
 } from "../../config/database.js";
-import { sendInvitationEmail } from "../../services/mail/index.js";
+import { sendInvitationEmail } from "../../mail/mail.service.js";
 import {
   DEFAULT_PERMISSIONS,
   SYSTEM_ROLE_NAMES,

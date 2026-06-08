@@ -7,7 +7,7 @@ import logger from "./config/logger.js";
 
 import { connectRedis, redisClient } from "./config/redis.js";
 
-import { verifyConnection } from "./services/mail/index.js";
+import { verifyMailConnection as verifyConnection } from "./config/mail.js";
 
 import { startWorkers, shutdownWorkers } from "./queue/worker.service.js";
 import { startScheduler } from "./queue/scheduler.service.js";

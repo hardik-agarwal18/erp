@@ -24,7 +24,7 @@ import {
   passwordResetEmailTemplate,
   verificationEmailTemplate,
 } from "./templates/index.js";
-import { transporter } from "../services/mail/transporter.js";
+import { transporter } from "../config/mail.js";
 
 export const defaultProvider = new NodemailerProvider(transporter);
 export const defaultProviderName = MailProviderNames.NODEMAILER;

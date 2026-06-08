@@ -8,7 +8,7 @@ import { redisClient } from "../../config/redis.js";
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
-} from "../../services/mail/index.js";
+} from "../../mail/mail.service.js";
 import { AUDIT_ACTIONS, auditService } from "../../services/audit/index.js";
 import { env } from "../../config/env.js";
 import {

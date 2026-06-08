@@ -1,4 +1,4 @@
-import { transporter } from "../services/mail/transporter.js";
+import { transporter } from "../config/mail.js";
 import { mailFrom } from "../config/mail.js";
 
 const run = async () => {

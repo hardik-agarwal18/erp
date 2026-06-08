@@ -3,7 +3,7 @@ import { jest } from "@jest/globals";
 // Mocking dependencies
 import { authRepository } from "../../../src/modules/auth/auth.repository.js";
 import { redisClient } from "../../../src/config/redis.js";
-import { sendPasswordResetEmail, sendVerificationEmail } from "../../../src/services/mail/index.js";
+import { sendPasswordResetEmail, sendVerificationEmail } from "../../../src/mail/mail.service.js";
 import { auditService } from "../../../src/services/audit/index.js";
 import { comparePassword, hashPassword } from "../../../src/lib/bcrypt.js";
 import { verifyToken } from "../../../src/lib/jwt.js";
@@ -27,7 +27,7 @@ jest.mock("../../../src/config/redis.js", () => ({
     del: jest.fn(),
   }
 }));
-jest.mock("../../../src/services/mail/index.js");
+jest.mock("../../../src/mail/mail.service.js");
 jest.mock("../../../src/services/audit/index.js", () => ({
   AUDIT_ACTIONS: {
     AUTH_REGISTER: "auth.register",

@@ -71,7 +71,7 @@ jest.mock("../../../src/modules/auth/auth.utils.js", () => ({
   buildInvitationUrl: jest.fn(),
 }));
 
-jest.mock("../../../src/services/mail/index.js", () => ({
+jest.mock("../../../src/mail/mail.service.js", () => ({
   sendVerificationEmail: jest.fn(),
   sendPasswordResetEmail: jest.fn(),
 }));
@@ -115,7 +115,7 @@ import {
   buildVerificationUrl,
   buildPasswordResetUrl,
 } from "../../../src/modules/auth/auth.utils.js";
-import { sendVerificationEmail, sendPasswordResetEmail } from "../../../src/services/mail/index.js";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../../../src/mail/mail.service.js";
 import { auditService } from "../../../src/services/audit/index.js";
 import { authService } from "../../../src/modules/auth/auth.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
