@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusSquare } from "lucide-react";
+import { Menu, PlusSquare } from "lucide-react";
 
 import { Breadcrumb } from "./breadcrumb";
 import { CommandPalette } from "./command-palette";
@@ -12,12 +12,20 @@ import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/store/ui-store";
 
 export function TopNavbar({ activePath }: { activePath: string }) {
-  const { setCommandOpen } = useUiStore();
+  const { setCommandOpen, setSidebarOpen } = useUiStore();
 
   return (
     <>
       <header className="sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white/92 px-5 backdrop-blur dark:bg-slate-950/92 dark:border-slate-800 lg:px-8">
-        <div className="flex flex-1 items-center min-w-0">
+        <div className="flex flex-1 items-center min-w-0 gap-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="xl:hidden -ml-2 text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
+            onClick={() => setSidebarOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <Breadcrumb activePath={activePath} />
         </div>
 

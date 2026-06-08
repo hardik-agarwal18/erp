@@ -3,11 +3,12 @@
 import type { ComponentType } from "react";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { Activity, ArrowLeftRight, BarChart3, Boxes, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star } from "lucide-react";
+import { Activity, ArrowLeftRight, BarChart3, Boxes, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star, X } from "lucide-react";
 
 import { appConfig } from "@/config/app-config";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { useUiStore } from "@/store/ui-store";
 import type { FeatureKey } from "@/types/app";
 
 type SidebarItem = {
@@ -87,7 +88,13 @@ export function Sidebar({ activePath }: { activePath: string }) {
   const [isMounted, setIsMounted] = useState(false);
 
   const { workspace, canAccess } = useWorkspace();
+  const { sidebarOpen, setSidebarOpen } = useUiStore();
   const activeLookup = useMemo(() => activePath, [activePath]);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [activePath, setSidebarOpen]);
 
   // Build a flat map of all routable items for Quick Access
   const allRoutes = useMemo(() => {
@@ -235,12 +242,22 @@ export function Sidebar({ activePath }: { activePath: string }) {
   };
 
   return (
-    <aside
-      className={cn(
-        "hidden shrink-0 border-r border-slate-200 bg-slate-950 text-slate-100 transition-[width] duration-200 xl:flex xl:flex-col",
-        collapsed ? "w-[72px]" : "w-[260px]",
+    <>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm xl:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
-    >
+
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex shrink-0 flex-col border-r border-slate-200 bg-slate-950 text-slate-100 transition-all duration-300 xl:static xl:flex",
+          collapsed ? "w-[72px]" : "w-[260px]",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full xl:translate-x-0"
+        )}
+      >
       <div className="flex h-[72px] items-center justify-between border-b border-slate-800 px-4">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20">
@@ -253,14 +270,24 @@ export function Sidebar({ activePath }: { activePath: string }) {
             </div>
           ) : null}
         </div>
-        <button
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
-          onClick={() => setCollapsed((value) => !value)}
-          type="button"
-        >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden xl:flex rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
+            onClick={() => setCollapsed((value) => !value)}
+            type="button"
+          >
+            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </button>
+          <button
+            aria-label="Close sidebar"
+            className="xl:hidden rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
+            onClick={() => setSidebarOpen(false)}
+            type="button"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-6 custom-scrollbar">
@@ -339,5 +366,6 @@ export function Sidebar({ activePath }: { activePath: string }) {
         </div>
       </div>
     </aside>
+    </>
   );
 }
