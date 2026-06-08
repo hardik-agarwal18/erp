@@ -35,7 +35,7 @@ export function VendorCreateView() {
             status: "active",
             category: "services",
             gstin: "07AAEVP9100N1Z3",
-            currency: "USD",
+            currency: "INR",
             paymentTerms: "Net 21",
             leadTimeDays: 3,
             accountManager: "Sara Khan",

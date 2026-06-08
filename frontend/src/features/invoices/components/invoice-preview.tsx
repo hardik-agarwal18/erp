@@ -5,7 +5,7 @@ import { InvoiceLineItems } from "./invoice-line-items";
 import { InvoiceStatusBadge } from "./invoice-status-badge";
 
 export function InvoicePreview({ invoice }: { invoice: Invoice }) {
-  const currency = invoice.currency ?? "USD";
+  const currency = invoice.currency ?? "INR";
 
   return (
     <Card>

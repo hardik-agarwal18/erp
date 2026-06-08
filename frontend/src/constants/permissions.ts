@@ -2,16 +2,16 @@ import type { FeatureKey } from "@/types/app";
 
 export const featurePermissions: Record<FeatureKey, string[]> = {
   dashboard: ["reports.view"],
-  customers: ["customers.view", "customers.create", "customers.update"],
-  vendors: ["vendors.view", "vendors.create", "vendors.update"],
-  invoices: ["invoices.view", "invoices.create", "invoices.update"],
-  inventory: ["inventory.manage"],
-  purchases: ["expenses.manage"],
-  products: ["products.manage"],
-  transactions: ["transactions.view"],
-  expenses: ["expenses.manage"],
-  payments: ["invoices.manage"], // Using invoices.manage for payments initially
+  customers: ["customers.view"],
+  vendors: ["vendors.view"],
+  invoices: ["sales.view"],
+  inventory: ["inventory.view"],
+  purchases: ["purchasing.view"],
+  products: ["products.view"],
+  transactions: ["finance.view"],
+  expenses: ["purchasing.view"],
+  payments: ["finance.view", "sales.view"],
   reports: ["reports.view"],
-  organizations: ["organizations.manage"],
-  audit_logs: ["audit_logs.view"],
+  organizations: ["organization.view", "organization.settings"],
+  audit_logs: ["audit.read"],
 };

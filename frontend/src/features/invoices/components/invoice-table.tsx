@@ -40,7 +40,7 @@ export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
         header: () => <div className="text-right">Amount</div>,
         cell: ({ row }) => (
           <div className="text-right">
-            {formatCurrency(row.original.amount, row.original.currency ?? "USD")}
+            {formatCurrency(row.original.amount, row.original.currency ?? "INR")}
           </div>
         ),
       },
@@ -49,7 +49,7 @@ export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
         header: () => <div className="text-right">Balance</div>,
         cell: ({ row }) => (
           <div className="text-right">
-            {formatCurrency(row.original.balance, row.original.currency ?? "USD")}
+            {formatCurrency(row.original.balance, row.original.currency ?? "INR")}
           </div>
         ),
       },

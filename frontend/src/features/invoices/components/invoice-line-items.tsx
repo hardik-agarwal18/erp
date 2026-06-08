@@ -1,7 +1,7 @@
 import type { InvoiceLineItem } from "@/types/app";
 import { formatCurrency } from "@/utils/formatters";
 
-export function InvoiceLineItems({ items, currency = "USD" }: { items: InvoiceLineItem[]; currency?: string }) {
+export function InvoiceLineItems({ items, currency = "INR" }: { items: InvoiceLineItem[]; currency?: string }) {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200">
       <table className="w-full border-collapse text-left text-sm">

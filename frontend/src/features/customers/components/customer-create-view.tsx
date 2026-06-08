@@ -35,7 +35,7 @@ export function CustomerCreateView() {
             status: "active",
             segment: "mid_market",
             gstin: "33AAECA9100M1Z2",
-            currency: "USD",
+            currency: "INR",
             paymentTerms: "Net 30",
             creditLimit: 50000,
             owner: "Sara Khan",

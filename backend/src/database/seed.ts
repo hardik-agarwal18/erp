@@ -91,7 +91,7 @@ export async function seedDatabase(): Promise<void> {
         joinCode: "DEFAULT123",
         ownerId: superAdmin.id,
         settings: {
-          currency: "USD",
+          currency: "INR",
           timezone: "UTC",
         } satisfies Prisma.InputJsonValue,
       },

@@ -112,11 +112,11 @@ export function TransactionListView() {
       />
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <MetricCard label="Cash Position" value="$482,000" detail="Operating + Savings" trend={4.2} />
-        <MetricCard label="Receivables" value="$145,500" detail="Outstanding Invoices" trend={1.1} />
-        <MetricCard label="Payables" value="$82,400" detail="Pending Bills" trend={-2.4} />
-        <MetricCard label="Net Profit (MTD)" value="$42,800" detail="Gross Income - Expenses" trend={12.5} />
-        <MetricCard label="Expenses (MTD)" value="$64,200" detail="Total operational spend" trend={0.8} />
+        <MetricCard label="Cash Position" value="₹482,000" detail="Operating + Savings" trend={4.2} />
+        <MetricCard label="Receivables" value="₹145,500" detail="Outstanding Invoices" trend={1.1} />
+        <MetricCard label="Payables" value="₹82,400" detail="Pending Bills" trend={-2.4} />
+        <MetricCard label="Net Profit (MTD)" value="₹42,800" detail="Gross Income - Expenses" trend={12.5} />
+        <MetricCard label="Expenses (MTD)" value="₹64,200" detail="Total operational spend" trend={0.8} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
@@ -128,7 +128,7 @@ export function TransactionListView() {
             { key: "inflow", name: "Money In", type: "bar", color: "hsl(var(--success))" },
             { key: "outflow", name: "Money Out", type: "line", color: "hsl(var(--danger))" }
           ]}
-          valueFormatter={(val: any) => `$${(val / 1000).toFixed(0)}k`}
+          valueFormatter={(val: any) => `₹${(val / 1000).toFixed(0)}k`}
           height={280}
         />
         <TrendChart 
@@ -139,7 +139,7 @@ export function TransactionListView() {
             { key: "operations", name: "Operations", type: "bar", color: "hsl(var(--warning))" },
             { key: "payroll", name: "Payroll", type: "bar", color: "hsl(var(--primary))" }
           ]}
-          valueFormatter={(val: any) => `$${(val / 1000).toFixed(0)}k`}
+          valueFormatter={(val: any) => `₹${(val / 1000).toFixed(0)}k`}
           height={280}
         />
       </div>

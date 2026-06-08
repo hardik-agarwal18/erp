@@ -138,7 +138,7 @@ export function PurchaseListView() {
               { key: "spend", name: "Spend", type: "bar", color: "hsl(var(--primary))" },
               { key: "budget", name: "Budget", type: "line", color: "hsl(var(--muted-foreground))" }
             ]}
-            valueFormatter={(val: any) => `$${(val / 1000).toFixed(1)}k`}
+            valueFormatter={(val: any) => `₹${(val / 1000).toFixed(1)}k`}
             height={280}
           />
           <AlertWidget title="Vendor Performance" items={vendorPerformanceItems} />

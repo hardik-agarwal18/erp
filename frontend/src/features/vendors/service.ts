@@ -62,7 +62,7 @@ function mapLedgerToVendor(ledger: VendorLedgerResponse): Vendor {
     status: mapVendorStatus(ledger.totalPurchases),
     category: mapVendorCategory(lastPurchase?.category),
     gstin: vendor.gstNumber ?? "",
-    currency: "USD",
+    currency: "INR",
     paymentTerms: "Net 30",
     leadTimeDays: 0,
     outstandingBalance: Number(ledger.outstandingPayables),

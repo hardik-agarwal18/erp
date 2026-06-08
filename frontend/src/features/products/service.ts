@@ -90,7 +90,7 @@ function mapProduct(product: BackendProduct, categories: BackendCategory[], item
       wholesalePrice: salePrice,
       taxRate: Number(product.tax?.rate ?? 0),
       marginPercent,
-      currency: "USD",
+      currency: "INR",
       lastUpdated: product.updatedAt.slice(0, 10),
     },
     inventory,

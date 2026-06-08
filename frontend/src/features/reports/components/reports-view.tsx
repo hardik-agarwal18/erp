@@ -134,11 +134,11 @@ export function ReportsView() {
       />
 
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <MetricCard label="Revenue (MTD)" value="$145,500" detail="Gross Sales" trend={2.1} />
-        <MetricCard label="Expenses (MTD)" value="$64,200" detail="Operational & Payroll" trend={0.8} />
-        <MetricCard label="Net Profit (MTD)" value="$81,300" detail="Operating Profit" trend={4.5} />
-        <MetricCard label="Inventory Value" value="$215,800" detail="Current Warehouse Stock" />
-        <MetricCard label="Purchasing Spend" value="$42,100" detail="Procurement MTD" trend={-1.2} />
+        <MetricCard label="Revenue (MTD)" value="₹145,500" detail="Gross Sales" trend={2.1} />
+        <MetricCard label="Expenses (MTD)" value="₹64,200" detail="Operational & Payroll" trend={0.8} />
+        <MetricCard label="Net Profit (MTD)" value="₹81,300" detail="Operating Profit" trend={4.5} />
+        <MetricCard label="Inventory Value" value="₹215,800" detail="Current Warehouse Stock" />
+        <MetricCard label="Purchasing Spend" value="₹42,100" detail="Procurement MTD" trend={-1.2} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">

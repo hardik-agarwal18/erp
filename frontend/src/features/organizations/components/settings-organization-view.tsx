@@ -45,7 +45,7 @@ export function SettingsOrganizationView() {
     defaultValues: {
       name: "",
       legalName: "",
-      currency: "USD",
+      currency: "INR",
       timezone: "UTC",
       description: "",
     },
@@ -60,7 +60,7 @@ export function SettingsOrganizationView() {
       reset({
         name: organization.name || "",
         legalName: (organization.settings?.legalName as string) || "",
-        currency: (organization.settings?.currency as string) || "USD",
+        currency: (organization.settings?.currency as string) || "INR",
         timezone: (organization.settings?.timezone as string) || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
         description: (organization.settings?.description as string) || "",
       });
@@ -109,7 +109,7 @@ export function SettingsOrganizationView() {
       reset({
         name: organization.name || "",
         legalName: (organization.settings?.legalName as string) || "",
-        currency: (organization.settings?.currency as string) || "USD",
+        currency: (organization.settings?.currency as string) || "INR",
         timezone: (organization.settings?.timezone as string) || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
         description: (organization.settings?.description as string) || "",
       });

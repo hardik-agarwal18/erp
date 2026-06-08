@@ -71,7 +71,7 @@ export function InvoiceListView() {
   const alertItems: AlertWidgetItem[] = overdueInvoices.slice(0, 5).map(inv => ({
     id: inv.id,
     title: inv.customer,
-    subtitle: `${inv.invoiceNumber} - ${formatCurrency(inv.balance, inv.currency || "USD")}`,
+    subtitle: `${inv.invoiceNumber} - ${formatCurrency(inv.balance, inv.currency || "INR")}`,
     badgeLabel: "Overdue",
     badgeVariant: "danger"
   }));

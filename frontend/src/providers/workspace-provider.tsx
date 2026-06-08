@@ -8,7 +8,7 @@ import { featurePermissions } from "@/constants/permissions";
 import * as authService from "@/services/auth.service";
 import type { FeatureKey, UserSession, Workspace } from "@/types/app";
 
-const DEFAULT_CURRENCY = "USD";
+const DEFAULT_CURRENCY = "INR";
 
 function buildInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -119,7 +119,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
       if (nextWorkspaceId) {
         const nextPermissions = await authService.listPermissions();
-        setPermissions(nextPermissions.map((permission) => permission.name));
+        setPermissions(nextPermissions.map((p: any) => p.name || p.permission));
       } else {
         setPermissions([]);
       }
@@ -176,7 +176,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         setStoredOrganizationId(result.activeOrganization?.id ?? null);
         setWorkspaces(result.organizations.map(mapWorkspace));
         setWorkspaceId(result.activeOrganization?.id ?? null);
-        setPermissions((await authService.listPermissions()).map((permission) => permission.name));
+        setPermissions((await authService.listPermissions()).map((p: any) => p.name || p.permission));
         setSession((current) => ({
           ...(current ?? FALLBACK_SESSION),
           role: result.activeOrganization?.role ?? null,

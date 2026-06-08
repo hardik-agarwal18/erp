@@ -52,8 +52,8 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
 
       <InvoiceSummary
         items={[
-          { label: "Amount", value: formatCurrency(invoice.amount, invoice.currency ?? "USD"), detail: "Gross invoice amount including taxes." },
-          { label: "Balance", value: formatCurrency(invoice.balance, invoice.currency ?? "USD"), detail: "Remaining unpaid balance." },
+          { label: "Amount", value: formatCurrency(invoice.amount, invoice.currency ?? "INR"), detail: "Gross invoice amount including taxes." },
+          { label: "Balance", value: formatCurrency(invoice.balance, invoice.currency ?? "INR"), detail: "Remaining unpaid balance." },
           { label: "Due Date", value: invoice.dueDate, detail: "Customer payment due date." },
           { label: "Status", value: invoice.status, detail: "Current invoice lifecycle stage." },
           { label: "Terms", value: invoice.paymentTerms ?? "Standard", detail: "Commercial payment terms on this invoice." },
@@ -72,7 +72,7 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
                 <InvoiceStatusBadge status={invoice.status} />
               </div>
               <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">Sales rep: {invoice.salesRep}</div>
-              <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">Currency: {invoice.currency ?? "USD"}</div>
+              <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">Currency: {invoice.currency ?? "INR"}</div>
               <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">Issued: {invoice.issueDate ?? "Pending"}</div>
             </CardContent>
           </Card>
