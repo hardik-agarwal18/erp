@@ -2,7 +2,7 @@ import { jest } from "@jest/globals";
 
 // Mocking dependencies
 import { authRepository } from "../../../src/modules/auth/auth.repository.js";
-import { redisClient } from "../../../src/redis/redisClient.js";
+import { redisClient } from "../../../src/config/redis.js";
 import { sendPasswordResetEmail, sendVerificationEmail } from "../../../src/services/mail/index.js";
 import { auditService } from "../../../src/services/audit/index.js";
 import { comparePassword, hashPassword } from "../../../src/lib/bcrypt.js";
@@ -20,7 +20,7 @@ jest.mock("../../../src/queue/queue.service.js", () => ({
   reportsQueue: { add: jest.fn() },
   auditExportsQueue: { add: jest.fn() },
 }));
-jest.mock("../../../src/redis/redisClient.js", () => ({
+jest.mock("../../../src/config/redis.js", () => ({
   redisClient: {
     set: jest.fn(),
     get: jest.fn(),

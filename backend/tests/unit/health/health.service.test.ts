@@ -2,7 +2,8 @@ import { jest } from "@jest/globals";
 
 // Mocking dependencies
 import { prisma } from "../../../src/database/prisma.js";
-import { checkRedisHealth } from "../../../src/redis/redisClient.js";
+import { checkRedisHealth } from "../../../src/config/redis.js";
+import { checkMailHealth } from "../../../src/config/mail.js";
 import { storageService } from "../../../src/lib/storage/storage.service.js";
 import { queueConnection } from "../../../src/queue/connection.js";
 
@@ -12,8 +13,12 @@ jest.mock("../../../src/database/prisma.js", () => ({
   },
 }));
 
-jest.mock("../../../src/redis/redisClient.js", () => ({
+jest.mock("../../../src/config/redis.js", () => ({
   checkRedisHealth: jest.fn(),
+}));
+
+jest.mock("../../../src/config/mail.js", () => ({
+  checkMailHealth: jest.fn(),
 }));
 
 jest.mock("../../../src/lib/storage/storage.service.js", () => ({
@@ -89,6 +94,7 @@ describe("healthService", () => {
     it("should return aggregated health status", async () => {
       (prisma.$queryRaw as jest.Mock).mockResolvedValue(1);
       (checkRedisHealth as jest.Mock).mockResolvedValue(true);
+      (checkMailHealth as jest.Mock).mockResolvedValue(true);
       (storageService.uploadFile as jest.Mock).mockResolvedValue(undefined);
       (storageService.deleteFile as jest.Mock).mockResolvedValue(undefined);
       (queueConnection.ping as jest.Mock).mockResolvedValue("PONG");
@@ -98,6 +104,7 @@ describe("healthService", () => {
       expect(result).toEqual({
         database: "ok",
         redis: "ok",
+        mail: "ok",
         storage: "ok",
         queues: "ok",
       });
@@ -106,6 +113,7 @@ describe("healthService", () => {
     it("should return error for failing components", async () => {
       (prisma.$queryRaw as jest.Mock).mockRejectedValue(new Error());
       (checkRedisHealth as jest.Mock).mockResolvedValue(false);
+      (checkMailHealth as jest.Mock).mockResolvedValue(false);
       (storageService.uploadFile as jest.Mock).mockRejectedValue(new Error());
       (queueConnection.ping as jest.Mock).mockRejectedValue(new Error());
 
@@ -114,6 +122,7 @@ describe("healthService", () => {
       expect(result).toEqual({
         database: "error",
         redis: "error",
+        mail: "error",
         storage: "error",
         queues: "error",
       });

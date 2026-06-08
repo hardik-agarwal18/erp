@@ -9,7 +9,7 @@ jest.mock("../../../src/config/database.js", () => ({
   },
 }));
 
-jest.mock("../../../src/redis/redisClient.js", () => ({
+jest.mock("../../../src/config/redis.js", () => ({
   redisClient: {
     get: jest.fn(),
     set: jest.fn(),
@@ -17,7 +17,7 @@ jest.mock("../../../src/redis/redisClient.js", () => ({
   },
 }));
 
-import { redisClient } from "../../../src/redis/redisClient.js";
+import { redisClient } from "../../../src/config/redis.js";
 import {
   getCachedMemberPermissions,
   clearMemberPermissionCache,

@@ -1,5 +1,5 @@
 import prisma from "../../config/database.js";
-import { redisClient } from "../../redis/redisClient.js";
+import { redisClient } from "../../config/redis.js";
 
 const PERMISSION_CACHE_TTL_SECONDS = 5 * 60;
 

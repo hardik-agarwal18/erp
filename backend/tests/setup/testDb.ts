@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 
 import { env } from "../../src/config/env.js";
 import prisma from "../../src/config/database.js";
-import { redisClient } from "../../src/redis/redisClient.js";
+import { redisClient } from "../../src/config/redis.js";
 
 const ensureSafeTestTarget = () => {
   const databaseUrl = env.TEST_DATABASE_URL ?? env.DATABASE_URL;

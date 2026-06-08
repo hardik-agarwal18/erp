@@ -5,7 +5,7 @@ import prisma from "./config/database.js";
 
 import logger from "./config/logger.js";
 
-import { connectRedis, redisClient } from "./redis/redisClient.js";
+import { connectRedis, redisClient } from "./config/redis.js";
 
 import { verifyConnection } from "./services/mail/index.js";
 

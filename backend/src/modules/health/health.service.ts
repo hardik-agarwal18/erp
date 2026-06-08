@@ -1,5 +1,5 @@
 import { prisma } from "../../database/prisma.js";
-import { checkRedisHealth } from "../../redis/redisClient.js";
+import { checkRedisHealth } from "../../config/redis.js";
 import { storageService } from "../../lib/storage/storage.service.js";
 import { queueConnection } from "../../queue/connection.js";
 import { checkMailHealth } from "../../config/mail.js";

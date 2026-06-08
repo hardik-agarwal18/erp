@@ -5,7 +5,7 @@ jest.mock("../../../src/lib/jwt.js", () => ({
   verifyToken: jest.fn(),
 }));
 
-jest.mock("../../../src/redis/redisClient.js", () => ({
+jest.mock("../../../src/config/redis.js", () => ({
   redisClient: {
     get: jest.fn(),
   },
@@ -21,7 +21,7 @@ jest.mock("../../../src/config/env.js", () => ({
 import { Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../../../src/middleware/auth.middleware.js";
 import { verifyToken } from "../../../src/lib/jwt.js";
-import { redisClient } from "../../../src/redis/redisClient.js";
+import { redisClient } from "../../../src/config/redis.js";
 import ApiError from "../../../src/utils/ApiError.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

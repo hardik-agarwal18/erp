@@ -5,7 +5,7 @@ const mockRedisGet = jest.fn();
 const mockRedisSet = jest.fn();
 const mockRedisDel = jest.fn();
 
-jest.mock("../../../src/redis/redisClient.js", () => ({
+jest.mock("../../../src/config/redis.js", () => ({
   redisClient: { get: mockRedisGet, set: mockRedisSet, del: mockRedisDel },
 }));
 

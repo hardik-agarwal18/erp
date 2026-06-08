@@ -4,7 +4,7 @@ import { Request } from "express";
 import ApiError from "../../utils/ApiError.js";
 import { comparePassword, hashPassword } from "../../lib/bcrypt.js";
 import { verifyToken } from "../../lib/jwt.js";
-import { redisClient } from "../../redis/redisClient.js";
+import { redisClient } from "../../config/redis.js";
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
