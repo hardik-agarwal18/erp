@@ -146,7 +146,20 @@ const dashboardMetrics = async (organizationId: string) => {
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999),
     );
 
-    const [salesSnapshot, expenseSnapshot, inventorySnapshot] = await Promise.all([
+    const startOfPrevMonth = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1),
+    );
+    const endOfPrevMonth = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
+    );
+
+    const [
+      salesSnapshot,
+      expenseSnapshot,
+      inventorySnapshot,
+      prevSalesSnapshot,
+      prevExpenseSnapshot
+    ] = await Promise.all([
       salesReport(organizationId, {
         startDate: startOfMonth.toISOString(),
         endDate: endOfMonth.toISOString(),
@@ -156,18 +169,37 @@ const dashboardMetrics = async (organizationId: string) => {
         endDate: endOfMonth.toISOString(),
       }),
       inventoryReport(organizationId),
+      salesReport(organizationId, {
+        startDate: startOfPrevMonth.toISOString(),
+        endDate: endOfPrevMonth.toISOString(),
+      }),
+      expenseReport(organizationId, {
+        startDate: startOfPrevMonth.toISOString(),
+        endDate: endOfPrevMonth.toISOString(),
+      }),
     ]);
 
     const unpaidInvoices =
       await reportRepository.countUnpaidInvoices(organizationId);
 
+    const calcTrend = (current: number, prev: number) => {
+      if (prev === 0) return current > 0 ? 100 : 0;
+      return Math.round(((current - prev) / prev) * 100);
+    };
+
+    const currentProfit = salesSnapshot.totalSales - expenseSnapshot.totalExpenses;
+    const prevProfit = prevSalesSnapshot.totalSales - prevExpenseSnapshot.totalExpenses;
+
     return {
       monthlyRevenue: salesSnapshot.totalSales,
       monthlyExpenses: expenseSnapshot.totalExpenses,
-      profitEstimate: salesSnapshot.totalSales - expenseSnapshot.totalExpenses,
+      profitEstimate: currentProfit,
       unpaidInvoices,
       inventoryValue: inventorySnapshot.stockValue,
       topCustomers: salesSnapshot.topCustomers,
+      revenueTrend: calcTrend(salesSnapshot.totalSales, prevSalesSnapshot.totalSales),
+      expensesTrend: calcTrend(expenseSnapshot.totalExpenses, prevExpenseSnapshot.totalExpenses),
+      profitTrend: calcTrend(currentProfit, prevProfit),
     };
 };
 

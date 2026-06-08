@@ -9,6 +9,9 @@ type DashboardReport = {
   profitEstimate: number;
   unpaidInvoices: number;
   inventoryValue: number;
+  revenueTrend: number;
+  expensesTrend: number;
+  profitTrend: number;
   topCustomers: Array<{
     customer: { id: string; name: string } | null;
     totalSales: number;
@@ -57,12 +60,12 @@ export async function getDashboardSnapshot() {
 
   const snapshot: DashboardSnapshot = {
     kpis: [
-      { label: "Revenue", value: dashboard.monthlyRevenue, trend: 0, detail: "Current month sales from backend reports." },
-      { label: "Expenses", value: dashboard.monthlyExpenses, trend: 0, detail: "Current month expenses from backend reports." },
-      { label: "Profit", value: dashboard.profitEstimate, trend: 0, detail: "Revenue less expenses for the current month." },
-      { label: "Unpaid Invoices", value: dashboard.unpaidInvoices, trend: 0, detail: "Open issued invoices requiring follow-up." },
-      { label: "Inventory Value", value: dashboard.inventoryValue, trend: 0, detail: "Inventory valuation from backend stock report." },
-      { label: "Avg Invoice", value: sales.averageInvoiceValue, trend: 0, detail: "Average invoice value in the selected report range." },
+      { label: "Revenue", value: dashboard.monthlyRevenue, trend: dashboard.revenueTrend, detail: "Current month sales from backend reports." },
+      { label: "Expenses", value: dashboard.monthlyExpenses, trend: dashboard.expensesTrend, detail: "Current month expenses from backend reports." },
+      { label: "Profit", value: dashboard.profitEstimate, trend: dashboard.profitTrend, detail: "Revenue less expenses for the current month." },
+      { label: "Unpaid Invoices", value: dashboard.unpaidInvoices, trend: undefined, detail: "Open issued invoices requiring follow-up." },
+      { label: "Inventory Value", value: dashboard.inventoryValue, trend: undefined, detail: "Inventory valuation from backend stock report." },
+      { label: "Avg Invoice", value: sales.averageInvoiceValue, trend: undefined, detail: "Average invoice value in the selected report range." },
     ],
     revenueTrend: sales.topCustomers.map((entry, index) => ({
       month: `Top ${index + 1}`,

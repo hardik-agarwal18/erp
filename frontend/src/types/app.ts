@@ -54,7 +54,7 @@ export type FeatureKey = "dashboard" | "customers" | "vendors" | "invoices" | "i
 export type KpiMetric = {
   label: string;
   value: number;
-  trend: number;
+  trend?: number;
   detail: string;
 };
 
