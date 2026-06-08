@@ -6,22 +6,7 @@ export type CustomerFiltersState = {
   segment: CustomerSegment | "all";
 };
 
-export type CustomerFormValues = {
-  code: string;
-  name: string;
-  legalName: string;
-  email: string;
-  phone: string;
-  status: CustomerStatus;
-  segment: CustomerSegment;
-  gstin: string;
-  currency: string;
-  paymentTerms: string;
-  creditLimit: number;
-  owner: string;
-  billingAddress: string;
-  shippingAddress: string;
-};
+
 
 export type CustomerSummary = {
   totalCustomers: number;

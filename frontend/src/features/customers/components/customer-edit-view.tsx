@@ -40,20 +40,20 @@ export function CustomerEditView({ customerId }: { customerId: string }) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.72fr)]">
         <CustomerForm
           defaultValues={{
-            code: customer.code,
-            name: customer.name,
-            legalName: customer.legalName,
-            email: customer.email,
-            phone: customer.phone,
+            code: customer.code || "",
+            name: customer.name || "",
+            legalName: customer.legalName || "",
+            email: customer.email || "",
+            phone: customer.phone || "",
             status: customer.status,
             segment: customer.segment,
-            gstin: customer.gstin,
-            currency: customer.currency,
-            paymentTerms: customer.paymentTerms,
-            creditLimit: customer.creditLimit,
-            owner: customer.owner,
-            billingAddress: customer.billingAddress,
-            shippingAddress: customer.shippingAddress,
+            gstin: customer.gstin || "",
+            currency: customer.currency || "INR",
+            paymentTerms: customer.paymentTerms || "",
+            creditLimit: customer.creditLimit || 0,
+            owner: customer.owner || "",
+            billingAddress: customer.billingAddress || "",
+            shippingAddress: customer.shippingAddress || "",
           }}
           description="Maintain customer metadata without leaving the ERP master data workspace."
           pending={mutation.isPending}

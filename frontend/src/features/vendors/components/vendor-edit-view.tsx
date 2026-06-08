@@ -40,20 +40,20 @@ export function VendorEditView({ vendorId }: { vendorId: string }) {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.72fr)]">
         <VendorForm
           defaultValues={{
-            code: vendor.code,
-            name: vendor.name,
-            legalName: vendor.legalName,
-            email: vendor.email,
-            phone: vendor.phone,
+            code: vendor.code || "",
+            name: vendor.name || "",
+            legalName: vendor.legalName || "",
+            email: vendor.email || "",
+            phone: vendor.phone || "",
             status: vendor.status,
             category: vendor.category,
-            gstin: vendor.gstin,
-            currency: vendor.currency,
-            paymentTerms: vendor.paymentTerms,
-            leadTimeDays: vendor.leadTimeDays,
-            accountManager: vendor.accountManager,
-            billingAddress: vendor.billingAddress,
-            shippingAddress: vendor.shippingAddress,
+            gstin: vendor.gstin || "",
+            currency: vendor.currency || "INR",
+            paymentTerms: vendor.paymentTerms || "",
+            leadTimeDays: vendor.leadTimeDays || 0,
+            accountManager: vendor.accountManager || "",
+            billingAddress: vendor.billingAddress || "",
+            shippingAddress: vendor.shippingAddress || "",
           }}
           description="Maintain supplier, compliance, and payment settings without leaving the master data workspace."
           pending={mutation.isPending}

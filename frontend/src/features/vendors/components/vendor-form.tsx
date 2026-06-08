@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { vendorFormSchema, type VendorFormSchema } from "../schema";
-import type { VendorFormValues } from "../types";
+
 
 export function VendorForm({
   defaultValues,
@@ -19,15 +19,15 @@ export function VendorForm({
   onSubmit,
   pending,
 }: {
-  defaultValues: VendorFormValues;
+  defaultValues: Partial<VendorFormSchema>;
   submitLabel: string;
   description: string;
   onSubmit: (values: VendorFormSchema) => Promise<void> | void;
   pending?: boolean;
 }) {
   const form = useForm<VendorFormSchema>({
-    resolver: zodResolver(vendorFormSchema),
-    defaultValues,
+    resolver: zodResolver(vendorFormSchema) as any,
+    defaultValues: defaultValues as any,
   });
 
   return (
@@ -39,7 +39,17 @@ export function VendorForm({
         </div>
       </CardHeader>
       <CardContent>
-        <form className="space-y-4" onSubmit={form.handleSubmit(async (values) => onSubmit(values))}>
+        <form className="space-y-4" onSubmit={form.handleSubmit(async (values) => onSubmit(values as VendorFormSchema))}>
+          {Object.keys(form.formState.errors).length > 0 && (
+            <div className="rounded-md bg-red-50 p-4 border border-red-200">
+              <h3 className="text-sm font-medium text-red-800">Please fix the following validation errors:</h3>
+              <ul className="mt-2 list-disc pl-5 text-sm text-red-700">
+                {Object.entries(form.formState.errors).map(([field, error]) => (
+                  <li key={field}>{field}: {error?.message?.toString() || "Invalid value"}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
               <Label htmlFor="vendor-code">Vendor Code</Label>
