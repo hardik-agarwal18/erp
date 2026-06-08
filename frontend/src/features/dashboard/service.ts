@@ -12,6 +12,11 @@ type DashboardReport = {
   revenueTrend: number;
   expensesTrend: number;
   profitTrend: number;
+  historicalRevenue: Array<{ month: string; total: number }>;
+  historicalExpenses: Array<{ month: string; total: number }>;
+  expensesByCategory: Array<{ category: string; total: number }>;
+  taxCollected: number;
+  taxTrend: number;
   topCustomers: Array<{
     customer: { id: string; name: string } | null;
     totalSales: number;
@@ -63,17 +68,30 @@ export async function getDashboardSnapshot() {
       { label: "Revenue", value: dashboard.monthlyRevenue, trend: dashboard.revenueTrend, detail: "Current month sales from backend reports." },
       { label: "Expenses", value: dashboard.monthlyExpenses, trend: dashboard.expensesTrend, detail: "Current month expenses from backend reports." },
       { label: "Profit", value: dashboard.profitEstimate, trend: dashboard.profitTrend, detail: "Revenue less expenses for the current month." },
+      { label: "Tax Collected", value: dashboard.taxCollected, trend: dashboard.taxTrend, detail: "Taxes collected on issued invoices." },
       { label: "Unpaid Invoices", value: dashboard.unpaidInvoices, trend: undefined, detail: "Open issued invoices requiring follow-up." },
       { label: "Inventory Value", value: dashboard.inventoryValue, trend: undefined, detail: "Inventory valuation from backend stock report." },
       { label: "Avg Invoice", value: sales.averageInvoiceValue, trend: undefined, detail: "Average invoice value in the selected report range." },
     ],
-    revenueTrend: sales.topCustomers.map((entry, index) => ({
-      month: `Top ${index + 1}`,
-      revenue: entry.totalSales,
-      forecast: entry.totalSales,
+    revenueTrend: dashboard.historicalRevenue.map(h => ({
+      month: h.month,
+      revenue: h.total,
+      forecast: 0,
     })),
-    expenseTrend: [{ month: "Current", expenses: dashboard.monthlyExpenses, payroll: 0 }],
-    cashFlowTrend: [{ month: "Current", inflow: dashboard.monthlyRevenue, outflow: dashboard.monthlyExpenses, net: dashboard.profitEstimate }],
+    expenseTrend: dashboard.historicalExpenses.map(h => ({
+      month: h.month,
+      expenses: h.total,
+      payroll: 0,
+    })),
+    cashFlowTrend: dashboard.historicalRevenue.map((r, i) => {
+      const expenses = dashboard.historicalExpenses[i]?.total || 0;
+      return {
+        month: r.month,
+        inflow: r.total,
+        outflow: expenses,
+        net: r.total - expenses,
+      };
+    }),
     bankBalances: [{ label: "Operating Position", amount: dashboard.profitEstimate }],
     receivablesVsPayables: [
       { label: "Receivables", amount: dashboard.monthlyRevenue },
@@ -100,6 +118,11 @@ export async function getDashboardSnapshot() {
       dueDate: "Open balance",
       amount: entry.totalSales,
       status: "due_soon" as const,
+    })),
+    expensesByCategory: dashboard.expensesByCategory,
+    topCustomers: dashboard.topCustomers.map(tc => ({
+      customer: tc.customer?.name || "Unknown",
+      revenue: tc.totalSales,
     })),
   };
 

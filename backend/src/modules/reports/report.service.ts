@@ -49,11 +49,28 @@ const salesReport = async (organizationId: string, range: ReportRange) => {
       };
     });
 
+    const invoiceData = await reportRepository.listInvoiceDatesAndAmounts(
+      organizationId,
+      startDate,
+      endDate,
+    );
+
+    const monthlyMap = new Map<string, number>();
+    invoiceData.forEach((invoice) => {
+      const date = invoice.issueDate;
+      const monthKey = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+      monthlyMap.set(monthKey, (monthlyMap.get(monthKey) ?? 0) + Number(invoice.totalAmount));
+    });
+    const monthlySales = Array.from(monthlyMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([month, total]) => ({ month, total }));
+
     return {
       totalSales,
       invoiceCount,
       averageInvoiceValue,
       topCustomers,
+      monthlySales,
     };
 };
 
@@ -153,12 +170,19 @@ const dashboardMetrics = async (organizationId: string) => {
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0, 23, 59, 59, 999),
     );
 
+    const startOfSixMonthsAgo = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 5, 1),
+    );
+
     const [
       salesSnapshot,
       expenseSnapshot,
       inventorySnapshot,
       prevSalesSnapshot,
-      prevExpenseSnapshot
+      prevExpenseSnapshot,
+      historicalSalesSnapshot,
+      historicalExpenseSnapshot,
+      taxSnapshot
     ] = await Promise.all([
       salesReport(organizationId, {
         startDate: startOfMonth.toISOString(),
@@ -177,6 +201,18 @@ const dashboardMetrics = async (organizationId: string) => {
         startDate: startOfPrevMonth.toISOString(),
         endDate: endOfPrevMonth.toISOString(),
       }),
+      salesReport(organizationId, {
+        startDate: startOfSixMonthsAgo.toISOString(),
+        endDate: endOfMonth.toISOString(),
+      }),
+      expenseReport(organizationId, {
+        startDate: startOfSixMonthsAgo.toISOString(),
+        endDate: endOfMonth.toISOString(),
+      }),
+      taxReport(organizationId, {
+        startDate: startOfMonth.toISOString(),
+        endDate: endOfMonth.toISOString(),
+      }),
     ]);
 
     const unpaidInvoices =
@@ -190,6 +226,20 @@ const dashboardMetrics = async (organizationId: string) => {
     const currentProfit = salesSnapshot.totalSales - expenseSnapshot.totalExpenses;
     const prevProfit = prevSalesSnapshot.totalSales - prevExpenseSnapshot.totalExpenses;
 
+    // Fill missing months for the last 6 months to ensure arrays are exactly 6 elements
+    const historicalRevenue = [];
+    const historicalExpenses = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+      const monthKey = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
+      
+      const salesRecord = historicalSalesSnapshot.monthlySales.find(s => s.month === monthKey);
+      historicalRevenue.push({ month: monthKey, total: salesRecord?.total || 0 });
+
+      const expenseRecord = historicalExpenseSnapshot.monthlyExpenses.find(e => e.month === monthKey);
+      historicalExpenses.push({ month: monthKey, total: expenseRecord?.total || 0 });
+    }
+
     return {
       monthlyRevenue: salesSnapshot.totalSales,
       monthlyExpenses: expenseSnapshot.totalExpenses,
@@ -200,6 +250,11 @@ const dashboardMetrics = async (organizationId: string) => {
       revenueTrend: calcTrend(salesSnapshot.totalSales, prevSalesSnapshot.totalSales),
       expensesTrend: calcTrend(expenseSnapshot.totalExpenses, prevExpenseSnapshot.totalExpenses),
       profitTrend: calcTrend(currentProfit, prevProfit),
+      historicalRevenue,
+      historicalExpenses,
+      expensesByCategory: expenseSnapshot.expensesByCategory,
+      taxCollected: taxSnapshot.taxCollected,
+      taxTrend: calcTrend(taxSnapshot.taxCollected, 0) // No previous month tax calculated here, so trend is basic
     };
 };
 

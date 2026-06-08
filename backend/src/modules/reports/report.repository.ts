@@ -232,6 +232,29 @@ export const reportRepository = {
       select: { amount: true, expenseDate: true },
     });
   },
+  listInvoiceDatesAndAmounts: (
+    organizationId: string,
+    startDate?: string,
+    endDate?: string,
+  ) => {
+    const { start, end } = resolveDateRange(startDate, endDate);
+    return prisma.invoice.findMany({
+      where: {
+        organizationId,
+        deletedAt: null,
+        status: { in: ["ISSUED", "PAID", "PARTIALLY_PAID", "OVERDUE"] },
+        ...(start || end
+          ? {
+              issueDate: {
+                ...(start ? { gte: start } : {}),
+                ...(end ? { lte: end } : {}),
+              },
+            }
+          : {}),
+      },
+      select: { totalAmount: true, issueDate: true },
+    });
+  },
   calculateStockValue: async (organizationId: string) => {
     // Prisma aggregate does not support multiplication across relations
     // We use raw SQL for performance instead of mapping over all items in memory

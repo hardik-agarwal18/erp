@@ -68,6 +68,8 @@ export type DashboardSnapshot = {
   activity: Array<{ id: string; title: string; detail: string; time: string; kind: "invoice" | "inventory" | "purchase" }>;
   lowStockAlerts: Array<{ id: string; item: string; sku: string; warehouse: string; remaining: number; severity: "critical" | "warning" }>;
   outstandingInvoices: Array<{ id: string; customer: string; dueDate: string; amount: number; status: "overdue" | "due_soon" }>;
+  expensesByCategory: Array<{ category: string; total: number }>;
+  topCustomers: Array<{ customer: string; revenue: number }>;
 };
 
 export type InvoiceStatus = "draft" | "sent" | "partial" | "paid" | "overdue";

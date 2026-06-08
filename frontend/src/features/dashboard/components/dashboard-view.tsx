@@ -109,26 +109,59 @@ export function DashboardView() {
       {/* Row 2: Financial Trends */}
       <section className="grid gap-4 grid-cols-1 xl:grid-cols-2">
         <TrendChart 
-          title="Revenue & Forecast"
-          description="Actual performance vs projected growth"
+          title="Revenue Trend"
+          description="Actual historical performance"
           data={data.revenueTrend}
           xAxisKey="month"
           dataKeys={[
-            { key: "revenue", name: "Revenue", type: "line", color: "hsl(var(--primary))" },
-            { key: "forecast", name: "Forecast", type: "line", color: "hsl(var(--muted-foreground))" }
+            { key: "revenue", name: "Revenue", type: "line", color: "hsl(var(--primary))" }
           ]}
-          valueFormatter={(val) => `$${val}k`}
+          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
         />
         <TrendChart 
           title="Expenses"
-          description="Operating expenses and payroll movement"
+          description="Operating expenses"
           data={data.expenseTrend}
           xAxisKey="month"
           dataKeys={[
-            { key: "expenses", name: "Expenses", type: "bar", color: "hsl(var(--foreground))" },
-            { key: "payroll", name: "Payroll", type: "bar", color: "hsl(var(--muted-foreground))" }
+            { key: "expenses", name: "Expenses", type: "bar", color: "hsl(var(--foreground))" }
           ]}
-          valueFormatter={(val) => `$${val}k`}
+          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+        />
+      </section>
+
+      {/* Row 2.5: Additional Analytics */}
+      <section className="grid gap-4 grid-cols-1 lg:grid-cols-3">
+        <TrendChart 
+          title="Cash Flow Trend"
+          description="Monthly inflows vs outflows"
+          data={data.cashFlowTrend}
+          xAxisKey="month"
+          dataKeys={[
+            { key: "inflow", name: "Inflow", type: "area", color: "hsl(142.1 76.2% 36.3%)" },
+            { key: "outflow", name: "Outflow", type: "area", color: "hsl(0 84.2% 60.2%)" }
+          ]}
+          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+        />
+        <TrendChart 
+          title="Top Customers"
+          description="Revenue by client"
+          data={data.topCustomers}
+          xAxisKey="customer"
+          dataKeys={[
+            { key: "revenue", name: "Revenue", type: "bar", color: "hsl(var(--primary))" }
+          ]}
+          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
+        />
+        <TrendChart 
+          title="Expenses by Category"
+          description="Cost center breakdown"
+          data={data.expensesByCategory}
+          xAxisKey="category"
+          dataKeys={[
+            { key: "total", name: "Total", type: "bar", color: "hsl(var(--muted-foreground))" }
+          ]}
+          valueFormatter={(val) => val >= 1000 ? `$${(val / 1000).toFixed(1)}k` : `$${val}`}
         />
       </section>
 
