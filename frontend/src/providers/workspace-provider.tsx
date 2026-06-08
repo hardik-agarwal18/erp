@@ -149,14 +149,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     configureApiClient({
       getAccessToken: getStoredAccessToken,
-      getOrganizationId: () => workspaceId,
+      getOrganizationId: getStoredOrganizationId,
       refreshAccessToken: authService.refreshToken,
       onUnauthorized: () => {
         clearSession();
         router.replace("/login");
       },
     });
-  }, [clearSession, router, workspaceId]);
+  }, [clearSession, router]);
 
   useEffect(() => {
     void restoreSession();

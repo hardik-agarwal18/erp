@@ -107,7 +107,13 @@ apiClient.interceptors.response.use(
       });
     }
 
-    const accessToken = await refreshPromise;
+    let accessToken: string | null = null;
+    try {
+      accessToken = await refreshPromise;
+    } catch (refreshError) {
+      runtimeConfig.onUnauthorized();
+      throw normalizeApiError(refreshError);
+    }
 
     if (!accessToken || !error.config) {
       runtimeConfig.onUnauthorized();

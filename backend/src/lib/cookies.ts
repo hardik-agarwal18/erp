@@ -27,11 +27,11 @@ export const setAuthCookies = (
     secure: isProduction,
     sameSite: "strict",
     maxAge: REFRESH_TOKEN_EXPIRES_IN * 1000,
-    path: "/api/v1/auth",
+    path: "/",
   });
 };
 
 export const clearAuthCookies = (res: Response) => {
   res.clearCookie(REFRESH_COOKIE_NAME, { path: "/api/v1/auth" });
-  res.clearCookie(CSRF_COOKIE_NAME, { path: "/api/v1/auth" });
+  res.clearCookie(CSRF_COOKIE_NAME, { path: "/" });
 };
