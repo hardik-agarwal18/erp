@@ -10,6 +10,7 @@ services:
       PORT: 5000
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/postgres
       REDIS_URL: redis://redis:6379
+      OTLP_ENDPOINT: http://tempo:4318/v1/traces
     depends_on:
       - postgres
       - redis
@@ -29,6 +30,32 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+      - tempo
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./monitoring/tempo.yml:/etc/tempo.yaml
+    ports:
+      - "3200:3200"
+      - "4318:4318"
 
 volumes:
   pgdata:
