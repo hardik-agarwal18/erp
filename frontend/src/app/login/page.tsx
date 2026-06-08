@@ -21,6 +21,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const { signIn, isAuthenticated, isLoading } = useWorkspace();
   const [error, setError] = useState<string | null>(null);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
   const { register, handleSubmit, formState } = useForm<LoginFormValues>({
     defaultValues: {
       email: "",
@@ -35,6 +36,23 @@ function LoginContent() {
       router.replace(nextPath);
     }
   }, [isAuthenticated, isLoading, nextPath, router]);
+
+  const handleDemoLogin = async () => {
+    try {
+      setError(null);
+      setIsDemoLoading(true);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"}/demo/seed`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Failed to provision demo environment");
+      const { data } = await res.json();
+      await signIn({ email: data.email, password: data.password });
+      router.replace(nextPath);
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : "Unable to generate demo");
+      setIsDemoLoading(false);
+    }
+  };
 
   return (
       <Card className="w-full max-w-md border-slate-200 shadow-xl">
@@ -66,10 +84,26 @@ function LoginContent() {
               {formState.errors.password && <p className="text-sm text-rose-600">{formState.errors.password.message}</p>}
             </div>
             {error ? <p className="text-sm text-rose-600">{error}</p> : null}
-            <Button className="w-full" disabled={formState.isSubmitting} type="submit">
+            <Button className="w-full" disabled={formState.isSubmitting || isDemoLoading} type="submit">
               {formState.isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </form>
+
+          <div className="mt-4 flex items-center">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="mx-4 text-sm text-slate-500">or</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <Button 
+            variant="outline" 
+            className="w-full mt-4" 
+            onClick={handleDemoLogin} 
+            disabled={isDemoLoading || formState.isSubmitting}
+          >
+            {isDemoLoading ? "Provisioning your demo workspace..." : "Try Interactive Demo"}
+          </Button>
+
 
           <div className="mt-5 flex items-center justify-between text-sm text-slate-600">
             <Link className="hover:text-slate-950" href="/signup">

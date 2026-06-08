@@ -24,6 +24,7 @@ import expenseRoutes from "./modules/expenses/expense.routes.js";
 import taxRoutes from "./modules/taxes/tax.routes.js";
 import transactionRoutes from "./modules/transactions/transaction.routes.js";
 import reportRoutes from "./modules/reports/report.routes.js";
+import demoRoutes from "./modules/demo/demo.routes.js";
 
 const app = express();
 
@@ -93,6 +94,7 @@ app.get("/metrics", async (_req, res) => {
 app.use("/api/v1/health", healthRoutes);
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/demo", demoRoutes);
 app.use("/api/v1/organizations", organizationRoutes);
 app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/permissions", permissionRoutes);
