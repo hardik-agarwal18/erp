@@ -18,6 +18,7 @@ env:
   JWT_REFRESH_SECRET: super-secret
   EMAIL_VERIFY_SECRET: super-secret
   PASSWORD_RESET_SECRET: super-secret
+  COOKIE_SECRET: super-secret
   SMTP_HOST: localhost
   SMTP_PORT: 2525
   SMTP_USER: test

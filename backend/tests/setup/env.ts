@@ -33,6 +33,9 @@ process.env.JWT_ACCESS_SECRET ??= "test-access-secret";
 process.env.JWT_REFRESH_SECRET ??= "test-refresh-secret";
 process.env.EMAIL_VERIFY_SECRET ??= "test-email-verify-secret";
 process.env.PASSWORD_RESET_SECRET ??= "test-password-reset-secret";
+process.env.COOKIE_SECRET ??= "test-cookie-secret";
+
+process.env.MAIL_FROM ??= "test@example.com";
 
 process.env.SMTP_HOST ??= "localhost";
 process.env.SMTP_PORT ??= "1025";
