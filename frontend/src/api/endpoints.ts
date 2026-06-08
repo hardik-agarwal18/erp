@@ -1,0 +1,84 @@
+export const apiEndpoints = {
+  auth: {
+    login: "/auth/login",
+    signup: "/auth/signup",
+    logout: "/auth/logout",
+    logoutAll: "/auth/logout-all",
+    refresh: "/auth/refresh",
+    me: "/auth/me",
+    forgotPassword: "/auth/forgot-password",
+    resetPassword: "/auth/reset-password",
+    verifyEmail: "/auth/verify-email",
+    resendVerification: "/auth/resend-verification",
+    switchWorkspace: "/auth/switch-workspace",
+  },
+  organizations: {
+    list: "/organizations",
+    details: (organizationId: string) => `/organizations/${organizationId}`,
+    members: (organizationId: string) => `/organizations/${organizationId}/members`,
+    invite: (organizationId: string) => `/organizations/${organizationId}/members/invite`,
+    updateMember: (organizationId: string, memberId: string) => `/organizations/${organizationId}/members/${memberId}`,
+    removeMember: (organizationId: string, memberId: string) => `/organizations/${organizationId}/members/${memberId}`,
+    transferOwnership: (organizationId: string) => `/organizations/${organizationId}/transfer-ownership`,
+    join: "/organizations/join",
+    joinRequests: (organizationId: string) => `/organizations/${organizationId}/join-requests`,
+    approveJoinRequest: (organizationId: string, requestId: string) => `/organizations/${organizationId}/join-requests/${requestId}/approve`,
+    rejectJoinRequest: (organizationId: string, requestId: string) => `/organizations/${organizationId}/join-requests/${requestId}/reject`,
+  },
+  permissions: {
+    list: "/permissions",
+  },
+  roles: {
+    list: "/roles",
+    details: (roleId: string) => `/roles/${roleId}`,
+  },
+  customers: {
+    list: "/customers",
+    ledger: (customerId: string) => `/customers/${customerId}/ledger`,
+    details: (customerId: string) => `/customers/${customerId}`,
+  },
+  vendors: {
+    list: "/vendors",
+    ledger: (vendorId: string) => `/vendors/${vendorId}/ledger`,
+    details: (vendorId: string) => `/vendors/${vendorId}`,
+  },
+  products: {
+    list: "/products",
+    categories: "/products/categories",
+    details: (productId: string) => `/products/${productId}`,
+    categoryDetails: (categoryId: string) => `/products/categories/${categoryId}`,
+  },
+  inventory: {
+    items: "/inventory/items",
+    movements: "/inventory/movements",
+    adjustments: "/inventory/adjustments",
+    transfers: "/inventory/transfers",
+  },
+  invoices: {
+    list: "/invoices",
+    details: (invoiceId: string) => `/invoices/${invoiceId}`,
+  },
+  payments: {
+    list: "/payments",
+    details: (paymentId: string) => `/payments/${paymentId}`,
+  },
+  transactions: {
+    list: "/transactions",
+  },
+  auditLogs: {
+    list: (organizationId: string) => `/organizations/${organizationId}/audit-logs`,
+  },
+  reports: {
+    dashboard: "/reports/dashboard",
+    sales: "/reports/sales",
+    expenses: "/reports/expenses",
+    inventory: "/reports/inventory",
+    tax: "/reports/tax",
+    export: "/reports/export",
+    exportStatus: (jobId: string) => `/reports/export/${jobId}`,
+  },
+  expenses: {
+    list: "/expenses",
+    details: (expenseId: string) => `/expenses/${expenseId}`,
+  },
+} as const;
