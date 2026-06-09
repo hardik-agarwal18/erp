@@ -12,10 +12,8 @@ export type ExportStatusResponse = {
   url?: string;
 };
 
-export async function requestExport(reportType: string) {
-  const response = await apiClient.post<ApiResponse<ExportResponse>>(apiEndpoints.reports.export, {
-    reportType,
-  });
+export async function requestExport(params: { reportType: string; startDate?: string; endDate?: string; frequency?: string }) {
+  const response = await apiClient.post<ApiResponse<ExportResponse>>(apiEndpoints.reports.export, params);
   return response.data.data;
 }
 

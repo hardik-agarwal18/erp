@@ -13,7 +13,7 @@ export default function ProfileSettingsPage() {
       </div>
       <h1 className="text-2xl font-bold text-slate-900 mb-2">My Profile</h1>
       <p className="text-slate-500 max-w-md text-center">
-        This page is currently under construction. Soon, you'll be able to manage your personal details, avatar, and communication preferences here.
+        This page is currently under construction. Soon, you&apos;ll be able to manage your personal details, avatar, and communication preferences here.
       </p>
     </div>
   );

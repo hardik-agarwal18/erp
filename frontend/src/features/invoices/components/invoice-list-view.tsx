@@ -25,15 +25,14 @@ import { cn } from "@/lib/utils";
 
 const EMPTY_INVOICES: Invoice[] = [];
 
+import { faker } from "@faker-js/faker";
+
 // Placeholder data for TrendChart until API supports revenue trends
-const MOCK_REVENUE_TREND = [
-  { month: "Jan", revenue: 12000, target: 10000 },
-  { month: "Feb", revenue: 15000, target: 11000 },
-  { month: "Mar", revenue: 14000, target: 12000 },
-  { month: "Apr", revenue: 18000, target: 13000 },
-  { month: "May", revenue: 22000, target: 14000 },
-  { month: "Jun", revenue: 25000, target: 15000 },
-];
+const MOCK_REVENUE_TREND = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
+  month,
+  revenue: faker.number.int({ min: 10000, max: 30000 }),
+  target: faker.number.int({ min: 12000, max: 25000 })
+}));
 
 export function InvoiceListView() {
   const query = useInvoicesQuery();

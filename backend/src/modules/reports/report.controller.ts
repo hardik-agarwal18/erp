@@ -34,12 +34,15 @@ export const reportController = {
     sendSuccess(res, { statusCode: 200, data: report });
   },
   exportReport: async (req: Request, res: Response) => {
-    const { reportType } = req.body;
+    const { reportType, startDate, endDate, frequency } = req.body;
     const { reportsQueue } = await import("../../queue/queue.service.js");
     const job = await reportsQueue.add("export-report", {
       organizationId: req.organization!.id,
       userId: req.user!.id,
       reportType,
+      startDate,
+      endDate,
+      frequency,
     });
     sendSuccess(res, { statusCode: 202, data: { jobId: job.id } });
   },

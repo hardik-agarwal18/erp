@@ -10,7 +10,7 @@ const defaultJobOptions: JobsOptions = {
     type: "exponential",
     delay: 1000,
   },
-  removeOnComplete: true, // Keep Redis clean
+  removeOnComplete: { age: 3600 }, // Keep in Redis for 1 hour so status endpoints work
   removeOnFail: false, // Leave failed jobs for dead-letter processing
 };
 

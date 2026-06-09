@@ -64,24 +64,26 @@ export const startWorkers = () => {
     workers.push(worker);
   };
 
+  const prefix = env.NODE_ENV === "test" ? "{test-bull}" : "{bull}";
+
   // Mail worker
-  const mailWorker = new Worker<MailJobPayload>(QueueNames.MAIL, withLoggerContext(processMailJob), { connection: queueConnection.duplicate() as any, concurrency: 5 });
+  const mailWorker = new Worker<MailJobPayload>(QueueNames.MAIL, withLoggerContext(processMailJob), { connection: queueConnection.duplicate() as any, concurrency: 5, prefix });
   attachWorkerObservability(mailWorker, QueueNames.MAIL);
 
   // PDF Generation Worker
-  const pdfWorker = new Worker(QueueNames.PDF_GENERATION, withLoggerContext(processPdfGenerationJob), { connection: queueConnection.duplicate() as any, concurrency: 2 });
+  const pdfWorker = new Worker(QueueNames.PDF_GENERATION, withLoggerContext(processPdfGenerationJob), { connection: queueConnection.duplicate() as any, concurrency: 2, prefix });
   attachWorkerObservability(pdfWorker, QueueNames.PDF_GENERATION);
 
   // Cleanup Worker
-  const cleanupWorker = new Worker(QueueNames.STORAGE_CLEANUP, withLoggerContext(processCleanupJob), { connection: queueConnection.duplicate() as any, concurrency: 1 });
+  const cleanupWorker = new Worker(QueueNames.STORAGE_CLEANUP, withLoggerContext(processCleanupJob), { connection: queueConnection.duplicate() as any, concurrency: 1, prefix });
   attachWorkerObservability(cleanupWorker, QueueNames.STORAGE_CLEANUP);
 
   // Report Worker
-  const reportWorker = new Worker(QueueNames.REPORTS, withLoggerContext(processReportJob), { connection: queueConnection.duplicate() as any, concurrency: 2 });
+  const reportWorker = new Worker(QueueNames.REPORTS, withLoggerContext(processReportJob), { connection: queueConnection.duplicate() as any, concurrency: 2, prefix });
   attachWorkerObservability(reportWorker, QueueNames.REPORTS);
 
   // Audit Worker
-  const auditWorker = new Worker(QueueNames.AUDIT_EXPORTS, withLoggerContext(processAuditExportJob), { connection: queueConnection.duplicate() as any, concurrency: 1 });
+  const auditWorker = new Worker(QueueNames.AUDIT_EXPORTS, withLoggerContext(processAuditExportJob), { connection: queueConnection.duplicate() as any, concurrency: 1, prefix });
   attachWorkerObservability(auditWorker, QueueNames.AUDIT_EXPORTS);
 };
 

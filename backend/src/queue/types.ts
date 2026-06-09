@@ -40,6 +40,9 @@ export type ReportJobPayload = {
   organizationId: string;
   reportType: string;
   userId: string;
+  startDate?: string;
+  endDate?: string;
+  frequency?: string;
   filters?: Record<string, unknown>;
 };
 

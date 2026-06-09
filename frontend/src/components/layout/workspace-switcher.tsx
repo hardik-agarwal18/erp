@@ -44,7 +44,7 @@ export function WorkspaceSwitcher() {
           <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`} />
         </div>
 
-        <Badge variant="secondary" className="hidden lg:inline-flex text-[9px] uppercase tracking-wider px-1.5 py-0.5 h-auto leading-none opacity-80">
+        <Badge variant="neutral" className="hidden lg:inline-flex text-[9px] uppercase tracking-wider px-1.5 py-0.5 h-auto leading-none opacity-80">
           {workspace.role.replace("_", " ")}
         </Badge>
       </div>

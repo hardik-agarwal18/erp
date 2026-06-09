@@ -21,15 +21,14 @@ import { TrendChart } from "@/features/dashboard/components/trend-chart";
 import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
 import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
 
+import { faker } from "@faker-js/faker";
+
 // Placeholder data for TrendChart
-const MOCK_SPEND_TREND = [
-  { month: "Jan", spend: 45000, budget: 50000 },
-  { month: "Feb", spend: 52000, budget: 50000 },
-  { month: "Mar", spend: 48000, budget: 50000 },
-  { month: "Apr", spend: 61000, budget: 55000 },
-  { month: "May", spend: 59000, budget: 55000 },
-  { month: "Jun", spend: 65000, budget: 60000 },
-];
+const MOCK_SPEND_TREND = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
+  month,
+  spend: faker.number.int({ min: 40000, max: 70000 }),
+  budget: faker.number.int({ min: 50000, max: 60000 })
+}));
 
 export function PurchaseListView() {
   const query = usePurchasesQuery();
@@ -78,7 +77,14 @@ export function PurchaseListView() {
     title: order.number,
     detail: `Awaiting approval for ${order.vendor}`,
     timestamp: order.orderDate || "Pending",
-    href: `/purchases/${order.id}/edit`
+    actions: (
+      <div className="flex gap-2">
+        <Button size="sm" variant="outline" asChild>
+          <Link href={`/purchases/${order.id}`}>View</Link>
+        </Button>
+        <Button size="sm" onClick={() => console.log('Approve', order.id)}>Approve</Button>
+      </div>
+    )
   }));
 
   // Derive Vendor Performance Widget stats

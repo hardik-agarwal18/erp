@@ -12,6 +12,7 @@ export interface ActionListItem {
   timestamp?: string;
   href?: string;
   icon?: ReactNode;
+  actions?: ReactNode;
 }
 
 export interface ActionListProps {
@@ -48,12 +49,12 @@ export function ActionList({ title, description, icon, items, emptyMessage = "No
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   {item.timestamp && <span className="text-xs text-muted-foreground">{item.timestamp}</span>}
-                  {item.href && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                  {item.actions ? item.actions : item.href ? <ChevronRight className="h-4 w-4 text-muted-foreground" /> : null}
                 </div>
               </div>
             );
 
-            if (item.href) {
+            if (item.href && !item.actions) {
               return (
                 <Link 
                   key={item.id} 

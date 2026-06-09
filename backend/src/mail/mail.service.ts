@@ -12,6 +12,7 @@ import {
 import { NodemailerProvider } from "./providers/nodemailer.provider.js";
 import type {
   EmailRateLimitResult,
+  ExportEmailRequest,
   InvitationEmailRequest,
   InvoiceEmailRequest,
   MailProvider,
@@ -135,6 +136,7 @@ export interface MailDispatcher {
   sendPasswordResetEmail(request: PasswordResetEmailRequest): Promise<void>;
   sendInvitationEmail(request: InvitationEmailRequest): Promise<void>;
   sendInvoiceEmail(request: InvoiceEmailRequest): Promise<void>;
+  sendExportEmail(request: ExportEmailRequest): Promise<void>;
 }
 
 export class DirectMailDispatcher implements MailDispatcher {
@@ -154,6 +156,20 @@ export class DirectMailDispatcher implements MailDispatcher {
         subject: `Invoice ${request.invoiceNumber}`,
         html: `Your invoice ${request.invoiceNumber} is ready. <a href="${request.downloadUrl}">Download here</a>`,
         text: `Your invoice ${request.invoiceNumber} is ready. Download here: ${request.downloadUrl}`,
+      },
+      this.provider,
+      this.providerName,
+    );
+  }
+
+  async sendExportEmail(request: ExportEmailRequest): Promise<void> {
+    await sendMail(
+      {
+        from: mailFrom,
+        to: request.to,
+        subject: `Your ${request.exportType} report export is ready`,
+        html: `Your ${request.exportType} report has finished generating. <a href="${request.downloadUrl}">Download here</a>`,
+        text: `Your ${request.exportType} report has finished generating. Download here: ${request.downloadUrl}`,
       },
       this.provider,
       this.providerName,
@@ -259,6 +275,14 @@ export class QueueMailDispatcher implements MailDispatcher {
       "send-invoice",
       { type: "invoice", payload: request },
       { jobId: `invoice:${request.invoiceNumber}:${randomUUID()}` }
+    );
+  }
+
+  async sendExportEmail(request: ExportEmailRequest): Promise<void> {
+    await mailQueue.add(
+      "send-export",
+      { type: "export", payload: request },
+      { jobId: `export:${request.exportType}:${randomUUID()}` }
     );
   }
 }

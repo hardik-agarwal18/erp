@@ -110,6 +110,9 @@ app.use("/api/v1/taxes", taxRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/reports", reportRoutes);
 
+import path from "path";
+app.use("/api/v1/storage", express.static(path.resolve(process.cwd(), env.STORAGE_LOCAL_PATH || "./uploads")));
+
 app.use(errorMiddleware);
 
 export default app;

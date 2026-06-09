@@ -4,6 +4,10 @@ import { useMemo, useState } from "react";
 import { Download, Loader2, Search, Filter, Calendar as CalendarIcon, User as UserIcon } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { useExport } from "../hooks/use-export";
 
 import { MetricCard } from "@/features/dashboard/components/metric-card";
+import { MetricCardSkeleton } from "@/components/skeletons/metric-card-skeleton";
 import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
+import { useDashboardQuery } from "@/features/dashboard/hooks/use-dashboard-query";
+import { formatCompactCurrency } from "@/utils/formatters";
+import { faker } from "@faker-js/faker";
 
 type ReportDefinition = {
   id: string;
@@ -26,14 +34,18 @@ type ReportDefinition = {
 };
 
 const REPORTS_CATALOG: ReportDefinition[] = [
-  { id: "sales", name: "Sales Ledger", description: "Export all invoices, grouped by customer, including totals and status.", category: "Financial", lastGenerated: "2026-06-05 14:30", frequency: "Monthly", type: "sales" },
-  { id: "inventory", name: "Inventory Valuation", description: "Export current stock levels, valuation, and low stock items.", category: "Operations", lastGenerated: "2026-06-01 09:00", frequency: "On-Demand", type: "inventory" },
-  { id: "tax", name: "Tax Summary", description: "Export total tax collected vs paid over a period.", category: "Tax", lastGenerated: "2026-05-31 18:45", frequency: "Quarterly", type: "tax" },
+  { id: "sales", name: "Sales Ledger", description: "Export all invoices, grouped by customer, including totals and status.", category: "Financial", lastGenerated: null, frequency: "Monthly", type: "sales" },
+  { id: "inventory", name: "Inventory Valuation", description: "Export current stock levels, valuation, and low stock items.", category: "Operations", lastGenerated: null, frequency: "On-Demand", type: "inventory" },
+  { id: "tax", name: "Tax Summary", description: "Export total tax collected vs paid over a period.", category: "Tax", lastGenerated: null, frequency: "Quarterly", type: "tax" },
   { id: "expenses", name: "Expense Breakdown", description: "Export categorized business expenses.", category: "Financial", lastGenerated: null, frequency: "Monthly", type: "expenses" },
 ];
 
 function ReportActionCell({ reportType }: { reportType: string }) {
   const { requestExport, isRequesting, status, url, reset } = useExport();
+  const [open, setOpen] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [frequency, setFrequency] = useState("raw");
 
   if (status === "completed" && url) {
     return (
@@ -65,18 +77,66 @@ function ReportActionCell({ reportType }: { reportType: string }) {
     );
   }
 
+  const handleGenerate = () => {
+    requestExport({
+      reportType,
+      ...(startDate ? { startDate } : {}),
+      ...(endDate ? { endDate } : {}),
+      frequency,
+    });
+    setOpen(false);
+  };
+
   return (
-    <div className="flex justify-end">
-      <Button size="sm" variant="outline" onClick={() => requestExport(reportType)}>
-        <Download className="mr-2 h-3 w-3" />
-        Generate
-      </Button>
-    </div>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline">
+            <Download className="mr-2 h-3 w-3" />
+            Generate
+          </Button>
+        </div>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Export Options</DialogTitle>
+          <DialogDescription>
+            Configure date range and grouping frequency for your report.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="startDate">Start Date</Label>
+              <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="endDate">End Date</Label>
+              <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="frequency">Grouping Frequency</Label>
+            <Select value={frequency} onChange={(e) => setFrequency(e.target.value)} id="frequency">
+              <option value="raw">Raw (No Grouping)</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </Select>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button onClick={handleGenerate}>Generate Report</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
 export function ReportsView() {
   const [search, setSearch] = useState("");
+  const dashboardQuery = useDashboardQuery();
 
   const columns = useMemo<ColumnDef<ReportDefinition>[]>(
     () => [
@@ -113,18 +173,28 @@ export function ReportsView() {
     []
   );
 
+  const reportsWithDates = useMemo(() => {
+    return REPORTS_CATALOG.map(r => ({
+      ...r,
+      lastGenerated: faker.date.recent({ days: 10 }).toISOString().replace('T', ' ').substring(0, 16)
+    }));
+  }, []);
+
   const filteredReports = useMemo(() => {
-    return REPORTS_CATALOG.filter(report => 
+    return reportsWithDates.filter(report => 
       report.name.toLowerCase().includes(search.toLowerCase()) || 
       report.description.toLowerCase().includes(search.toLowerCase())
     );
-  }, [search]);
+  }, [search, reportsWithDates]);
 
-  const recentReports: ActionListItem[] = [
-    { id: "r1", title: "Sales Ledger", detail: "Generated by Ava Nolan", timestamp: "2 hours ago" },
-    { id: "r2", title: "Inventory Valuation", detail: "Generated by System", timestamp: "Yesterday" },
-    { id: "r3", title: "Tax Summary", detail: "Generated by Finance Dept", timestamp: "Last Week" },
-  ];
+  const recentReports = useMemo<ActionListItem[]>(() => {
+    return Array.from({ length: 5 }).map((_, i) => ({
+      id: `r${i}`,
+      title: faker.helpers.arrayElement(["Sales Ledger", "Inventory Valuation", "Tax Summary", "Expense Breakdown", "Trial Balance"]),
+      detail: `Generated by ${faker.person.fullName()}`,
+      timestamp: faker.date.recent({ days: 2 }).toLocaleString(),
+    }));
+  }, []);
 
   return (
     <div className="space-y-5">
@@ -133,12 +203,27 @@ export function ReportsView() {
         description="Generate, track, and export comprehensive CSV/PDF reports from your ERP data."
       />
 
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <MetricCard label="Revenue (MTD)" value="₹145,500" detail="Gross Sales" trend={2.1} />
-        <MetricCard label="Expenses (MTD)" value="₹64,200" detail="Operational & Payroll" trend={0.8} />
-        <MetricCard label="Net Profit (MTD)" value="₹81,300" detail="Operating Profit" trend={4.5} />
-        <MetricCard label="Inventory Value" value="₹215,800" detail="Current Warehouse Stock" />
-        <MetricCard label="Purchasing Spend" value="₹42,100" detail="Procurement MTD" trend={-1.2} />
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-5">
+        {dashboardQuery.isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <MetricCardSkeleton key={i} />
+          ))
+        ) : dashboardQuery.data?.kpis ? (
+          dashboardQuery.data.kpis.slice(0, 5).map((metric: any) => {
+            const isCurrency = ["Revenue", "Expenses", "Profit", "Tax Collected", "Inventory Value", "Avg Invoice"].includes(metric.label);
+            const displayValue = isCurrency ? formatCompactCurrency(metric.value) : metric.value >= 1000 ? `${(metric.value / 1000).toFixed(1)}k` : metric.value.toString();
+            
+            return (
+              <MetricCard 
+                key={metric.label} 
+                label={metric.label} 
+                value={displayValue} 
+                trend={metric.trend} 
+                detail={metric.detail} 
+              />
+            );
+          })
+        ) : null}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-3">

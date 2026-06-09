@@ -14,6 +14,7 @@ import { useTransactionsQuery } from "../hooks/use-transactions-query";
 import type { TransactionFiltersState } from "../types";
 import { TransactionTable } from "./transaction-table";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/formatters";
 
 // Phase 4 Components
 import { MetricCard } from "@/features/dashboard/components/metric-card";
@@ -21,24 +22,21 @@ import { TrendChart } from "@/features/dashboard/components/trend-chart";
 import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
 import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
 
-// Placeholder data for TrendCharts
-const MOCK_CASH_FLOW = [
-  { month: "Jan", inflow: 120000, outflow: 95000 },
-  { month: "Feb", inflow: 135000, outflow: 110000 },
-  { month: "Mar", inflow: 140000, outflow: 105000 },
-  { month: "Apr", inflow: 125000, outflow: 130000 },
-  { month: "May", inflow: 155000, outflow: 115000 },
-  { month: "Jun", inflow: 165000, outflow: 120000 },
-];
+import { faker } from "@faker-js/faker";
 
-const MOCK_EXPENSES = [
-  { month: "Jan", payroll: 45000, operations: 50000 },
-  { month: "Feb", payroll: 45000, operations: 65000 },
-  { month: "Mar", payroll: 48000, operations: 57000 },
-  { month: "Apr", payroll: 48000, operations: 82000 },
-  { month: "May", payroll: 52000, operations: 63000 },
-  { month: "Jun", payroll: 52000, operations: 68000 },
-];
+// Placeholder data for TrendCharts
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+const MOCK_CASH_FLOW = MONTHS.map(month => ({
+  month,
+  inflow: faker.number.int({ min: 100000, max: 200000 }),
+  outflow: faker.number.int({ min: 80000, max: 150000 }),
+}));
+
+const MOCK_EXPENSES = MONTHS.map(month => ({
+  month,
+  payroll: faker.number.int({ min: 40000, max: 60000 }),
+  operations: faker.number.int({ min: 40000, max: 90000 }),
+}));
 
 export function TransactionListView() {
   const query = useTransactionsQuery();
