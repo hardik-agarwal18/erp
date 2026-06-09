@@ -10,21 +10,20 @@ import { PageLoader } from "@/components/states/page-loader";
 import { ModuleError } from "@/components/states/module-error";
 import { EmptyState } from "@/components/states/empty-state";
 
+import { TableSkeleton } from "@/components/skeletons/table-skeleton";
+
 export function AuditLogsView() {
   const { data: logs, isLoading, isError, refetch } = useAuditLogs();
   const [search, setSearch] = useState("");
 
-  if (isLoading) return <PageLoader label="Loading audit trail..." />;
-  if (isError || !logs) return <ModuleError title="Audit Logs Unavailable" message="Could not fetch the activity log." retry={() => refetch()} />;
-
-  const filteredLogs = logs.filter(log => {
+  const filteredLogs = logs?.filter(log => {
     if (!search) return true;
     const q = search.toLowerCase();
     return log.action.toLowerCase().includes(q) || 
            log.entityType.toLowerCase().includes(q) || 
            log.actorName.toLowerCase().includes(q) ||
            log.actorEmail.toLowerCase().includes(q);
-  });
+  }) ?? [];
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -45,7 +44,11 @@ export function AuditLogsView() {
             />
           </div>
 
-          {filteredLogs.length === 0 ? (
+          {isLoading ? (
+            <TableSkeleton rows={6} columns={4} />
+          ) : isError || !logs ? (
+            <ModuleError title="Audit Logs Unavailable" message="Could not fetch the activity log." retry={() => refetch()} />
+          ) : filteredLogs.length === 0 ? (
             <EmptyState title="No logs found" description="No activity matches your search." />
           ) : (
             <div className="border border-slate-200 rounded-md divide-y divide-slate-100 bg-white">

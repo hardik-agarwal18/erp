@@ -19,6 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { updateOrganizationSchema, type UpdateOrganizationSchema } from "../schema";
 import { useOrganization, useOrganizationMutations } from "../hooks/use-organizations";
 import { DeleteOrganizationDialog } from "./delete-organization-dialog";
+import { DetailsSkeleton } from "@/components/skeletons/details-skeleton";
 
 export function SettingsOrganizationView() {
   const { hasRole } = useWorkspace();
@@ -117,7 +118,12 @@ export function SettingsOrganizationView() {
   };
 
   if (isLoading) {
-    return <div className="p-8 text-center text-slate-500">Loading organization details...</div>;
+    return (
+      <div className="space-y-6 max-w-3xl">
+        <PageHeader title="Organization Details" description="Manage your business profile and workspace settings." />
+        <DetailsSkeleton sections={1} />
+      </div>
+    );
   }
 
   if (isError || !organization) {

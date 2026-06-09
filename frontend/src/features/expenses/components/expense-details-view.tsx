@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { ModuleError } from "@/components/states/module-error";
-import { PageLoader } from "@/components/states/page-loader";
+import { DetailsSkeleton } from "@/components/skeletons/details-skeleton";
 import { useExpense } from "../hooks/use-expense";
 import { useExpenseMutations } from "../hooks/use-expense-mutations";
 import { ExpenseForm } from "./expense-form";
@@ -15,7 +15,11 @@ export function ExpenseDetailsView({ expenseId }: { expenseId: string }) {
   const { updateExpense } = useExpenseMutations();
 
   if (isLoading) {
-    return <PageLoader label="Loading expense details..." />;
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <DetailsSkeleton />
+      </div>
+    );
   }
 
   if (isError || !expense) {

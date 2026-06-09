@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AlertTriangle, ChevronDown, ChevronUp, ChevronsUpDown, Loader2, Search, SlidersHorizontal } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export type DataTableDensity = "compact" | "comfortable";
@@ -203,14 +204,15 @@ export function DataTable<TData, TValue>({
         </TableHead>
         <TableBody>
           {isLoading ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-32 text-center">
-                <div className="flex flex-col items-center justify-center text-muted-foreground">
-                  <Loader2 className="h-6 w-6 animate-spin mb-2" />
-                  <p className="text-sm">Loading data...</p>
-                </div>
-              </TableCell>
-            </TableRow>
+            Array.from({ length: 5 }).map((_, rowIndex) => (
+              <TableRow key={`loading-row-${rowIndex}`}>
+                {columns.map((_, colIndex) => (
+                  <TableCell key={`loading-cell-${rowIndex}-${colIndex}`} className={densityClass}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
           ) : isError ? (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-32 text-center">

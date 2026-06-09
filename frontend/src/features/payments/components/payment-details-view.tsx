@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { ModuleError } from "@/components/states/module-error";
-import { PageLoader } from "@/components/states/page-loader";
+import { DetailsSkeleton } from "@/components/skeletons/details-skeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/utils/formatters";
@@ -13,7 +13,11 @@ export function PaymentDetailsView({ paymentId }: { paymentId: string }) {
   const { data: payment, isError, isLoading, refetch } = usePayment(paymentId);
 
   if (isLoading) {
-    return <PageLoader label="Loading payment details..." />;
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <DetailsSkeleton />
+      </div>
+    );
   }
 
   if (isError || !payment) {
