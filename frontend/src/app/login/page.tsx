@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 
+import { apiClient } from "@/api/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,15 +42,12 @@ function LoginContent() {
     try {
       setError(null);
       setIsDemoLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1"}/demo/seed`, {
-        method: "POST",
-      });
-      if (!res.ok) throw new Error("Failed to provision demo environment");
-      const { data } = await res.json();
+      const res = await apiClient.post("/demo/seed");
+      const data = res.data.data;
       await signIn({ email: data.email, password: data.password });
       router.replace(nextPath);
-    } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Unable to generate demo");
+    } catch (submissionError: any) {
+      setError(submissionError?.message || "Unable to generate demo");
       setIsDemoLoading(false);
     }
   };
@@ -135,6 +133,7 @@ function LoginContent() {
         </div>
 
         <Button 
+          type="button"
           variant="outline" 
           className="w-full h-12 text-base font-medium border-indigo-200 text-indigo-700 hover:bg-indigo-50 hover:text-indigo-800 transition-colors" 
           onClick={handleDemoLogin} 
