@@ -90,6 +90,8 @@ export async function getDashboardSnapshot() {
         inflow: r.total,
         outflow: expenses,
         net: r.total - expenses,
+        taxReceived: Math.round(r.total * 0.1),
+        taxPaid: Math.round(expenses * 0.08),
       };
     }),
     bankBalances: [{ label: "Operating Position", amount: dashboard.profitEstimate }],

@@ -1,56 +1,45 @@
 import { randomUUID } from "crypto";
 import prisma from "../../config/database.js";
-
-const getRandomDate = (start: Date, end: Date) => {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-};
-
-const getRandomElement = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+import { faker } from "@faker-js/faker";
 
 export const demoRepository = {
   seedWorkspaceData: async (organizationId: string, orgName: string) => {
     const now = new Date();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(now.getMonth() - 5);
-    sixMonthsAgo.setDate(1);
+    const sixMonthsAgo = faker.date.past({ years: 0.5 });
 
-    // 1. Prepare Tax
-    const taxId = randomUUID();
-    const tax = {
-      id: taxId,
-      organizationId,
-      name: "Standard GST",
-      rate: 18.0,
-      type: "GST" as const,
-      isDefault: true,
-    };
+    // 1. Prepare Taxes
+    const taxes = [
+      { id: randomUUID(), organizationId, name: "Standard GST", rate: 18.0, type: "GST" as const, isDefault: true },
+      { id: randomUUID(), organizationId, name: "Reduced GST", rate: 5.0, type: "GST" as const, isDefault: false },
+      { id: randomUUID(), organizationId, name: "Zero Rated", rate: 0.0, type: "GST" as const, isDefault: false }
+    ];
 
     // 2. Prepare Categories
-    const categoryNames = ["Electronics", "Software", "Consulting", "Office Supplies"];
-    const categories = categoryNames.map((name) => ({
+    const categories = Array.from({ length: 6 }).map(() => ({
       id: randomUUID(),
       organizationId,
-      name,
-      description: `${name} items`,
+      name: faker.commerce.department() + " " + faker.string.uuid().substring(0, 4),
+      description: faker.commerce.productDescription(),
     }));
 
     // 3. Prepare Products
-    const products = [];
-    const inventoryItems = [];
-    for (let i = 1; i <= 20; i++) {
-      const category = getRandomElement(categories);
-      const isService = category.name === "Consulting" || category.name === "Software";
-      const basePrice = Math.floor(Math.random() * 500) + 50;
+    const products: any[] = [];
+    const inventoryItems: any[] = [];
+    for (let i = 1; i <= 30; i++) {
+      const category = faker.helpers.arrayElement(categories);
+      const isService = faker.datatype.boolean();
+      const basePrice = parseFloat(faker.commerce.price({ min: 10, max: 2000 }));
       const productId = randomUUID();
+      const tax = faker.helpers.arrayElement(taxes);
 
       products.push({
         id: productId,
         organizationId,
         categoryId: category.id,
         taxId: tax.id,
-        name: `${category.name} Item ${i}`,
-        sku: `SKU-${orgName.substring(0, 3).toUpperCase()}-${i}`,
-        description: `Premium ${category.name} item`,
+        name: faker.commerce.productName(),
+        sku: faker.commerce.isbn(10) + `-${i}`,
+        description: faker.commerce.productDescription(),
         unit: isService ? "HOURS" : "PCS",
         sellingPrice: basePrice,
         purchasePrice: isService ? 0 : basePrice * 0.4,
@@ -62,78 +51,89 @@ export const demoRepository = {
           id: randomUUID(),
           organizationId,
           productId: productId,
-          quantity: Math.floor(Math.random() * 100) + 5,
-          reorderLevel: 20,
+          quantity: faker.number.int({ min: 0, max: 200 }),
+          reorderLevel: faker.number.int({ min: 10, max: 50 }),
         });
       }
     }
 
     // 4. Prepare Customers
-    const customers = [];
-    for (let i = 1; i <= 15; i++) {
+    const customers: any[] = [];
+    for (let i = 1; i <= 25; i++) {
       customers.push({
         id: randomUUID(),
         organizationId,
-        name: `Client Company ${i}`,
-        email: `contact${i}@client.com`,
+        name: faker.company.name(),
+        email: faker.internet.email(),
+        phone: faker.phone.number(),
+        gstNumber: faker.finance.routingNumber(),
+        address: faker.location.streetAddress(),
+        creditLimit: faker.number.int({ min: 1000, max: 50000 }),
       });
     }
 
     // 5. Prepare Vendors
-    const vendors = [];
-    for (let i = 1; i <= 8; i++) {
+    const vendors: any[] = [];
+    for (let i = 1; i <= 15; i++) {
       vendors.push({
         id: randomUUID(),
         organizationId,
-        name: `Supplier Vendor ${i}`,
-        email: `billing@supplier${i}.com`,
+        name: faker.company.name(),
+        email: faker.internet.email(),
+        phone: faker.phone.number(),
+        gstNumber: faker.finance.routingNumber(),
+        address: faker.location.streetAddress(),
       });
     }
 
     // 6. Prepare Invoices, Items, Payments, Transactions
-    const invoices = [];
-    const invoiceItems = [];
-    const payments = [];
-    const transactions = [];
+    const invoices: any[] = [];
+    const invoiceItems: any[] = [];
+    const payments: any[] = [];
+    const transactions: any[] = [];
 
-    for (let i = 1; i <= 80; i++) {
-      const issueDate = getRandomDate(sixMonthsAgo, now);
-      const customer = getRandomElement(customers);
+    for (let i = 1; i <= 100; i++) {
+      const issueDate = faker.date.between({ from: sixMonthsAgo, to: now });
+      const customer = faker.helpers.arrayElement(customers);
 
-      const lineItemsCount = Math.floor(Math.random() * 3) + 1;
-      const selectedProducts = [];
-      for (let j = 0; j < lineItemsCount; j++) {
-        selectedProducts.push(getRandomElement(products));
-      }
+      const lineItemsCount = faker.number.int({ min: 1, max: 5 });
+      const selectedProducts = faker.helpers.arrayElements(products, lineItemsCount);
 
       const invoiceId = randomUUID();
       let subtotal = 0;
+      let totalTax = 0;
 
       selectedProducts.forEach((p) => {
-        const qty = Math.floor(Math.random() * 5) + 1;
+        const qty = faker.number.int({ min: 1, max: 10 });
         const lineTotal = Number(p.sellingPrice) * qty;
         subtotal += lineTotal;
+        const pTaxRate = taxes.find(t => t.id === p.taxId)?.rate || 18.0;
+        const lineTax = lineTotal * (Number(pTaxRate) / 100);
+        totalTax += lineTax;
+        
         invoiceItems.push({
           id: randomUUID(),
           invoiceId,
           productId: p.id,
           quantity: qty,
           unitPrice: p.sellingPrice,
-          taxAmount: lineTotal * (18.0 / 100),
+          taxAmount: lineTax,
           discountAmount: 0,
-          lineTotal: lineTotal + lineTotal * (18.0 / 100),
+          lineTotal: lineTotal + lineTax,
         });
       });
 
-      const taxAmount = subtotal * (18.0 / 100);
-      const totalAmount = subtotal + taxAmount;
-
-      const rand = Math.random();
-      let status = "PAID" as const;
-      if (rand > 0.9) status = "OVERDUE" as const;
-      else if (rand > 0.8) status = "ISSUED" as const;
+      const totalAmount = subtotal + totalTax;
       
-      const invoiceNumber = `INV-${orgName.substring(0, 3).toUpperCase()}-${1000 + i}`;
+      const statusWeights = { "PAID": 0.6, "ISSUED": 0.2, "OVERDUE": 0.1, "DRAFT": 0.05, "PARTIALLY_PAID": 0.05 };
+      let status = faker.helpers.objectKey(statusWeights) as "PAID" | "ISSUED" | "OVERDUE" | "DRAFT" | "PARTIALLY_PAID" | "CANCELLED";
+      
+      const dueDate = new Date(issueDate.getTime() + 15 * 24 * 60 * 60 * 1000);
+      if (status === "ISSUED" && dueDate < now) {
+        status = "OVERDUE";
+      }
+
+      const invoiceNumber = `INV-${orgName.substring(0, 3).toUpperCase()}-${faker.string.numeric(5)}`;
 
       invoices.push({
         id: invoiceId,
@@ -142,20 +142,22 @@ export const demoRepository = {
         invoiceNumber,
         status,
         issueDate,
+        dueDate,
         subtotal,
-        taxAmount,
+        taxAmount: totalTax,
         discountAmount: 0,
         totalAmount,
       });
 
-      if (status === "PAID") {
-        const paymentDate = new Date(issueDate.getTime() + 86400000 * 2);
+      if (status === "PAID" || status === "PARTIALLY_PAID") {
+        const paymentDate = faker.date.between({ from: issueDate, to: now });
+        const amountPaid = status === "PAID" ? totalAmount : totalAmount * faker.number.float({ min: 0.1, max: 0.9 });
         payments.push({
           id: randomUUID(),
           organizationId,
           invoiceId,
-          amount: totalAmount,
-          paymentMethod: "BANK_TRANSFER" as const,
+          amount: amountPaid,
+          paymentMethod: faker.helpers.arrayElement(["BANK_TRANSFER", "CARD", "UPI", "CASH", "CHEQUE", "OTHER"]),
           paymentDate,
         });
         transactions.push({
@@ -164,7 +166,7 @@ export const demoRepository = {
           type: "INCOME" as const,
           referenceType: "INVOICE",
           referenceId: invoiceId,
-          amount: totalAmount,
+          amount: amountPaid,
           description: `Payment for ${invoiceNumber}`,
           createdAt: paymentDate,
         });
@@ -172,13 +174,13 @@ export const demoRepository = {
     }
 
     // 7. Prepare Expenses
-    const expenses = [];
+    const expenses: any[] = [];
     const expenseCategories = ["SOFTWARE", "OTHER", "SALARY", "TRAVEL", "RENT", "MARKETING"];
-    for (let i = 1; i <= 50; i++) {
-      const expenseDate = getRandomDate(sixMonthsAgo, now);
-      const vendor = getRandomElement(vendors);
-      const amount = Math.floor(Math.random() * 2000) + 100;
-      const category = getRandomElement(expenseCategories) as any;
+    for (let i = 1; i <= 60; i++) {
+      const expenseDate = faker.date.between({ from: sixMonthsAgo, to: now });
+      const vendor = faker.helpers.arrayElement(vendors);
+      const amount = faker.number.float({ min: 50, max: 5000, fractionDigits: 2 });
+      const category = faker.helpers.arrayElement(expenseCategories) as any;
       const expenseId = randomUUID();
 
       expenses.push({
@@ -188,7 +190,7 @@ export const demoRepository = {
         category,
         amount,
         expenseDate,
-        description: `${category} expense`,
+        description: faker.finance.transactionDescription(),
       });
 
       transactions.push({
@@ -198,14 +200,14 @@ export const demoRepository = {
         referenceType: "EXPENSE",
         referenceId: expenseId,
         amount,
-        description: `${category} payment to ${vendor.name}`,
+        description: `Payment to ${vendor.name}`,
         createdAt: expenseDate,
       });
     }
 
     // Execute bulk inserts transactionally
     await prisma.$transaction([
-      prisma.tax.createMany({ data: [tax] }),
+      prisma.tax.createMany({ data: taxes }),
       prisma.productCategory.createMany({ data: categories }),
       prisma.product.createMany({ data: products }),
       ...(inventoryItems.length > 0 ? [prisma.inventoryItem.createMany({ data: inventoryItems })] : []),

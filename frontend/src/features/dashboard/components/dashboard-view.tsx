@@ -112,14 +112,16 @@ export function DashboardView() {
       </section>
 
       {/* Row 2: Financial Trends */}
-      <section className="grid gap-4 grid-cols-1 xl:grid-cols-2">
+      <section className="grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
         <TrendChart 
-          title="Revenue Trend"
-          description="Actual historical performance"
-          data={data.revenueTrend}
+          title="Revenue & Expenses Trend"
+          description="Historical inflow vs outflow"
+          data={data.cashFlowTrend}
           xAxisKey="month"
           dataKeys={[
-            { key: "revenue", name: "Revenue", type: "line", color: "hsl(var(--primary))" }
+            { key: "inflow", name: "Income", type: "line", color: "hsl(var(--primary))" },
+            { key: "outflow", name: "Expenses", type: "line", color: "hsl(var(--destructive))" },
+            { key: "net", name: "Profit", type: "line", color: "hsl(var(--success, 142.1 76.2% 36.3%))" }
           ]}
           valueFormatter={(val) => formatCompactCurrency(val)}
         />
@@ -130,6 +132,17 @@ export function DashboardView() {
           xAxisKey="month"
           dataKeys={[
             { key: "expenses", name: "Expenses", type: "bar", color: "hsl(var(--foreground))" }
+          ]}
+          valueFormatter={(val) => formatCompactCurrency(val)}
+        />
+        <TrendChart 
+          title="Tax Position"
+          description="Taxes paid vs collected"
+          data={data.cashFlowTrend}
+          xAxisKey="month"
+          dataKeys={[
+            { key: "taxReceived", name: "Tax Collected", type: "line", color: "hsl(var(--chart-4, 43 74% 66%))" },
+            { key: "taxPaid", name: "Tax Paid", type: "line", color: "hsl(var(--chart-5, 27 87% 67%))" }
           ]}
           valueFormatter={(val) => formatCompactCurrency(val)}
         />

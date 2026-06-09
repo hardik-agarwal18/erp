@@ -10,7 +10,7 @@ export function SearchBar() {
   return (
     <div
       aria-label="Open search and command palette"
-      className="hidden w-full max-w-xl items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-left md:flex"
+      className="hidden w-full max-w-md items-center gap-2 rounded-md bg-slate-100/80 dark:bg-slate-800/50 hover:bg-slate-200/60 dark:hover:bg-slate-800 hover:ring-4 hover:ring-slate-100 dark:hover:ring-slate-800/50 transition-all px-2.5 py-1.5 text-left md:flex cursor-text border border-transparent hover:border-slate-300/50 dark:hover:border-slate-700"
       onClick={() => setCommandOpen(true)}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -21,10 +21,10 @@ export function SearchBar() {
       role="button"
       tabIndex={0}
     >
-      <Search className="h-4 w-4 text-slate-400" />
-      <span className="text-sm text-slate-500">Search invoices, vendors, products, reports...</span>
-      <div className="ml-auto rounded-md border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-500">
-        Ctrl K
+      <Search className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+      <span className="text-[13px] text-slate-500 truncate flex-1 font-medium">Search or jump to...</span>
+      <div className="ml-auto shrink-0 rounded bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-slate-400 shadow-sm">
+        ⌘K
       </div>
     </div>
   );

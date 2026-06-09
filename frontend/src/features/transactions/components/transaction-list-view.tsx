@@ -93,8 +93,9 @@ export function TransactionListView() {
   const actionItems: ActionListItem[] = exceptions.slice(0, 5).map((t: any) => ({
     id: t.id,
     title: t.reference,
-    detail: t.memo || "Requires manual clearing",
-    timestamp: t.date
+    detail: `${t.account} - ${t.type}`,
+    timestamp: formatCurrency(t.amount, t.currency),
+    href: `/transactions/${t.id}/edit`
   }));
 
   return (

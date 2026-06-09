@@ -37,8 +37,7 @@ const MOCK_REVENUE_TREND = [
 
 export function InvoiceListView() {
   const query = useInvoicesQuery();
-  const [filters, setFilters] = useState<InvoiceFiltersState>({
-    search: "",
+  const [filters, setFilters] = useState<{ status: string }>({
     status: "all",
   });
 
@@ -47,14 +46,9 @@ export function InvoiceListView() {
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((invoice) => {
-      const matchesSearch =
-        filters.search.length === 0 ||
-        [invoice.invoiceNumber, invoice.customer, invoice.salesRep].some((value) => value.toLowerCase().includes(filters.search.toLowerCase()));
-      const matchesStatus = filters.status === "all" || invoice.status === filters.status;
-
-      return matchesSearch && matchesStatus;
+      return filters.status === "all" || invoice.status === filters.status;
     });
-  }, [invoices, filters]);
+  }, [invoices, filters.status]);
 
   if (query.isError) {
     return <ModuleError title="Invoices unavailable" message="We could not load receivables data for this workspace." retry={() => query.refetch()} />;
@@ -82,7 +76,8 @@ export function InvoiceListView() {
     id: inv.id,
     title: inv.invoiceNumber,
     detail: inv.customer,
-    timestamp: inv.issueDate || "No date"
+    timestamp: inv.issueDate || "No date",
+    href: `/invoices/${inv.id}/edit`
   }));
 
   const handleTabChange = (val: string) => {
@@ -130,9 +125,13 @@ export function InvoiceListView() {
             valueFormatter={(val: any) => `$${(val / 1000).toFixed(1)}k`}
           />
         </div>
-        <div className="space-y-4">
-          <AlertWidget title="Overdue Collections" items={alertItems} />
-          <ActionList title="Drafts Awaiting Review" items={actionItems} emptyMessage="No drafts pending." />
+        <div className="flex flex-col gap-4">
+          <div className="flex-1 min-h-0">
+            <AlertWidget title="Overdue Collections" items={alertItems} />
+          </div>
+          <div className="flex-1 min-h-0">
+            <ActionList title="Drafts Awaiting Review" items={actionItems} emptyMessage="No drafts pending." />
+          </div>
         </div>
       </div>
 
@@ -156,33 +155,7 @@ export function InvoiceListView() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3 items-center">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-9 bg-background"
-                onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
-                placeholder="Search invoice number, customer, or rep..."
-                value={filters.search}
-              />
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 shrink-0">
-              <Button variant="outline" size="sm">
-                Sales Rep
-                <UserIcon className="ml-2 h-3 w-3 text-muted-foreground" />
-              </Button>
-              <Button variant="outline" size="sm">
-                Date Range
-                <CalendarIcon className="ml-2 h-3 w-3 text-muted-foreground" />
-              </Button>
-              <Button variant="outline" size="sm">
-                Status
-                <Filter className="ml-2 h-3 w-3 text-muted-foreground" />
-              </Button>
-            </div>
-          </div>
-
+        <CardContent className="space-y-4 p-0 sm:p-4">
           <InvoiceTable invoices={filteredInvoices} />
         </CardContent>
       </Card>

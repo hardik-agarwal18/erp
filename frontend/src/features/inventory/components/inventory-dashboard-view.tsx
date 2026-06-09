@@ -43,16 +43,18 @@ export function InventoryDashboardView() {
 
   const transferItems: ActionListItem[] = transfers.map((t: any) => ({
     id: t.id,
-    title: t.reference,
-    detail: `${t.fromWarehouse} to ${t.toWarehouse} · ETA ${t.eta}`,
-    timestamp: t.status.replace("_", " "),
+    title: `Transfer #${t.id.slice(-6)}`,
+    detail: `${t.from} → ${t.to}`,
+    timestamp: t.date,
+    href: `/inventory/transfers/${t.id}`
   }));
 
   const auditItems: ActionListItem[] = audits.map((a: any) => ({
     id: a.id,
-    title: a.warehouse,
-    detail: `${a.scope} · ${a.cycle} cycle`,
-    timestamp: a.status.replace("_", " "),
+    title: `Audit ${a.month}`,
+    detail: a.warehouse,
+    timestamp: a.status,
+    href: `/inventory/audits/${a.id}`
   }));
 
   return (

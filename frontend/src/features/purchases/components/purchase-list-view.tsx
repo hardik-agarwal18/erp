@@ -33,8 +33,7 @@ const MOCK_SPEND_TREND = [
 
 export function PurchaseListView() {
   const query = usePurchasesQuery();
-  const [filters, setFilters] = useState<PurchaseFiltersState>({
-    search: "",
+  const [filters, setFilters] = useState<{ status: string }>({
     status: "all",
   });
 
@@ -44,13 +43,9 @@ export function PurchaseListView() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const matchesSearch =
-        filters.search.length === 0 ||
-        [order.vendor, order.number, order.buyer, order.warehouse].some((value) => value.toLowerCase().includes(filters.search.toLowerCase()));
-      const matchesStatus = filters.status === "all" || order.status === filters.status;
-      return matchesSearch && matchesStatus;
+      return filters.status === "all" || order.status === filters.status;
     });
-  }, [orders, filters]);
+  }, [orders, filters.status]);
 
   const handleTabChange = (val: string) => {
     setFilters(prev => ({ ...prev, status: val as any }));
@@ -82,7 +77,8 @@ export function PurchaseListView() {
     id: order.id,
     title: order.number,
     detail: `Awaiting approval for ${order.vendor}`,
-    timestamp: order.orderDate || "Pending"
+    timestamp: order.orderDate || "Pending",
+    href: `/purchases/${order.id}/edit`
   }));
 
   // Derive Vendor Performance Widget stats
@@ -141,11 +137,17 @@ export function PurchaseListView() {
             valueFormatter={(val: any) => `₹${(val / 1000).toFixed(1)}k`}
             height={280}
           />
-          <AlertWidget title="Vendor Performance" items={vendorPerformanceItems} />
         </div>
-        <div className="space-y-4">
-          <AlertWidget title="Delivery Escalations" items={alertItems} />
-          <ActionList title="Awaiting Approval" items={actionItems} emptyMessage="No approvals pending." />
+         <div className="flex flex-col gap-4">
+          <div className="flex-1 min-h-0">
+            <AlertWidget title="Vendor Performance" items={vendorPerformanceItems} />
+          </div>
+          <div className="flex-1 min-h-0">
+            <AlertWidget title="Delivery Escalations" items={alertItems} />
+          </div>
+          <div className="flex-1 min-h-0">
+            <ActionList title="Awaiting Approval" items={actionItems} emptyMessage="No approvals pending." />
+          </div>
         </div>
       </div>
 
@@ -169,33 +171,7 @@ export function PurchaseListView() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3 items-center">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                className="pl-9 bg-background"
-                onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
-                placeholder="Search vendor, PO number, buyer, warehouse..."
-                value={filters.search}
-              />
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 shrink-0">
-              <Button variant="outline" size="sm">
-                Vendor
-                <UserIcon className="ml-2 h-3 w-3 text-muted-foreground" />
-              </Button>
-              <Button variant="outline" size="sm">
-                Date Range
-                <CalendarIcon className="ml-2 h-3 w-3 text-muted-foreground" />
-              </Button>
-              <Button variant="outline" size="sm">
-                Status
-                <Filter className="ml-2 h-3 w-3 text-muted-foreground" />
-              </Button>
-            </div>
-          </div>
-
+        <CardContent className="space-y-4 p-0 sm:p-4">
           <PurchaseTable orders={filteredOrders} />
         </CardContent>
       </Card>

@@ -62,7 +62,7 @@ export type DashboardSnapshot = {
   kpis: KpiMetric[];
   revenueTrend: Array<{ month: string; revenue: number; forecast: number }>;
   expenseTrend: Array<{ month: string; expenses: number; payroll: number }>;
-  cashFlowTrend: Array<{ month: string; inflow: number; outflow: number; net: number }>;
+  cashFlowTrend: Array<{ month: string; inflow: number; outflow: number; net: number; taxReceived: number; taxPaid: number }>;
   bankBalances: Array<{ label: string; amount: number }>;
   receivablesVsPayables: Array<{ label: string; amount: number }>;
   activity: Array<{ id: string; title: string; detail: string; time: string; kind: "invoice" | "inventory" | "purchase" }>;

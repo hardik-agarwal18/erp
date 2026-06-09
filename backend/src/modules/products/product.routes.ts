@@ -37,25 +37,6 @@ router.get(
   validate(listProductsSchema),
   asyncHandler(productController.listProducts),
 );
-router.get(
-  "/:id",
-  requirePermission(PERMISSIONS.PRODUCTS_VIEW),
-  validate(productIdParamSchema),
-  asyncHandler(productController.getProduct),
-);
-router.patch(
-  "/:id",
-  requirePermission(PERMISSIONS.PRODUCTS_UPDATE),
-  validate(updateProductSchema),
-  asyncHandler(productController.updateProduct),
-);
-router.delete(
-  "/:id",
-  requirePermission(PERMISSIONS.PRODUCTS_DELETE),
-  validate(productIdParamSchema),
-  asyncHandler(productController.archiveProduct),
-);
-
 router.post(
   "/categories",
   requirePermission(PERMISSIONS.PRODUCTS_CREATE),
@@ -79,6 +60,25 @@ router.delete(
   requirePermission(PERMISSIONS.PRODUCTS_DELETE),
   validate(categoryIdParamSchema),
   asyncHandler(productController.archiveCategory),
+);
+
+router.get(
+  "/:id",
+  requirePermission(PERMISSIONS.PRODUCTS_VIEW),
+  validate(productIdParamSchema),
+  asyncHandler(productController.getProduct),
+);
+router.patch(
+  "/:id",
+  requirePermission(PERMISSIONS.PRODUCTS_UPDATE),
+  validate(updateProductSchema),
+  asyncHandler(productController.updateProduct),
+);
+router.delete(
+  "/:id",
+  requirePermission(PERMISSIONS.PRODUCTS_DELETE),
+  validate(productIdParamSchema),
+  asyncHandler(productController.archiveProduct),
 );
 
 export default router;
