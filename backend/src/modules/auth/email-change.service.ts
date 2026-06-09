@@ -3,6 +3,7 @@ import { redisClient } from "../../config/redis.js";
 import ApiError from "../../utils/ApiError.js";
 import { authRepository } from "./auth.repository.js";
 import { sendEmailChangeCurrentVerification, sendEmailChangeNewVerification } from "../../mail/mail.service.js";
+import { auditService, AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../services/audit/index.js";
 
 const OTP_EXPIRY = 600; // 10 minutes
 
@@ -69,6 +70,11 @@ export const emailChangeService = {
       throw new ApiError(409, "Email already in use");
     }
 
+    const user = await authRepository.findUserById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
     // Update the email
     const updatedUser = await authRepository.updateUser(userId, {
       email: data.newEmail,
@@ -77,6 +83,19 @@ export const emailChangeService = {
 
     // Clean up
     await redisClient.del(`email_change:${userId}`);
+
+    // Audit log
+    await auditService.recordAuthEvent({
+      action: AUDIT_ACTIONS.AUTH_EMAIL_CHANGED,
+      entityType: AUDIT_ENTITY_TYPES.AUTH,
+      entityId: userId,
+      userId: userId,
+      details: {
+        oldEmail: user.email,
+        newEmail: data.newEmail,
+      },
+      ipAddress: "0.0.0.0", // Placeholder since we don't have request context here
+    });
 
     return updatedUser;
   },

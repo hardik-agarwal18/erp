@@ -1,44 +1,36 @@
 "use client";
 
-import { useState, useEffect, createContext, useContext, useCallback, ReactNode } from "react";
+import { ReactNode } from "react";
+import { toast as sonnerToast } from "sonner";
 
 export type Toast = {
-  id: string;
   title: string;
   description?: string;
-  variant?: "default" | "destructive" | "success";
+  variant?: "default" | "destructive" | "success" | "warning";
 };
 
-type ToastContextType = {
-  toasts: Toast[];
-  toast: (props: Omit<Toast, "id">) => void;
-};
-
-const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
+// Kept for backwards compatibility but it doesn't do anything since Sonner handles state globally
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const toast = useCallback((props: Omit<Toast, "id">) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { ...props, id }]);
-
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 3000);
-  }, []);
-
-  return (
-    <ToastContext.Provider value={{ toasts, toast }}>
-      {children}
-    </ToastContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 export function useToast() {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
-  }
-  return context;
+  const toast = (props: Toast) => {
+    switch (props.variant) {
+      case "destructive":
+        sonnerToast.error(props.title, { description: props.description });
+        break;
+      case "success":
+        sonnerToast.success(props.title, { description: props.description });
+        break;
+      case "warning":
+        sonnerToast.warning(props.title, { description: props.description });
+        break;
+      default:
+        sonnerToast(props.title, { description: props.description });
+        break;
+    }
+  };
+
+  return { toast, toasts: [] };
 }
