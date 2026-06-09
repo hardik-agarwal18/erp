@@ -25,6 +25,8 @@ import {
   invitationEmailTemplate,
   passwordResetEmailTemplate,
   verificationEmailTemplate,
+  emailChangeCurrentTemplate,
+  emailChangeNewTemplate,
 } from "./templates/index.js";
 import { transporter } from "../config/mail.js";
 
@@ -245,13 +247,15 @@ export class DirectMailDispatcher implements MailDispatcher {
   }
 
   async sendEmailChangeCurrentVerification(request: EmailChangeVerificationRequest): Promise<void> {
+    const template = emailChangeCurrentTemplate(request);
+
     await sendMail(
       {
         from: mailFrom,
         to: request.to,
         subject: "Security Alert: Email Change Requested",
-        html: `<p>Hi ${request.name},</p><p>We received a request to change your email. Your verification code is: <strong>${request.otp}</strong></p><p>If this wasn't you, please ignore this email or contact support.</p>`,
-        text: `Hi ${request.name}, We received a request to change your email. Your verification code is: ${request.otp}`,
+        html: template.html,
+        text: template.text,
       },
       this.provider,
       this.providerName,
@@ -259,13 +263,15 @@ export class DirectMailDispatcher implements MailDispatcher {
   }
 
   async sendEmailChangeNewVerification(request: EmailChangeVerificationRequest): Promise<void> {
+    const template = emailChangeNewTemplate(request);
+
     await sendMail(
       {
         from: mailFrom,
         to: request.to,
         subject: "Verify your new email address",
-        html: `<p>Hi ${request.name},</p><p>Please use the following verification code to confirm your new email address: <strong>${request.otp}</strong></p>`,
-        text: `Hi ${request.name}, Please use the following verification code to confirm your new email address: ${request.otp}`,
+        html: template.html,
+        text: template.text,
       },
       this.provider,
       this.providerName,
