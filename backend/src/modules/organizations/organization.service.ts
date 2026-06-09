@@ -1,6 +1,8 @@
 import { Prisma } from "@prisma/client";
 import { randomBytes } from "crypto";
 
+import { redisClient } from "../../config/redis.js";
+
 import prisma, {
   type DatabaseTransactionClient,
 } from "../../config/database.js";
@@ -30,7 +32,7 @@ import {
   UpdateOrganizationInput,
 } from "./organization.types.js";
 
-const INVITATION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const INVITATION_TTL_MS = 24 * 60 * 60 * 1000;
 
 const buildUniqueSlug = async (candidate: string) => {
   const base = slugify(candidate);
@@ -362,6 +364,10 @@ export const organizationService = {
       },
     });
 
+    await redisClient.set(`invitation:${token}`, invitation.id, {
+      EX: Math.ceil(INVITATION_TTL_MS / 1000),
+    });
+
     await auditService.record({
       organizationId,
       userId: actorUserId,
@@ -595,6 +601,11 @@ export const organizationService = {
   },
 
   acceptInvitation: async (token: string, password?: string, name?: string) => {
+    const isBlacklisted = await redisClient.get(`blacklist:invitation:${token}`);
+    if (isBlacklisted) {
+      throw new ApiError(400, "Invitation has already been used.");
+    }
+
     const invitation =
       await organizationRepository.findInvitationByToken(token);
     if (!invitation || invitation.acceptedAt) {
@@ -672,6 +683,11 @@ export const organizationService = {
     }, { timeout: 30000 });
 
     await clearMemberPermissionCache(membership.id);
+
+    await redisClient.set(`blacklist:invitation:${token}`, "1", {
+      EX: Math.ceil(INVITATION_TTL_MS / 1000),
+    });
+    await redisClient.del(`invitation:${token}`);
 
     return {
       organizationId: invitation.organizationId,

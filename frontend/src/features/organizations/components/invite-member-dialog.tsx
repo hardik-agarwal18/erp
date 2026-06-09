@@ -42,7 +42,7 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
     resolver: zodResolver(inviteMemberSchema),
     defaultValues: {
       email: "",
-      roleId: "member",
+      roleName: "member",
     },
   });
 
@@ -101,18 +101,18 @@ export function InviteMemberDialog({ open, onOpenChange }: InviteMemberDialogPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="roleId">Role</Label>
+            <Label htmlFor="roleName">Role</Label>
             <Select
-              id="roleId"
+              id="roleName"
               className="w-full"
-              {...register("roleId")}
+              {...register("roleName")}
             >
               <option value="admin">Admin</option>
               <option value="member">Member</option>
               <option value="viewer">Viewer</option>
             </Select>
-            {errors.roleId && (
-              <p className="text-sm text-rose-600">{errors.roleId.message}</p>
+            {errors.roleName && (
+              <p className="text-sm text-rose-600">{errors.roleName.message}</p>
             )}
           </div>
 

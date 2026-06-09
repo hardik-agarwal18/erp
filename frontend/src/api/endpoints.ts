@@ -28,6 +28,9 @@ export const apiEndpoints = {
     approveJoinRequest: (organizationId: string, requestId: string) => `/organizations/${organizationId}/join-requests/${requestId}/approve`,
     rejectJoinRequest: (organizationId: string, requestId: string) => `/organizations/${organizationId}/join-requests/${requestId}/reject`,
   },
+  invitations: {
+    accept: "/invitations/accept",
+  },
   permissions: {
     list: "/permissions",
   },

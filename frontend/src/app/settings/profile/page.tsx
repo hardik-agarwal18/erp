@@ -308,7 +308,7 @@ export default function ProfileSettingsPage() {
           
           <div className="p-6 space-y-6">
             <p className="text-sm text-slate-600 text-center">
-              We've sent verification codes to both your current email (<strong className="text-slate-900">{session?.email}</strong>) and your new email (<strong className="text-slate-900">{pendingEmail}</strong>).
+              We&apos;ve sent verification codes to both your current email (<strong className="text-slate-900">{session?.email}</strong>) and your new email (<strong className="text-slate-900">{pendingEmail}</strong>).
             </p>
             
             <div className="space-y-5">

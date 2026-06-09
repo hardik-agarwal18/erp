@@ -112,7 +112,7 @@ export default function OnboardingPage() {
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 mb-2">Join Workspace</h3>
                   <p className="text-sm text-slate-500">
-                    Enter a Join Code to request access to an existing organization.
+                    Enter a Join Code or Organization ID to request access to an existing organization.
                   </p>
                 </CardContent>
               </Card>
@@ -182,19 +182,19 @@ export default function OnboardingPage() {
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
               <CardTitle>Join Workspace</CardTitle>
-              <CardDescription>Enter the Join Code provided by your administrator.</CardDescription>
+              <CardDescription>Enter the Join Code or Organization ID provided by your administrator.</CardDescription>
             </CardHeader>
             <CardContent>
               <form className="space-y-6" onSubmit={joinForm.handleSubmit(onJoinSubmit)}>
                 <div className="space-y-2">
-                  <Label htmlFor="joinCode">Join Code <span className="text-rose-500">*</span></Label>
+                  <Label htmlFor="joinCode">Join Code or Organization ID <span className="text-rose-500">*</span></Label>
                   <Input
                     id="joinCode"
                     className="font-mono uppercase tracking-widest text-lg"
-                    placeholder="ACME-XXXXXX"
+                    placeholder="ACME-XXXXXX or UUID"
                     {...joinForm.register("joinCode", { required: true })}
                   />
-                  <p className="text-xs text-slate-500">Ask your workspace administrator for this code.</p>
+                  <p className="text-xs text-slate-500">Ask your workspace administrator for this code or ID.</p>
                 </div>
 
                 <div className="space-y-2">

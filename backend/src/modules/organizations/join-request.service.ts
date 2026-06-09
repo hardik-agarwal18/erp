@@ -8,8 +8,15 @@ import { clearMemberPermissionCache } from "../../shared/utils/permissions.js";
 
 export const joinRequestService = {
   createJoinRequest: async (userId: string, joinCode: string, message?: string) => {
-    const organization = await prisma.organization.findUnique({
-      where: { joinCode },
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(joinCode);
+
+    const organization = await prisma.organization.findFirst({
+      where: {
+        OR: [
+          { joinCode },
+          ...(isUuid ? [{ id: joinCode }] : [])
+        ]
+      },
     });
 
     if (!organization) {

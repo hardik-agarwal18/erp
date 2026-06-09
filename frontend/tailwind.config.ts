@@ -62,6 +62,16 @@ const config: Config = {
         "dashboard-grid":
           "linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px)",
       },
+      keyframes: {
+        shimmer: {
+          "100%": {
+            transform: "translateX(100%)",
+          },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.5s infinite",
+      },
     },
   },
   plugins: [tailwindAnimate],
