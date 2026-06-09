@@ -25,6 +25,12 @@ export const processMailJob = async (job: Job<MailJobPayload>) => {
     case "export":
       await dispatcher.sendExportEmail(job.data.payload);
       break;
+    case "email-change-current":
+      await dispatcher.sendEmailChangeCurrentVerification(job.data.payload);
+      break;
+    case "email-change-new":
+      await dispatcher.sendEmailChangeNewVerification(job.data.payload);
+      break;
     default:
       throw new Error(`Unknown mail job type`);
   }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 
 import { authService } from "./auth.service.js";
+import { emailChangeService } from "./email-change.service.js";
 import { clearAuthCookies, setAuthCookies } from "../../lib/cookies.js";
 import { REFRESH_COOKIE_NAME } from "./auth.constants.js";
 import ApiError from "../../utils/ApiError.js";
@@ -151,9 +152,33 @@ export const authController = {
       throw new ApiError(401, "Unauthorized");
     }
 
-    const updatedUser = await authService.updateProfile(req.user.id, req.body);
+    // Ignore email here, handled by requestEmailChange
+    const { name } = req.body;
+    const updatedUser = await authService.updateProfile(req.user.id, { name, email: req.user.email });
     return sendSuccess(res, {
       message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  },
+
+  requestEmailChange: async (req: Request, res: Response): Promise<Response> => {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized");
+    }
+    await emailChangeService.requestEmailChange(req.user.id, req.body.newEmail);
+    return sendSuccess(res, {
+      message: "Email change requested. Please check both your current and new email for OTP codes.",
+    });
+  },
+
+  verifyEmailChange: async (req: Request, res: Response): Promise<Response> => {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized");
+    }
+    const { currentEmailOtp, newEmailOtp } = req.body;
+    const updatedUser = await emailChangeService.verifyEmailChange(req.user.id, currentEmailOtp, newEmailOtp);
+    return sendSuccess(res, {
+      message: "Email successfully updated.",
       data: updatedUser,
     });
   },

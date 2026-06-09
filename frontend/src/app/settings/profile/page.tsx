@@ -16,11 +16,25 @@ import { useToast } from "@/hooks/use-toast";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { updateProfileSchema, type UpdateProfileSchema } from "@/features/profile/schema";
 import { useProfileMutations } from "@/features/profile/hooks/use-profile";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
 
 export default function ProfileSettingsPage() {
   const { session, restoreSession } = useWorkspace();
-  const { updateProfile } = useProfileMutations();
+  const { updateProfile, requestEmailChange, verifyEmailChange } = useProfileMutations();
   const { toast } = useToast();
+  
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [currentEmailOtp, setCurrentEmailOtp] = useState("");
+  const [newEmailOtp, setNewEmailOtp] = useState("");
 
   const form = useForm<UpdateProfileSchema>({
     resolver: zodResolver(updateProfileSchema),
@@ -44,21 +58,25 @@ export default function ProfileSettingsPage() {
 
   const onSubmit = async (data: UpdateProfileSchema) => {
     try {
-      await updateProfile.mutateAsync(data);
-      await restoreSession(); // Refresh context to get updated name/initials across the app
-      
-      reset(data); // Clear dirty state
-      toast({
-        title: "Profile updated",
-        description: "Your personal details have been saved.",
-        variant: "success",
-      });
-
-      if (data.email !== session.email) {
+      if (data.email !== session?.email) {
+        // Handle Email Change Flow
+        await requestEmailChange.mutateAsync(data.email);
+        setPendingEmail(data.email);
+        setShowOtpModal(true);
+        // Only update name right now
+        if (data.name !== session?.name) {
+          await updateProfile.mutateAsync({ name: data.name, email: session?.email || "" });
+          await restoreSession();
+        }
+      } else {
+        // Just updating name
+        await updateProfile.mutateAsync(data);
+        await restoreSession();
+        reset(data);
         toast({
-          title: "Verification Required",
-          description: "A verification link has been sent to your new email address.",
-          variant: "warning",
+          title: "Profile updated",
+          description: "Your personal details have been saved.",
+          variant: "success",
         });
       }
     } catch (error: unknown) {
@@ -82,6 +100,34 @@ export default function ProfileSettingsPage() {
         name: session.name || "",
         email: session.email || "",
       });
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (currentEmailOtp.length !== 6 || newEmailOtp.length !== 6) {
+      toast({ title: "Validation Error", description: "Please enter both 6-digit codes", variant: "destructive" });
+      return;
+    }
+    try {
+      await verifyEmailChange.mutateAsync({ currentEmailOtp, newEmailOtp });
+      await restoreSession();
+      toast({
+        title: "Email updated",
+        description: "Your email has been successfully verified and changed.",
+        variant: "success",
+      });
+      setShowOtpModal(false);
+      reset({ name: form.getValues("name"), email: pendingEmail });
+      setCurrentEmailOtp("");
+      setNewEmailOtp("");
+    } catch (error: unknown) {
+      let msg = "Failed to verify codes.";
+      if (isAxiosError(error) && error.response?.data?.message) {
+        msg = error.response.data.message;
+      } else if (error instanceof Error) {
+        msg = error.message;
+      }
+      toast({ title: "Verification failed", description: msg, variant: "destructive" });
     }
   };
 
@@ -237,6 +283,48 @@ export default function ProfileSettingsPage() {
         </div>
       </div>
       </div>
+
+      <Dialog open={showOtpModal} onOpenChange={(open) => !open && setShowOtpModal(false)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Verify Email Change</DialogTitle>
+            <DialogDescription>
+              We've sent verification codes to both your current email ({session?.email}) and your new email ({pendingEmail}). Please enter both codes to verify the change.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Current Email Code</Label>
+              <Input 
+                value={currentEmailOtp}
+                onChange={(e) => setCurrentEmailOtp(e.target.value)}
+                placeholder="6-digit code"
+                maxLength={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>New Email Code</Label>
+              <Input 
+                value={newEmailOtp}
+                onChange={(e) => setNewEmailOtp(e.target.value)}
+                placeholder="6-digit code"
+                maxLength={6}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowOtpModal(false)}>Cancel</Button>
+            <Button 
+              onClick={handleVerifyOtp} 
+              disabled={verifyEmailChange.isPending || currentEmailOtp.length !== 6 || newEmailOtp.length !== 6}
+            >
+              {verifyEmailChange.isPending ? "Verifying..." : "Verify Codes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }

@@ -12,6 +12,7 @@ import {
 import { NodemailerProvider } from "./providers/nodemailer.provider.js";
 import type {
   EmailRateLimitResult,
+  EmailChangeVerificationRequest,
   ExportEmailRequest,
   InvitationEmailRequest,
   InvoiceEmailRequest,
@@ -137,6 +138,8 @@ export interface MailDispatcher {
   sendInvitationEmail(request: InvitationEmailRequest): Promise<void>;
   sendInvoiceEmail(request: InvoiceEmailRequest): Promise<void>;
   sendExportEmail(request: ExportEmailRequest): Promise<void>;
+  sendEmailChangeCurrentVerification(request: EmailChangeVerificationRequest): Promise<void>;
+  sendEmailChangeNewVerification(request: EmailChangeVerificationRequest): Promise<void>;
 }
 
 export class DirectMailDispatcher implements MailDispatcher {
@@ -240,6 +243,34 @@ export class DirectMailDispatcher implements MailDispatcher {
       this.providerName,
     );
   }
+
+  async sendEmailChangeCurrentVerification(request: EmailChangeVerificationRequest): Promise<void> {
+    await sendMail(
+      {
+        from: mailFrom,
+        to: request.to,
+        subject: "Security Alert: Email Change Requested",
+        html: `<p>Hi ${request.name},</p><p>We received a request to change your email. Your verification code is: <strong>${request.otp}</strong></p><p>If this wasn't you, please ignore this email or contact support.</p>`,
+        text: `Hi ${request.name}, We received a request to change your email. Your verification code is: ${request.otp}`,
+      },
+      this.provider,
+      this.providerName,
+    );
+  }
+
+  async sendEmailChangeNewVerification(request: EmailChangeVerificationRequest): Promise<void> {
+    await sendMail(
+      {
+        from: mailFrom,
+        to: request.to,
+        subject: "Verify your new email address",
+        html: `<p>Hi ${request.name},</p><p>Please use the following verification code to confirm your new email address: <strong>${request.otp}</strong></p>`,
+        text: `Hi ${request.name}, Please use the following verification code to confirm your new email address: ${request.otp}`,
+      },
+      this.provider,
+      this.providerName,
+    );
+  }
 }
 
 import { mailQueue } from "../queue/queue.service.js";
@@ -283,6 +314,22 @@ export class QueueMailDispatcher implements MailDispatcher {
       "send-export",
       { type: "export", payload: request },
       { jobId: `export:${request.exportType}:${randomUUID()}` }
+    );
+  }
+
+  async sendEmailChangeCurrentVerification(request: EmailChangeVerificationRequest): Promise<void> {
+    await mailQueue.add(
+      "send-email-change-current",
+      { type: "email-change-current", payload: request },
+      { jobId: `email-change-current:${request.to}:${randomUUID()}` }
+    );
+  }
+
+  async sendEmailChangeNewVerification(request: EmailChangeVerificationRequest): Promise<void> {
+    await mailQueue.add(
+      "send-email-change-new",
+      { type: "email-change-new", payload: request },
+      { jobId: `email-change-new:${request.to}:${randomUUID()}` }
     );
   }
 }
@@ -448,3 +495,27 @@ export const sendInvitationEmail = async (
     invitationUrl: assertValidUrl(url, "Invitation URL"),
     expiresInHours,
   });
+
+export const sendEmailChangeCurrentVerification = async (
+  to: string,
+  name: string,
+  otp: string,
+): Promise<void> => {
+  if (env.NODE_ENV === "test") {
+    await mailDispatcher.sendEmailChangeCurrentVerification({ to, name, otp });
+    return;
+  }
+  await mailDispatcher.sendEmailChangeCurrentVerification({ to, name, otp });
+};
+
+export const sendEmailChangeNewVerification = async (
+  to: string,
+  name: string,
+  otp: string,
+): Promise<void> => {
+  if (env.NODE_ENV === "test") {
+    await mailDispatcher.sendEmailChangeNewVerification({ to, name, otp });
+    return;
+  }
+  await mailDispatcher.sendEmailChangeNewVerification({ to, name, otp });
+};

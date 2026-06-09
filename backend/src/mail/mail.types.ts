@@ -144,3 +144,12 @@ export interface EmailRateLimitResult {
   remaining: number;
   resetAt: Date;
 }
+
+/**
+ * Request payload for email change verification (OTP).
+ */
+export interface EmailChangeVerificationRequest {
+  to: string;
+  name: string;
+  otp: string;
+}

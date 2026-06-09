@@ -57,6 +57,16 @@ export async function updateProfile(payload: { name: string; email: string }) {
   return response.data;
 }
 
+export async function requestEmailChange(newEmail: string) {
+  const response = await apiClient.post(apiEndpoints.auth.requestEmailChange, { newEmail });
+  return response.data;
+}
+
+export async function verifyEmailChange(payload: { currentEmailOtp: string; newEmailOtp: string }) {
+  const response = await apiClient.post(apiEndpoints.auth.verifyEmailChange, payload);
+  return response.data;
+}
+
 export async function logout() {
   await apiClient.post(apiEndpoints.auth.logout);
   setStoredAccessToken(null);

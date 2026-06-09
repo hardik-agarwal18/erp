@@ -12,6 +12,8 @@ import {
   resetPasswordSchema,
   switchWorkspaceSchema,
   updateProfileSchema,
+  requestEmailChangeSchema,
+  verifyEmailChangeSchema,
   verifyEmailSchema,
 } from "./auth.validators.js";
 import { authMiddleware } from "../../middleware/auth.middleware.js";
@@ -80,6 +82,20 @@ router.patch(
   authMiddleware,
   validate(updateProfileSchema),
   asyncHandler(authController.updateProfile),
+);
+
+router.post(
+  "/email-change/request",
+  authMiddleware,
+  validate(requestEmailChangeSchema),
+  asyncHandler(authController.requestEmailChange),
+);
+
+router.post(
+  "/email-change/verify",
+  authMiddleware,
+  validate(verifyEmailChangeSchema),
+  asyncHandler(authController.verifyEmailChange),
 );
 
 export default router;

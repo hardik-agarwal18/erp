@@ -64,3 +64,16 @@ export const updateProfileSchema = z.object({
     email: emailSchema,
   }),
 });
+
+export const requestEmailChangeSchema = z.object({
+  body: z.object({
+    newEmail: emailSchema,
+  }),
+});
+
+export const verifyEmailChangeSchema = z.object({
+  body: z.object({
+    currentEmailOtp: z.string().length(6),
+    newEmailOtp: z.string().length(6),
+  }),
+});

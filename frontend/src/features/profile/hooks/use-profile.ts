@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateProfile } from "@/services/auth.service";
+import { updateProfile, requestEmailChange, verifyEmailChange } from "@/services/auth.service";
 import type { UpdateProfileSchema } from "../schema";
 
 export function useProfileMutations() {
@@ -7,13 +7,20 @@ export function useProfileMutations() {
 
   const updateProfileMutation = useMutation({
     mutationFn: (data: UpdateProfileSchema) => updateProfile(data),
-    onSuccess: () => {
-      // Invalidate queries that might depend on the user's name/email
-      // such as the session or any "me" queries if we had them in react-query
-    },
+    onSuccess: () => {},
+  });
+
+  const requestEmailChangeMutation = useMutation({
+    mutationFn: (newEmail: string) => requestEmailChange(newEmail),
+  });
+
+  const verifyEmailChangeMutation = useMutation({
+    mutationFn: (data: { currentEmailOtp: string; newEmailOtp: string }) => verifyEmailChange(data),
   });
 
   return {
     updateProfile: updateProfileMutation,
+    requestEmailChange: requestEmailChangeMutation,
+    verifyEmailChange: verifyEmailChangeMutation,
   };
 }

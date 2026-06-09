@@ -21,7 +21,9 @@ export type MailJobPayload =
   | { type: "password-reset"; payload: PasswordResetEmailRequest }
   | { type: "invitation"; payload: InvitationEmailRequest }
   | { type: "invoice"; payload: InvoiceEmailRequest }
-  | { type: "export"; payload: import("../mail/mail.types.js").ExportEmailRequest };
+  | { type: "export"; payload: import("../mail/mail.types.js").ExportEmailRequest }
+  | { type: "email-change-current"; payload: import("../mail/mail.types.js").EmailChangeVerificationRequest }
+  | { type: "email-change-new"; payload: import("../mail/mail.types.js").EmailChangeVerificationRequest };
 
 // Future jobs
 
