@@ -24,6 +24,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { useState } from "react";
 
 export default function ProfileSettingsPage() {
@@ -285,40 +291,73 @@ export default function ProfileSettingsPage() {
       </div>
 
       <Dialog open={showOtpModal} onOpenChange={(open) => !open && setShowOtpModal(false)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Verify Email Change</DialogTitle>
-            <DialogDescription>
-              We've sent verification codes to both your current email ({session?.email}) and your new email ({pendingEmail}). Please enter both codes to verify the change.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Current Email Code</Label>
-              <Input 
-                value={currentEmailOtp}
-                onChange={(e) => setCurrentEmailOtp(e.target.value)}
-                placeholder="6-digit code"
-                maxLength={6}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>New Email Code</Label>
-              <Input 
-                value={newEmailOtp}
-                onChange={(e) => setNewEmailOtp(e.target.value)}
-                placeholder="6-digit code"
-                maxLength={6}
-              />
+        <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-full backdrop-blur-md">
+                <ShieldCheck className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-semibold text-white">Security Verification</DialogTitle>
+                <DialogDescription className="text-blue-100 mt-1 text-sm">
+                  Verify your email change request.
+                </DialogDescription>
+              </div>
             </div>
           </div>
           
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowOtpModal(false)}>Cancel</Button>
+          <div className="p-6 space-y-6">
+            <p className="text-sm text-slate-600 text-center">
+              We've sent verification codes to both your current email (<strong className="text-slate-900">{session?.email}</strong>) and your new email (<strong className="text-slate-900">{pendingEmail}</strong>).
+            </p>
+            
+            <div className="space-y-5">
+              <div className="space-y-3">
+                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex justify-center">Current Email Code</Label>
+                <div className="flex justify-center">
+                  <InputOTP maxLength={6} value={currentEmailOtp} onChange={(val) => setCurrentEmailOtp(val)}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={1} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={2} className="w-12 h-14 text-2xl font-bold bg-white" />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={4} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={5} className="w-12 h-14 text-2xl font-bold bg-white" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+              </div>
+              
+              <div className="space-y-3">
+                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex justify-center">New Email Code</Label>
+                <div className="flex justify-center">
+                  <InputOTP maxLength={6} value={newEmailOtp} onChange={(val) => setNewEmailOtp(val)}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={1} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={2} className="w-12 h-14 text-2xl font-bold bg-white" />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={4} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={5} className="w-12 h-14 text-2xl font-bold bg-white" />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 sm:justify-between flex-row">
+            <Button variant="ghost" onClick={() => setShowOtpModal(false)} className="text-slate-500 hover:text-slate-700">Cancel</Button>
             <Button 
               onClick={handleVerifyOtp} 
               disabled={verifyEmailChange.isPending || currentEmailOtp.length !== 6 || newEmailOtp.length !== 6}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white min-w-[120px]"
             >
               {verifyEmailChange.isPending ? "Verifying..." : "Verify Codes"}
             </Button>
