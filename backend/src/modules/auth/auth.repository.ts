@@ -10,6 +10,9 @@ export const authRepository = {
   findUserById: (id: string) => {
     return prisma.user.findUnique({ where: { id } });
   },
+  updateUser: (userId: string, data: { name?: string; email?: string; isVerified?: boolean }) => {
+    return prisma.user.update({ where: { id: userId }, data });
+  },
   listUserMemberships: (userId: string) => {
     return prisma.organizationMember.findMany({
       where: { userId },

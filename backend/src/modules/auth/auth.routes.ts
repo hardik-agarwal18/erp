@@ -11,6 +11,7 @@ import {
   resendVerificationSchema,
   resetPasswordSchema,
   switchWorkspaceSchema,
+  updateProfileSchema,
   verifyEmailSchema,
 } from "./auth.validators.js";
 import { authMiddleware } from "../../middleware/auth.middleware.js";
@@ -74,5 +75,11 @@ router.post(
   asyncHandler(authController.resendVerification),
 );
 router.get("/me", authMiddleware, asyncHandler(authController.getMe));
+router.patch(
+  "/me",
+  authMiddleware,
+  validate(updateProfileSchema),
+  asyncHandler(authController.updateProfile),
+);
 
 export default router;

@@ -11,6 +11,7 @@ export const apiEndpoints = {
     verifyEmail: "/auth/verify-email",
     resendVerification: "/auth/resend-verification",
     switchWorkspace: "/auth/switch-workspace",
+    updateProfile: "/auth/me",
   },
   organizations: {
     list: "/organizations",

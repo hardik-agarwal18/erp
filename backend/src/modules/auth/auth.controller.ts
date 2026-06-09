@@ -146,6 +146,18 @@ export const authController = {
     return sendSuccess(res, { message: "Password updated" });
   },
 
+  updateProfile: async (req: Request, res: Response): Promise<Response> => {
+    if (!req.user) {
+      throw new ApiError(401, "Unauthorized");
+    }
+
+    const updatedUser = await authService.updateProfile(req.user.id, req.body);
+    return sendSuccess(res, {
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  },
+
   getMe: async (req: Request, res: Response): Promise<Response> => {
     if (!req.user) {
       throw new ApiError(401, "Unauthorized");

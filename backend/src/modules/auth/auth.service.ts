@@ -642,6 +642,41 @@ export const authService = {
     }
   },
 
+  updateProfile: async (userId: string, data: { name: string; email: string }) => {
+    const user = await authRepository.findUserById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    let isVerified = user.isVerified;
+
+    if (data.email !== user.email) {
+      const existing = await authRepository.findUserByEmail(data.email);
+      if (existing) {
+        throw new ApiError(409, "Email already in use");
+      }
+      isVerified = false; // Require re-verification for new email
+    }
+
+    const updatedUser = await authRepository.updateUser(userId, {
+      name: data.name,
+      email: data.email,
+      isVerified,
+    });
+
+    if (!isVerified && data.email !== user.email) {
+      // Send verification email for the new email address
+      await authService.resendVerification(data.email);
+    }
+
+    return {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      isVerified: updatedUser.isVerified,
+    };
+  },
+
   getMe: async (userId: string, activeOrganizationId?: string | null) => {
     const user = await authRepository.findUserById(userId);
     if (!user) {

@@ -52,6 +52,11 @@ export async function signup(payload: SignupPayload) {
   return response.data;
 }
 
+export async function updateProfile(payload: { name: string; email: string }) {
+  const response = await apiClient.patch(apiEndpoints.auth.updateProfile, payload);
+  return response.data;
+}
+
 export async function logout() {
   await apiClient.post(apiEndpoints.auth.logout);
   setStoredAccessToken(null);
