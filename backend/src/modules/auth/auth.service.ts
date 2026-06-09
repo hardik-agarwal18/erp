@@ -642,16 +642,17 @@ export const authService = {
     }
   },
 
-  updateProfile: async (userId: string, data: { name: string; email: string }) => {
+  updateProfile: async (userId: string, data: { name?: string; email?: string }) => {
     const user = await authRepository.findUserById(userId);
     if (!user) {
       throw new ApiError(404, "User not found");
     }
 
     let isVerified = user.isVerified;
+    const newEmail = data.email ?? user.email;
 
-    if (data.email !== user.email) {
-      const existing = await authRepository.findUserByEmail(data.email);
+    if (newEmail !== user.email) {
+      const existing = await authRepository.findUserByEmail(newEmail);
       if (existing) {
         throw new ApiError(409, "Email already in use");
       }
@@ -659,14 +660,14 @@ export const authService = {
     }
 
     const updatedUser = await authRepository.updateUser(userId, {
-      name: data.name,
-      email: data.email,
+      name: data.name ?? user.name,
+      email: newEmail,
       isVerified,
     });
 
-    if (!isVerified && data.email !== user.email) {
+    if (!isVerified && newEmail !== user.email) {
       // Send verification email for the new email address
-      await authService.resendVerification(data.email);
+      await authService.resendVerification(newEmail);
     }
 
     return {

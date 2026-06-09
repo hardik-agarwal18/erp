@@ -16,7 +16,7 @@ export const demoService = {
     const org1Name = faker.company.name();
     const org2Name = faker.company.name();
 
-    // 1. Create a demo user
+    // 1. Create a demo user (owner)
     const user = await prisma.user.create({
       data: {
         name: userName,
@@ -34,9 +34,37 @@ export const demoService = {
       name: org2Name,
     });
 
-    // 3. Seed data for both
-    await demoRepository.seedWorkspaceData(org1.id, org1Name);
-    await demoRepository.seedWorkspaceData(org2.id, org2Name);
+    // 3. Create additional users and add to org1
+    const roles = await prisma.role.findMany({
+      where: { organizationId: org1.id, isSystem: true }
+    });
+
+    const roleNames = ["admin", "manager", "member"];
+    for (let i = 0; i < roleNames.length; i++) {
+      const role = roles.find(r => r.name === roleNames[i]);
+      if (role) {
+        const additionalUser = await prisma.user.create({
+          data: {
+            name: faker.person.fullName(),
+            email: `demo-${roleNames[i]}-${uuid}@example.com`,
+            password: hashedPassword,
+            isVerified: true,
+          },
+        });
+        
+        await prisma.organizationMember.create({
+          data: {
+            organizationId: org1.id,
+            userId: additionalUser.id,
+            roleId: role.id,
+          }
+        });
+      }
+    }
+
+    // 4. Seed data for both
+    await demoRepository.seedWorkspaceData(org1.id, org1Name, user.id);
+    await demoRepository.seedWorkspaceData(org2.id, org2Name, user.id);
 
     return { email, password, organization: org1 };
   },

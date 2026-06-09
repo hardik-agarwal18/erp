@@ -154,7 +154,7 @@ export const authController = {
 
     // Ignore email here, handled by requestEmailChange
     const { name } = req.body;
-    const updatedUser = await authService.updateProfile(req.user.id, { name, email: req.user.email });
+    const updatedUser = await authService.updateProfile(req.user.id, { name });
     return sendSuccess(res, {
       message: "Profile updated successfully",
       data: updatedUser,

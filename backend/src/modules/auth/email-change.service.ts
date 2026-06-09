@@ -87,14 +87,11 @@ export const emailChangeService = {
     // Audit log
     await auditService.recordAuthEvent({
       action: AUDIT_ACTIONS.AUTH_EMAIL_CHANGED,
-      entityType: AUDIT_ENTITY_TYPES.AUTH,
-      entityId: userId,
       userId: userId,
-      details: {
+      metadata: {
         oldEmail: user.email,
         newEmail: data.newEmail,
       },
-      ipAddress: "0.0.0.0", // Placeholder since we don't have request context here
     });
 
     return updatedUser;
