@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/states/empty-state";
 import { ModuleError } from "@/components/states/module-error";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { useProductDetailQuery, useUpdateProductMutation } from "../hooks/use-products-query";
 import { ProductForm } from "./product-form";
 
@@ -37,7 +37,7 @@ export function ProductEditView({ productId }: { productId: string }) {
         }
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.72fr)]">
+      <div>
         <ProductForm
           defaultValues={{
             code: product.code,
@@ -75,21 +75,6 @@ export function ProductEditView({ productId }: { productId: string }) {
             router.push(`/products/${product.id}`);
           }}
         />
-        <Card>
-          <CardContent className="space-y-4 p-4">
-            <p className="text-sm font-semibold text-slate-950">Impact of changes</p>
-            {[
-              "Supplier updates change default sourcing behavior and PO planning assumptions.",
-              "Price changes should be reviewed before reusing the product on new quotes or invoices.",
-              "Reorder threshold changes affect replenishment urgency across inventory dashboards.",
-              "Status changes can hide discontinued products from day-to-day operational flows.",
-            ].map((item) => (
-              <div key={item} className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 text-sm text-slate-600">
-                {item}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

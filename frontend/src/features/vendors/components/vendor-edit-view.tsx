@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/states/empty-state";
 import { ModuleError } from "@/components/states/module-error";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { useUpdateVendorMutation, useVendorDetailQuery } from "../hooks/use-vendors-query";
 import { VendorForm } from "./vendor-form";
 
@@ -37,7 +37,7 @@ export function VendorEditView({ vendorId }: { vendorId: string }) {
         }
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.72fr)]">
+      <div>
         <VendorForm
           defaultValues={{
             code: vendor.code || "",
@@ -63,21 +63,6 @@ export function VendorEditView({ vendorId }: { vendorId: string }) {
             router.push(`/vendors/${vendor.id}`);
           }}
         />
-        <Card>
-          <CardContent className="space-y-4 p-4">
-            <p className="text-sm font-semibold text-slate-950">Impact of changes</p>
-            {[
-              "Payment term changes affect default bill due dates and approval expectations.",
-              "Lead time updates influence replenishment planning and PO scheduling.",
-              "Status changes affect vendor eligibility in procurement workflows.",
-              "Manager changes redirect supplier communication and escalations.",
-            ].map((item) => (
-              <div key={item} className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 text-sm text-slate-600">
-                {item}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

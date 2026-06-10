@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+
 import { useCreateVendorMutation } from "../hooks/use-vendors-query";
 import { VendorForm } from "./vendor-form";
 
@@ -24,23 +24,23 @@ export function VendorCreateView() {
         }
       />
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.72fr)]">
+      <div>
         <VendorForm
           defaultValues={{
-            code: "VEN-005",
-            name: "Prime Freight Services",
-            legalName: "Prime Freight Services LLC",
-            email: "ops@primefreight.example",
-            phone: "+1 972 555 0132",
+            code: "",
+            name: "",
+            legalName: "",
+            email: "",
+            phone: "",
             status: "active",
             category: "services",
-            gstin: "07AAEVP9100N1Z3",
-            currency: "INR",
-            paymentTerms: "Net 21",
-            leadTimeDays: 3,
-            accountManager: "Sara Khan",
-            billingAddress: "100 Beltway North, Dallas, TX 75207",
-            shippingAddress: "Distribution Node 5, Dallas, TX 75241",
+            gstin: "",
+            currency: "USD",
+            paymentTerms: "",
+            leadTimeDays: 0,
+            accountManager: "",
+            billingAddress: "",
+            shippingAddress: "",
           }}
           description="Complete vendor commercial, tax, and operational metadata."
           pending={mutation.isPending}
@@ -50,21 +50,6 @@ export function VendorCreateView() {
             router.push(`/vendors/${vendor.id}`);
           }}
         />
-        <Card>
-          <CardContent className="space-y-4 p-4">
-            <p className="text-sm font-semibold text-slate-950">Vendor setup checklist</p>
-            {[
-              "Confirm legal name and tax details before first PO issuance.",
-              "Use category and lead time for procurement planning and supplier selection.",
-              "Capture billing and receiving addresses separately for AP and warehouse coordination.",
-              "Set status to review when compliance or banking docs are pending.",
-            ].map((item) => (
-              <div key={item} className="rounded-lg border border-slate-200 bg-slate-50/70 p-3 text-sm text-slate-600">
-                {item}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

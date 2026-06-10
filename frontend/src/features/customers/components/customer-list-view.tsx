@@ -50,7 +50,7 @@ export function CustomerListView() {
   }
 
   if (!data?.customers.length) {
-    return <EmptyState title="No customers found" description="Create your first customer to start invoice and collections workflows." actionLabel="Create customer" />;
+    return <EmptyState title="No customers found" description="Create your first customer to start invoice and collections workflows." actionLabel="Create customer" actionUrl="/customers/create" />;
   }
 
   const { summary } = data;
