@@ -52,6 +52,8 @@ export const PERMISSIONS = {
   SALES_CREATE: "sales.create",
   SALES_UPDATE: "sales.update",
   SALES_DELETE: "sales.delete",
+  SALES_SEND: "sales.send",
+  SALES_EXPORT: "sales.export",
 
   // Purchasing (Expenses)
   PURCHASING_VIEW: "purchasing.view",

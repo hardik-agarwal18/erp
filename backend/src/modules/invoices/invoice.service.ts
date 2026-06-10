@@ -11,6 +11,8 @@ import {
 import { pdfGenerationQueue } from "../../queue/queue.service.js";
 import { invoiceRepository } from "./invoice.repository.js";
 import { CreateInvoiceInput, UpdateInvoiceInput } from "./invoice.types.js";
+import { invoicePdfService } from "./services/invoice-pdf.service.js";
+import { mailDispatcher } from "../../mail/mail.service.js"; // Wait, I need to get the mailDispatcher properly
 
 const formatInvoiceNumber = (prefix: string, value: number) =>
   `${prefix}-${String(value).padStart(6, "0")}`;
@@ -308,5 +310,92 @@ export const invoiceService = {
       entityType: AUDIT_ENTITY_TYPES.INVOICE,
       entityId: invoiceId,
     });
+  },
+
+  exportInvoicePdf: async (organizationId: string, invoiceId: string) => {
+    // Generate PDF buffer
+    return invoicePdfService.generateInvoicePdf({
+      invoiceId,
+      organizationId,
+    });
+  },
+
+  sendInvoiceEmail: async (organizationId: string, invoiceId: string, email: string) => {
+    const invoice = await invoiceService.getInvoice(organizationId, invoiceId);
+    if (!invoice) throw new ApiError(404, "Invoice not found");
+
+    // Create pending log
+    const emailLog = await prisma.invoiceEmailLog.create({
+      data: {
+        invoiceId,
+        organizationId,
+        recipient: email,
+        status: "PENDING",
+      },
+    });
+
+    try {
+      const pdfBuffer = await invoicePdfService.generateInvoicePdf({
+        invoiceId,
+        organizationId,
+      });
+
+      // We need to use the default direct dispatcher for now, or the exported dispatcher from mailService
+      // To avoid circular dependency, I'll import sendMail or the configured dispatcher
+      const { default: transporter } = await import("../../config/mail.js");
+      const { DirectMailDispatcher, defaultProvider, defaultProviderName } = await import("../../mail/mail.service.js");
+      
+      const mailDispatcher = new DirectMailDispatcher(defaultProvider, defaultProviderName);
+
+      await mailDispatcher.sendInvoiceEmail({
+        to: email,
+        invoiceNumber: invoice.invoiceNumber,
+        customerName: invoice.customer.name,
+        amountDue: invoice.balance?.toString() ?? invoice.totalAmount.toString(),
+        organizationName: invoice.organization.name,
+        pdfBuffer,
+      });
+
+      await prisma.invoiceEmailLog.update({
+        where: { id: emailLog.id },
+        data: {
+          status: "SENT",
+          sentAt: new Date(),
+        },
+      });
+
+      return { success: true };
+    } catch (error: any) {
+      await prisma.invoiceEmailLog.update({
+        where: { id: emailLog.id },
+        data: {
+          status: "FAILED",
+          error: error.message,
+        },
+      });
+      throw new ApiError(500, "Failed to send invoice email");
+    }
+  },
+
+  getInvoiceEmailHistory: async (organizationId: string, invoiceId: string) => {
+    const logs = await prisma.invoiceEmailLog.findMany({
+      where: {
+        invoiceId,
+        organizationId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        recipient: true,
+        status: true,
+        error: true,
+        sentAt: true,
+        openedAt: true,
+        createdAt: true,
+      },
+    });
+    return logs;
   },
 };

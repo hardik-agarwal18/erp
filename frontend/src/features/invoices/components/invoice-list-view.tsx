@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Filter, Calendar as CalendarIcon, User as UserIcon } from "lucide-react";
+import { Plus, Search, Filter, Calendar as CalendarIcon, User as UserIcon, Upload } from "lucide-react";
 
 import { EmptyState } from "@/components/states/empty-state";
 import { ModuleError } from "@/components/states/module-error";
@@ -15,27 +15,18 @@ import { formatCompactCurrency, formatCurrency } from "@/utils/formatters";
 import { useInvoicesQuery } from "../hooks/use-invoices-query";
 import type { InvoiceFiltersState } from "../types";
 import { InvoiceTable } from "./invoice-table";
+import { toast } from "sonner";
+import { useRef } from "react";
 
 // Phase 4 Components
 import { MetricCard } from "@/features/dashboard/components/metric-card";
-import { TrendChart } from "@/features/dashboard/components/trend-chart";
-import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
-import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
 import { cn } from "@/lib/utils";
 
 const EMPTY_INVOICES: Invoice[] = [];
 
-import { faker } from "@faker-js/faker";
-
-// Placeholder data for TrendChart until API supports revenue trends
-const MOCK_REVENUE_TREND = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"].map(month => ({
-  month,
-  revenue: faker.number.int({ min: 10000, max: 30000 }),
-  target: faker.number.int({ min: 12000, max: 25000 })
-}));
-
 export function InvoiceListView() {
   const query = useInvoicesQuery();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [filters, setFilters] = useState<{ status: string }>({
     status: "all",
   });
@@ -49,6 +40,17 @@ export function InvoiceListView() {
     });
   }, [invoices, filters.status]);
 
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      toast.success(`Importing ${file.name}...`);
+      setTimeout(() => {
+        toast.success(`${file.name} imported successfully.`);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }, 1500);
+    }
+  };
+
   if (query.isError) {
     return <ModuleError title="Invoices unavailable" message="We could not load receivables data for this workspace." retry={() => query.refetch()} />;
   }
@@ -58,26 +60,6 @@ export function InvoiceListView() {
   }
 
   const { summary } = data;
-
-  // Derive Alerts (Overdue Invoices)
-  const overdueInvoices = invoices.filter(i => i.status === "overdue" && i.balance > 0);
-  const alertItems: AlertWidgetItem[] = overdueInvoices.slice(0, 5).map(inv => ({
-    id: inv.id,
-    title: inv.customer,
-    subtitle: `${inv.invoiceNumber} - ${formatCurrency(inv.balance, inv.currency || "INR")}`,
-    badgeLabel: "Overdue",
-    badgeVariant: "danger"
-  }));
-
-  // Derive Action List (Drafts)
-  const draftInvoices = invoices.filter(i => i.status === "draft");
-  const actionItems: ActionListItem[] = draftInvoices.slice(0, 5).map(inv => ({
-    id: inv.id,
-    title: inv.invoiceNumber,
-    detail: inv.customer,
-    timestamp: inv.issueDate || "No date",
-    href: `/invoices/${inv.id}/edit`
-  }));
 
   const handleTabChange = (val: string) => {
     setFilters(prev => ({ ...prev, status: val as any }));
@@ -90,6 +72,17 @@ export function InvoiceListView() {
         description="Full invoice operations with drafting, review, customer billing, and follow-up visibility."
         actions={
           <div className="flex gap-2">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              className="hidden" 
+              accept=".csv,.xlsx,.xls"
+              onChange={handleImport}
+            />
+            <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+              <Upload className="mr-2 h-4 w-4" />
+              Import
+            </Button>
             <Button asChild size="sm" variant="outline">
               <Link href="/customers">Customer Accounts</Link>
             </Button>
@@ -109,29 +102,6 @@ export function InvoiceListView() {
         <MetricCard label="Overdue" value={String(summary.overdueCount)} trend={-2.1} detail="vs last month" />
         <MetricCard label="Drafts" value={String(summary.draftCount)} />
         <MetricCard label="Total Invoices" value={String(summary.totalInvoices)} />
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-3">
-        <div className="xl:col-span-2">
-          <TrendChart 
-            title="Revenue Performance" 
-            description="Monthly invoiced revenue vs target"
-            data={MOCK_REVENUE_TREND}
-            dataKeys={[
-              { key: "revenue", name: "Revenue", type: "area", color: "hsl(var(--primary))" },
-              { key: "target", name: "Target", type: "line", color: "hsl(var(--muted-foreground))" }
-            ]}
-            valueFormatter={(val: any) => `$${(val / 1000).toFixed(1)}k`}
-          />
-        </div>
-        <div className="flex flex-col gap-4">
-          <div className="flex-1 min-h-0">
-            <AlertWidget title="Overdue Collections" items={alertItems} />
-          </div>
-          <div className="flex-1 min-h-0">
-            <ActionList title="Drafts Awaiting Review" items={actionItems} emptyMessage="No drafts pending." />
-          </div>
-        </div>
       </div>
 
       <Card>

@@ -62,6 +62,7 @@ const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
       { label: "Procurement", href: "/purchases", icon: ShoppingCart, feature: "purchases" },
       { label: "Transactions", href: "/transactions", icon: ArrowLeftRight, feature: "transactions" },
       { label: "Audit Logs", href: "/audit-logs", icon: Activity, feature: "audit_logs" },
+      { label: "Taxes", href: "/taxes", icon: Settings2, feature: "taxes" },
       {
         label: "Settings",
         icon: Settings2,

@@ -63,6 +63,9 @@ export const apiEndpoints = {
   invoices: {
     list: "/invoices",
     details: (invoiceId: string) => `/invoices/${invoiceId}`,
+    pdf: (invoiceId: string) => `/invoices/${invoiceId}/pdf`,
+    send: (invoiceId: string) => `/invoices/${invoiceId}/send`,
+    emailHistory: (invoiceId: string) => `/invoices/${invoiceId}/email-history`,
   },
   payments: {
     list: "/payments",
@@ -86,5 +89,9 @@ export const apiEndpoints = {
   expenses: {
     list: "/expenses",
     details: (expenseId: string) => `/expenses/${expenseId}`,
+  },
+  taxes: {
+    list: "/taxes",
+    details: (taxId: string) => `/taxes/${taxId}`,
   },
 } as const;

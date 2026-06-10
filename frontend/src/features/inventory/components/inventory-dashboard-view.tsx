@@ -16,8 +16,6 @@ import { InventoryModuleNav } from "./inventory-module-nav";
 
 // Phase 4 Components
 import { MetricCard } from "@/features/dashboard/components/metric-card";
-import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
-import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
 
 export function InventoryDashboardView() {
   const query = useInventoryManagementQuery();
@@ -32,30 +30,7 @@ export function InventoryDashboardView() {
 
   const { alerts, items, summary, transfers, audits } = query.data;
 
-  // Mapping Phase 4 Components
-  const alertItems: AlertWidgetItem[] = alerts.map((alert: any) => ({
-    id: alert.id,
-    title: alert.title,
-    subtitle: alert.detail,
-    badgeLabel: alert.severity,
-    badgeVariant: alert.severity === "critical" ? "danger" : alert.severity === "warning" ? "warning" : "info",
-  }));
-
-  const transferItems: ActionListItem[] = transfers.map((t: any) => ({
-    id: t.id,
-    title: `Transfer #${t.id.slice(-6)}`,
-    detail: `${t.from} → ${t.to}`,
-    timestamp: t.date,
-    href: `/inventory/transfers/${t.id}`
-  }));
-
-  const auditItems: ActionListItem[] = audits.map((a: any) => ({
-    id: a.id,
-    title: `Audit ${a.month}`,
-    detail: a.warehouse,
-    timestamp: a.status,
-    href: `/inventory/audits/${a.id}`
-  }));
+  // No longer mapping phase 4 components
 
   return (
     <div className="space-y-5">
@@ -122,23 +97,8 @@ export function InventoryDashboardView() {
         </Card>
 
         <div className="space-y-4">
-          <AlertWidget 
-            title="Operational Alerts"
-            items={alertItems}
-          />
           <InventoryFormPanel />
         </div>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <ActionList 
-          title="Transfer Queue"
-          items={transferItems}
-        />
-        <ActionList 
-          title="Audit Queue"
-          items={auditItems}
-        />
       </div>
     </div>
   );

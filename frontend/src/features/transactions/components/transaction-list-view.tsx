@@ -18,25 +18,6 @@ import { formatCurrency } from "@/utils/formatters";
 
 // Phase 4 Components
 import { MetricCard } from "@/features/dashboard/components/metric-card";
-import { TrendChart } from "@/features/dashboard/components/trend-chart";
-import { AlertWidget, AlertWidgetItem } from "@/features/dashboard/components/alert-widget";
-import { ActionList, ActionListItem } from "@/features/dashboard/components/action-list";
-
-import { faker } from "@faker-js/faker";
-
-// Placeholder data for TrendCharts
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
-const MOCK_CASH_FLOW = MONTHS.map(month => ({
-  month,
-  inflow: faker.number.int({ min: 100000, max: 200000 }),
-  outflow: faker.number.int({ min: 80000, max: 150000 }),
-}));
-
-const MOCK_EXPENSES = MONTHS.map(month => ({
-  month,
-  payroll: faker.number.int({ min: 40000, max: 60000 }),
-  operations: faker.number.int({ min: 40000, max: 90000 }),
-}));
 
 export function TransactionListView() {
   const query = useTransactionsQuery();
@@ -77,25 +58,6 @@ export function TransactionListView() {
     return <EmptyState title="No transactions found" description="Transactions will populate here after posting and bank feed import." />;
   }
 
-  // Derive Alerts (Reconciliation Warnings)
-  const reconAlerts: AlertWidgetItem[] = reconciliations.filter(r => r.status === "attention" || r.status === "unbalanced").slice(0, 5).map(r => ({
-    id: r.id,
-    title: r.bankAccount,
-    subtitle: `${r.unmatchedCount} unmatched items`,
-    badgeLabel: "Review Required",
-    badgeVariant: "danger"
-  }));
-
-  // Derive Action List (Exceptions)
-  const exceptions = transactions.filter((t: any) => t.status === "exception");
-  const actionItems: ActionListItem[] = exceptions.slice(0, 5).map((t: any) => ({
-    id: t.id,
-    title: t.reference,
-    detail: `${t.account} - ${t.type}`,
-    timestamp: formatCurrency(t.amount, t.currency),
-    href: `/transactions/${t.id}/edit`
-  }));
-
   return (
     <div className="space-y-5">
       <PageHeader
@@ -116,36 +78,6 @@ export function TransactionListView() {
         <MetricCard label="Payables" value="₹82,400" detail="Pending Bills" trend={-2.4} />
         <MetricCard label="Net Profit (MTD)" value="₹42,800" detail="Gross Income - Expenses" trend={12.5} />
         <MetricCard label="Expenses (MTD)" value="₹64,200" detail="Total operational spend" trend={0.8} />
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <TrendChart 
-          title="Cash Flow Trend" 
-          description="Inflows vs Outflows over the last 6 months"
-          data={MOCK_CASH_FLOW}
-          dataKeys={[
-            { key: "inflow", name: "Money In", type: "bar", color: "hsl(var(--success))" },
-            { key: "outflow", name: "Money Out", type: "line", color: "hsl(var(--danger))" }
-          ]}
-          valueFormatter={(val: any) => `₹${(val / 1000).toFixed(0)}k`}
-          height={280}
-        />
-        <TrendChart 
-          title="Expense Burn Trend" 
-          description="Operating expenses vs Payroll"
-          data={MOCK_EXPENSES}
-          dataKeys={[
-            { key: "operations", name: "Operations", type: "bar", color: "hsl(var(--warning))" },
-            { key: "payroll", name: "Payroll", type: "bar", color: "hsl(var(--primary))" }
-          ]}
-          valueFormatter={(val: any) => `₹${(val / 1000).toFixed(0)}k`}
-          height={280}
-        />
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-2">
-        <AlertWidget title="Reconciliation Alerts" items={reconAlerts} />
-        <ActionList title="Exceptions & Overdue" items={actionItems} emptyMessage="No exceptions to clear." />
       </div>
 
       <Card>

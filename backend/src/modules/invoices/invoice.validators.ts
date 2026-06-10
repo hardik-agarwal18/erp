@@ -54,3 +54,12 @@ export const listInvoicesSchema = z.object({
     search: z.string().max(120).optional(),
   }),
 });
+
+export const sendInvoiceEmailSchema = z.object({
+  params: z.object({
+    id: z.string().uuid(),
+  }),
+  body: z.object({
+    email: z.string().email(),
+  }),
+});

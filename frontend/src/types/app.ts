@@ -49,7 +49,7 @@ export type NavigationItem = {
   feature: FeatureKey;
 };
 
-export type FeatureKey = "dashboard" | "customers" | "vendors" | "invoices" | "inventory" | "purchases" | "products" | "transactions" | "expenses" | "payments" | "reports" | "organizations" | "audit_logs";
+export type FeatureKey = "dashboard" | "customers" | "vendors" | "invoices" | "inventory" | "purchases" | "products" | "transactions" | "expenses" | "payments" | "reports" | "organizations" | "audit_logs" | "taxes";
 
 export type KpiMetric = {
   label: string;
@@ -327,4 +327,15 @@ export type Transaction = {
   channel: "bank" | "cash" | "journal";
   memo: string;
   workspaceId: string;
+};
+
+export type Tax = {
+  id: string;
+  name: string;
+  rate: number;
+  type: "GST" | "VAT" | "SALES_TAX" | "OTHER";
+  isDefault: boolean;
+  workspaceId: string;
+  createdAt: string;
+  updatedAt: string;
 };

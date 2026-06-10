@@ -54,6 +54,7 @@ model Organization {
   taxes              Tax[]
   transactions       Transaction[]
   vendors            Vendor[]
+  invoiceEmailLogs   InvoiceEmailLog[]
 
   @@index([ownerId])
 }
@@ -344,6 +345,7 @@ model Invoice {
   tax            Tax?          @relation(fields: [taxId], references: [id])
   items          InvoiceItem[]
   payments       Payment[]
+  emailLogs      InvoiceEmailLog[]
 
   @@unique([organizationId, invoiceNumber])
   @@index([organizationId])
@@ -512,4 +514,30 @@ enum JoinRequestStatus {
   PENDING
   ACCEPTED
   REJECTED
+}
+
+model InvoiceEmailLog {
+  id             String             @id @default(uuid())
+  invoiceId      String
+  organizationId String
+  recipient      String
+  status         InvoiceEmailStatus
+  error          String?
+  sentAt         DateTime?
+  openedAt       DateTime?
+  createdAt      DateTime           @default(now())
+
+  invoice      Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([organizationId])
+  @@index([status])
+}
+
+enum InvoiceEmailStatus {
+  PENDING
+  SENT
+  FAILED
+  OPENED
 }

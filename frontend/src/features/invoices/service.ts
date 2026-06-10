@@ -151,3 +151,29 @@ export async function updateLiveInvoice(
   const response = await apiClient.patch<ApiResponse<BackendInvoice>>(apiEndpoints.invoices.details(invoiceId), payload);
   return mapInvoice(response.data.data);
 }
+
+export async function downloadInvoicePdf(invoiceId: string) {
+  const response = await apiClient.get(apiEndpoints.invoices.pdf(invoiceId), {
+    responseType: "blob",
+  });
+  
+  const blob = new Blob([response.data], { type: "application/pdf" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Invoice-${invoiceId}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+}
+
+export async function sendInvoiceEmail(invoiceId: string, email: string) {
+  const response = await apiClient.post<ApiResponse<void>>(apiEndpoints.invoices.send(invoiceId), { email });
+  return response.data;
+}
+
+export async function getInvoiceEmailHistory(invoiceId: string) {
+  const response = await apiClient.get<ApiResponse<any[]>>(apiEndpoints.invoices.emailHistory(invoiceId));
+  return response.data.data;
+}

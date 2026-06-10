@@ -12,3 +12,4 @@ export { verificationEmailTemplate } from "./verification.template.js";
 export { welcomeEmailTemplate } from "./welcome.template.js";
 export { emailChangeCurrentTemplate } from "./email-change-current.template.js";
 export { emailChangeNewTemplate } from "./email-change-new.template.js";
+export { invoiceEmailTemplate } from "./invoice-email.template.js";

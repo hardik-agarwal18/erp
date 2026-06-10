@@ -14,6 +14,7 @@ import {
   invoiceIdParamSchema,
   listInvoicesSchema,
   updateInvoiceSchema,
+  sendInvoiceEmailSchema,
 } from "./invoice.validators.js";
 
 const router = Router();
@@ -50,6 +51,24 @@ router.delete(
   requirePermission(PERMISSIONS.SALES_DELETE),
   validate(invoiceIdParamSchema),
   asyncHandler(invoiceController.deleteInvoice),
+);
+router.get(
+  "/:id/pdf",
+  requirePermission(PERMISSIONS.SALES_EXPORT),
+  validate(invoiceIdParamSchema),
+  asyncHandler(invoiceController.exportPdf),
+);
+router.post(
+  "/:id/send",
+  requirePermission(PERMISSIONS.SALES_SEND),
+  validate(sendInvoiceEmailSchema),
+  asyncHandler(invoiceController.sendEmail),
+);
+router.get(
+  "/:id/email-history",
+  requirePermission(PERMISSIONS.SALES_VIEW),
+  validate(invoiceIdParamSchema),
+  asyncHandler(invoiceController.getEmailHistory),
 );
 
 export default router;

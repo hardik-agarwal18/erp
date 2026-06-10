@@ -91,6 +91,10 @@ app.get("/metrics", async (_req, res) => {
   res.end(await registry.metrics());
 });
 
+app.get("/health", (_req, res) => {
+  res.json({ status: "ok" });
+});
+
 app.use("/api/v1/health", healthRoutes);
 
 app.use("/api/v1/auth", authRoutes);

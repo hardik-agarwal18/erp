@@ -27,6 +27,7 @@ import {
   verificationEmailTemplate,
   emailChangeCurrentTemplate,
   emailChangeNewTemplate,
+  invoiceEmailTemplate,
 } from "./templates/index.js";
 import { transporter } from "../config/mail.js";
 
@@ -154,13 +155,27 @@ export class DirectMailDispatcher implements MailDispatcher {
   }
 
   async sendInvoiceEmail(request: InvoiceEmailRequest): Promise<void> {
+    const template = invoiceEmailTemplate({
+      organizationName: request.organizationName,
+      invoiceNumber: request.invoiceNumber,
+      customerName: request.customerName,
+      amountDue: request.amountDue,
+    });
+
     await sendMail(
       {
         from: mailFrom,
         to: request.to,
-        subject: `Invoice ${request.invoiceNumber}`,
-        html: `Your invoice ${request.invoiceNumber} is ready. <a href="${request.downloadUrl}">Download here</a>`,
-        text: `Your invoice ${request.invoiceNumber} is ready. Download here: ${request.downloadUrl}`,
+        subject: `Invoice ${request.invoiceNumber} from ${request.organizationName}`,
+        html: template.html,
+        text: template.text,
+        attachments: [
+          {
+            filename: `Invoice-${request.invoiceNumber}.pdf`,
+            content: request.pdfBuffer,
+            contentType: "application/pdf",
+          },
+        ],
       },
       this.provider,
       this.providerName,

@@ -13,9 +13,18 @@ import { useInvoiceDetailQuery } from "../hooks/use-invoices-query";
 import { InvoicePreview } from "./invoice-preview";
 import { InvoiceStatusBadge } from "./invoice-status-badge";
 import { InvoiceSummary } from "./invoice-summary";
+import { SendEmailModal } from "./send-email-modal";
+import { EmailHistoryModal } from "./email-history-modal";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown, Download, Mail, History } from "lucide-react";
+import { downloadInvoicePdf } from "../service";
+import { toast } from "sonner";
+import { useState } from "react";
 
 export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
   const query = useInvoiceDetailQuery(invoiceId);
+  const [isSendEmailOpen, setIsSendEmailOpen] = useState(false);
+  const [isEmailHistoryOpen, setIsEmailHistoryOpen] = useState(false);
 
   if (query.isError) {
     return <ModuleError title="Invoice unavailable" message="We could not load the selected invoice record." retry={() => query.refetch()} />;
@@ -40,12 +49,40 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
                 Back
               </Link>
             </Button>
-            <Button asChild size="sm">
+            <Button asChild size="sm" variant="outline">
               <Link href={`/invoices/${invoice.id}/edit`}>
                 <Pencil className="mr-2 h-4 w-4" />
-                Edit Invoice
+                Edit
               </Link>
             </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button size="sm">
+                  Actions <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={async () => {
+                  try {
+                    await downloadInvoicePdf(invoice.id);
+                    toast.success("PDF downloaded successfully");
+                  } catch (error) {
+                    toast.error("Failed to download PDF");
+                  }
+                }}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsSendEmailOpen(true)}>
+                  <Mail className="mr-2 h-4 w-4" />
+                  Send Email
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsEmailHistoryOpen(true)}>
+                  <History className="mr-2 h-4 w-4" />
+                  View Email History
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </>
         }
       />
@@ -90,6 +127,19 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
           </Card>
         </div>
       </div>
+
+      <SendEmailModal
+        isOpen={isSendEmailOpen}
+        onClose={() => setIsSendEmailOpen(false)}
+        invoiceId={invoice.id}
+        // If we had customer email in mapInvoice we could pass it here, but we default to empty for now
+      />
+
+      <EmailHistoryModal
+        isOpen={isEmailHistoryOpen}
+        onClose={() => setIsEmailHistoryOpen(false)}
+        invoiceId={invoice.id}
+      />
     </div>
   );
 }
