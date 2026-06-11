@@ -39,7 +39,7 @@ import demoRoutes from "./modules/demo/demo.routes.js";
 import employeeRoutes from "./domains/hrms/employees/employee.routes.js";
 import departmentRoutes from "./domains/hrms/employees/department.routes.js";
 import designationRoutes from "./domains/hrms/employees/designation.routes.js";
-// import shiftRoutes from "./domains/hrms/shifts/shift.routes.js";
+import shiftRoutes from "./domains/hrms/shifts/shift.routes.js";
 
 const app = express();
 
@@ -147,7 +147,7 @@ app.use("/api/v1/payroll", payrollRoutes);
 app.use("/api/v1/employees", employeeRoutes);
 app.use("/api/v1/departments", departmentRoutes);
 app.use("/api/v1/designations", designationRoutes);
-// app.use("/api/v1/shifts", shiftRoutes);
+app.use("/api/v1/shifts", shiftRoutes);
 app.use("/api/v1/holidays", holidayRoutes);
 
 import path from "path";
