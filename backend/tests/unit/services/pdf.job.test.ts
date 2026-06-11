@@ -24,17 +24,10 @@ jest.mock("pdfkit", () => {
   });
 });
 
-jest.mock("../../../src/modules/invoices/invoice.repository.js", () => ({
-  invoiceRepository: { findById: mockInvoiceFindById },
-}));
+import { invoiceRepository } from "../../../src/modules/invoices/invoice.repository.js";
+import { storageService } from "../../../src/lib/storage/storage.service.js";
 
-jest.mock("../../../src/lib/storage/storage.service.js", () => ({
-  storageService: { uploadFile: mockUploadFile, getSignedUrl: mockGetSignedUrl },
-}));
-
-jest.mock("bullmq", () => ({
-  Queue: jest.fn().mockImplementation(() => ({ add: mockMailQueueAdd })),
-}));
+import { mailQueue } from "../../../src/queue/queue.service.js";
 
 jest.mock("../../../src/queue/connection.js", () => ({
   queueConnection: { duplicate: jest.fn().mockReturnThis() },
@@ -74,7 +67,13 @@ const makeJob = (overrides: object = {}) =>
   } as any);
 
 describe("pdf.job — processPdfGenerationJob()", () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.spyOn(invoiceRepository, "findById").mockImplementation(mockInvoiceFindById as any);
+    jest.spyOn(storageService, "uploadFile").mockImplementation(mockUploadFile as any);
+    jest.spyOn(storageService, "getSignedUrl").mockImplementation(mockGetSignedUrl as any);
+    jest.spyOn(mailQueue, "add").mockImplementation(mockMailQueueAdd as any);
+  });
 
   it("should throw for unsupported document types", async () => {
     await expect(

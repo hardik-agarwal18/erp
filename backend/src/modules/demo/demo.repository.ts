@@ -1,10 +1,10 @@
 import { randomUUID, randomBytes } from "crypto";
 import prisma from "../../config/database.js";
-import { faker } from "@faker-js/faker";
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../services/audit/index.js";
 
 export const demoRepository = {
   seedWorkspaceData: async (organizationId: string, orgName: string, ownerId: string) => {
+    const { faker } = await import("@faker-js/faker");
     const now = new Date();
     const sixMonthsAgo = faker.date.past({ years: 0.5 });
 

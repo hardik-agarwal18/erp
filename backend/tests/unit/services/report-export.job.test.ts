@@ -7,6 +7,7 @@ const mockExpenseFindMany = jest.fn();
 const mockUploadFile = jest.fn();
 const mockGetSignedUrl = jest.fn();
 const mockMailQueueAdd = jest.fn();
+const mockInventoryItemFindMany = jest.fn();
 const mockLoggerInfo = jest.fn();
 const mockLoggerError = jest.fn();
 
@@ -16,6 +17,7 @@ jest.mock("../../../src/config/database.js", () => ({
     user: { findUnique: mockUserFindUnique },
     invoice: { findMany: mockInvoiceFindMany },
     expense: { findMany: mockExpenseFindMany },
+    inventoryItem: { findMany: mockInventoryItemFindMany },
   },
 }));
 
@@ -47,7 +49,11 @@ const fakeInvoice = {
   invoiceNumber: "INV-001",
   status: "PAID",
   totalAmount: 500,
+  subtotal: 400,
+  taxAmount: 100,
+  discountAmount: 0,
   issueDate: new Date("2026-01-15"),
+  customer: { name: "Test Customer" },
 };
 
 const fakeExpense = {
@@ -151,6 +157,7 @@ describe("report-export.job — processReportJob()", () => {
   // ── Fallback / unknown report type ──────────────────────────────────────────
   it("should generate a mocked fallback row for unknown report types", async () => {
     mockUserFindUnique.mockResolvedValue(fakeUser);
+    mockInventoryItemFindMany.mockResolvedValue([]);
     mockUploadFile.mockResolvedValue(undefined);
     mockGetSignedUrl.mockResolvedValue("https://url/inventory.csv");
     mockMailQueueAdd.mockResolvedValue({});
@@ -159,6 +166,7 @@ describe("report-export.job — processReportJob()", () => {
 
     expect(mockInvoiceFindMany).not.toHaveBeenCalled();
     expect(mockExpenseFindMany).not.toHaveBeenCalled();
+    expect(mockInventoryItemFindMany).toHaveBeenCalled();
     expect(result.status).toBe("COMPLETED");
   });
 

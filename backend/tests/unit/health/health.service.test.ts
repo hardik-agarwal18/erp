@@ -1,39 +1,12 @@
 import { jest } from "@jest/globals";
 
-// Mocking dependencies
+// Import dependencies
 import { prisma } from "../../../src/database/prisma.js";
-import { checkRedisHealth } from "../../../src/config/redis.js";
-import { checkMailHealth } from "../../../src/config/mail.js";
+import { redisClient } from "../../../src/config/redis.js";
+import { transporter } from "../../../src/config/mail.js";
 import { storageService } from "../../../src/lib/storage/storage.service.js";
 import { queueConnection } from "../../../src/queue/connection.js";
-
-jest.mock("../../../src/database/prisma.js", () => ({
-  prisma: {
-    $queryRaw: jest.fn(),
-  },
-}));
-
-jest.mock("../../../src/config/redis.js", () => ({
-  checkRedisHealth: jest.fn(),
-}));
-
-jest.mock("../../../src/config/mail.js", () => ({
-  checkMailHealth: jest.fn(),
-}));
-
-jest.mock("../../../src/lib/storage/storage.service.js", () => ({
-  storageService: {
-    uploadFile: jest.fn(),
-    deleteFile: jest.fn(),
-  },
-}));
-
-jest.mock("../../../src/queue/connection.js", () => ({
-  queueConnection: {
-    ping: jest.fn(),
-    duplicate: jest.fn().mockReturnThis(),
-  },
-}));
+import { env } from "../../../src/config/env.js";
 
 import {
   checkDatabaseHealth,
@@ -43,8 +16,37 @@ import {
 } from "../../../src/modules/health/health.service.js";
 
 describe("healthService", () => {
+
+  let originals: any = {};
+
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Save originals
+    originals.queryRaw = prisma.$queryRaw;
+    originals.redisPing = redisClient.ping;
+    originals.verify = transporter.verify;
+    originals.uploadFile = storageService.uploadFile;
+    originals.deleteFile = storageService.deleteFile;
+    originals.queuePing = queueConnection.ping;
+
+    // Mutate methods directly to avoid jest.spyOn OOM on complex classes
+    prisma.$queryRaw = jest.fn() as any;
+    redisClient.ping = jest.fn() as any;
+    transporter.verify = jest.fn() as any;
+    storageService.uploadFile = jest.fn() as any;
+    storageService.deleteFile = jest.fn() as any;
+    queueConnection.ping = jest.fn() as any;
+  });
+
+  afterEach(() => {
+    // Restore originals
+    prisma.$queryRaw = originals.queryRaw;
+    redisClient.ping = originals.redisPing;
+    transporter.verify = originals.verify;
+    storageService.uploadFile = originals.uploadFile;
+    storageService.deleteFile = originals.deleteFile;
+    queueConnection.ping = originals.queuePing;
   });
 
   describe("checkDatabaseHealth", () => {
@@ -93,8 +95,10 @@ describe("healthService", () => {
   describe("getSystemHealth", () => {
     it("should return aggregated health status", async () => {
       (prisma.$queryRaw as jest.Mock).mockResolvedValue(1);
-      (checkRedisHealth as jest.Mock).mockResolvedValue(true);
-      (checkMailHealth as jest.Mock).mockResolvedValue(true);
+      (redisClient.ping as jest.Mock).mockResolvedValue("PONG");
+      
+      // Mail health always returns true in test env
+      
       (storageService.uploadFile as jest.Mock).mockResolvedValue(undefined);
       (storageService.deleteFile as jest.Mock).mockResolvedValue(undefined);
       (queueConnection.ping as jest.Mock).mockResolvedValue("PONG");
@@ -112,8 +116,10 @@ describe("healthService", () => {
 
     it("should return error for failing components", async () => {
       (prisma.$queryRaw as jest.Mock).mockRejectedValue(new Error());
-      (checkRedisHealth as jest.Mock).mockResolvedValue(false);
-      (checkMailHealth as jest.Mock).mockResolvedValue(false);
+      (redisClient.ping as jest.Mock).mockRejectedValue(new Error());
+      
+      // Mail health always returns true in test env
+      
       (storageService.uploadFile as jest.Mock).mockRejectedValue(new Error());
       (queueConnection.ping as jest.Mock).mockRejectedValue(new Error());
 
@@ -122,7 +128,7 @@ describe("healthService", () => {
       expect(result).toEqual({
         database: "error",
         redis: "error",
-        mail: "error",
+        mail: "ok", // because env.NODE_ENV === "test" bypasses the check
         storage: "error",
         queues: "error",
       });

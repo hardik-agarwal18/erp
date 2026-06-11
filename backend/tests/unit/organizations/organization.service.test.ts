@@ -13,6 +13,13 @@ jest.mock("../../../src/modules/auth/auth.repository.js");
 jest.mock("../../../src/mail/mail.service.js");
 jest.mock("../../../src/shared/utils/permissions.js");
 jest.mock("../../../src/shared/utils/slug.js");
+jest.mock("../../../src/config/redis.js", () => ({
+  redisClient: {
+    set: jest.fn(),
+    get: jest.fn(),
+    del: jest.fn(),
+  }
+}));
 
 jest.mock("../../../src/services/audit/index.js", () => ({
   AUDIT_ACTIONS: {

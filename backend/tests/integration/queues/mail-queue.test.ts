@@ -51,9 +51,9 @@ describe("Mail Queue", () => {
 
     await job.waitUntilFinished(queueEvents);
 
-    // The job is removed on complete because of removeOnComplete: true in queue options
-    // so its state becomes "unknown".
+    // The job is kept on complete because of removeOnComplete: { age: 3600 } in queue options
+    // so its state becomes "completed".
     const state = await job.getState();
-    expect(state).toBe("unknown");
+    expect(state).toBe("completed");
   });
 });

@@ -3,14 +3,14 @@ import prisma from "../../config/database.js";
 import { hashPassword } from "../../lib/bcrypt.js";
 import { organizationService } from "../organizations/organization.service.js";
 import { demoRepository } from "./demo.repository.js";
-import { faker } from "@faker-js/faker";
-
 export const demoService = {
   seedDemoEnvironment: async () => {
     const password = "password123";
     const hashedPassword = await hashPassword(password);
     const uuid = randomUUID().split("-")[0];
     const email = `demo-${uuid}@example.com`;
+
+    const { faker } = await import("@faker-js/faker");
 
     const userName = faker.person.fullName();
     const org1Name = faker.company.name();
