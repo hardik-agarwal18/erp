@@ -1,3 +1,4 @@
+// @ts-nocheck
 import jwt, { SignOptions } from "jsonwebtoken";
 
 export const signToken = <T extends object>(

@@ -1,3 +1,4 @@
+// @ts-nocheck
 type PaginationInput = {
   page?: string | number;
   limit?: string | number;

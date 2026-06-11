@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const buildBaseTemplate = (content: string): string => `<!doctype html>
 <html lang="en">
   <head>

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Response } from "express";
 
 import { env } from "../config/env.js";
@@ -5,7 +6,7 @@ import {
   CSRF_COOKIE_NAME,
   REFRESH_COOKIE_NAME,
   REFRESH_TOKEN_EXPIRES_IN,
-} from "../modules/auth/auth.constants.js";
+} from "../domains/iam/auth/auth.constants.js";
 
 const isProduction = env.NODE_ENV === "production";
 

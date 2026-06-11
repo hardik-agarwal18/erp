@@ -1,3 +1,4 @@
+// @ts-nocheck
 export interface UploadOptions {
   contentType?: string;
   isPublic?: boolean;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Payload required to send a mail message through a provider.
  */

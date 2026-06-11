@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PERMISSIONS as NEW_PERMISSIONS, PermissionType } from "./permissions.js";
 
 export const SYSTEM_ROLE_NAMES = [

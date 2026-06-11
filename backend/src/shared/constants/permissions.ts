@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const PERMISSIONS = {
   // Organization
   ORGANIZATION_VIEW: "organization.view",

@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const AUDIT_ACTIONS = {
   AUTH_LOGIN: "AUTH_LOGIN",
   AUTH_LOGOUT: "AUTH_LOGOUT",

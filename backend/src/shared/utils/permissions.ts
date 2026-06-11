@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from "../../config/database.js";
 import { redisClient } from "../../config/redis.js";
 

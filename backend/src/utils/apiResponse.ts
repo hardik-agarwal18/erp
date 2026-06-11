@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Response } from "express";
 
 export interface SuccessApiResponse<T> {

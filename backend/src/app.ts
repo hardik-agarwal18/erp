@@ -10,7 +10,7 @@ import logger from "./config/logger.js";
 import { apiRateLimiter } from "./middleware/rateLimit.middleware.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import { sanitizeMiddleware } from "./middleware/sanitize.middleware.js";
-// import { idempotencyMiddleware } from "./middleware/idempotency.middleware.js";
+import { idempotencyMiddleware } from "./middleware/idempotency.middleware.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import organizationRoutes from "./modules/organizations/organization.routes.js";
 import roleRoutes from "./modules/roles/role.routes.js";
@@ -100,12 +100,12 @@ app.use("/api/v1/queues", queueObservabilityRoutes);
 
 import healthRoutes from "./modules/health/health.routes.js";
 import { registry } from "./monitoring/registry.js";
-// import { metricsAuth } from "./middleware/metrics.middleware.js";
+import { metricsAuth } from "./middleware/metrics.middleware.js";
 
-// app.get("/metrics", metricsAuth, async (_req, res) => {
-//   res.set("Content-Type", registry.contentType);
-//   res.end(await registry.metrics());
-// });
+app.get("/metrics", metricsAuth, async (_req, res) => {
+  res.set("Content-Type", registry.contentType);
+  res.end(await registry.metrics());
+});
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
@@ -122,10 +122,10 @@ app.use("/api/v1/invitations", invitationRoutes);
 app.use("/api/v1/customers", customerRoutes);
 app.use("/api/v1/vendors", vendorRoutes);
 app.use("/api/v1/products", productRoutes);
-// app.use("/api/v1/inventory", idempotencyMiddleware, inventoryRoutes);
-// app.use("/api/v1/invoices", idempotencyMiddleware, invoiceRoutes);
-// app.use("/api/v1/payments", idempotencyMiddleware, paymentRoutes);
-// app.use("/api/v1/expenses", idempotencyMiddleware, expenseRoutes);
+app.use("/api/v1/inventory", idempotencyMiddleware, inventoryRoutes);
+app.use("/api/v1/invoices", idempotencyMiddleware, invoiceRoutes);
+app.use("/api/v1/payments", idempotencyMiddleware, paymentRoutes);
+app.use("/api/v1/expenses", idempotencyMiddleware, expenseRoutes);
 app.use("/api/v1/taxes", taxRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/reports", reportRoutes);

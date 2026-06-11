@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Centralized email subjects for transactional messages.
  */

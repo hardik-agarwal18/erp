@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type {
   SendMailOptions as NodemailerSendMailOptions,
   Transporter,

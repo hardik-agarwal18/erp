@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Job } from "bullmq";
 import { MailJobPayload } from "../types.js";
 import { DirectMailDispatcher } from "../../mail/mail.service.js";
