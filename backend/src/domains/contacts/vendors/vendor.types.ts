@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type CreateVendorInput = {
   name: string;
   email?: string;

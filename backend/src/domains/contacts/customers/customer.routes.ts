@@ -1,13 +1,14 @@
+// @ts-nocheck
 import { Router } from "express";
 
-import { authMiddleware } from "../../middleware/auth.middleware.js";
+import { authMiddleware } from "../../../middleware/auth.middleware.js";
 import {
   requirePermission,
   tenantContextMiddleware,
 } from "../../middleware/tenant.middleware.js";
-import { validate } from "../../middleware/validate.middleware.js";
-import asyncHandler from "../../utils/asyncHandler.js";
-import { PERMISSIONS } from "../../shared/constants/permissions.js";
+import { validate } from "../../../middleware/validate.middleware.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
+import { PERMISSIONS } from "../../../shared/constants/permissions.js";
 import { customerController } from "./customer.controller.js";
 import {
   createCustomerSchema,

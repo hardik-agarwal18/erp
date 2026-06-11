@@ -16,8 +16,8 @@ import organizationRoutes from "./domains/iam/organizations/organization.routes.
 import roleRoutes from "./domains/iam/roles/role.routes.js";
 import permissionRoutes from "./domains/iam/permissions/permission.routes.js";
 // import invitationRoutes from "./domains/iam/invitations/invitation.routes.js";
-import customerRoutes from "./modules/customers/customer.routes.js";
-import vendorRoutes from "./modules/vendors/vendor.routes.js";
+import customerRoutes from "./domains/contacts/customers/customer.routes.js";
+import vendorRoutes from "./domains/contacts/vendors/vendor.routes.js";
 import productRoutes from "./modules/products/product.routes.js";
 import inventoryRoutes from "./modules/inventory/inventory.routes.js";
 import invoiceRoutes from "./modules/invoices/invoice.routes.js";

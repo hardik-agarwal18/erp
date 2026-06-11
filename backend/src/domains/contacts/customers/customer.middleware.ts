@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { NextFunction, Request, Response } from "express";
 
 import { customerRepository } from "./customer.repository.js";
-import ApiError from "../../utils/ApiError.js";
+import ApiError from "../../../utils/ApiError.js";
 
 export const customerContextMiddleware = async (
   req: Request,

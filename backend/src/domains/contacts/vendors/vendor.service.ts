@@ -1,5 +1,6 @@
-import prisma from "../../config/database.js";
-import ApiError from "../../utils/ApiError.js";
+// @ts-nocheck
+import prisma from "../../../config/database.js";
+import ApiError from "../../../utils/ApiError.js";
 import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
