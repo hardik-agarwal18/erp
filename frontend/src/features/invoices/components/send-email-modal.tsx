@@ -50,7 +50,7 @@ export function SendEmailModal({
         <DialogHeader>
           <DialogTitle>Send Invoice via Email</DialogTitle>
           <DialogDescription>
-            Enter the recipient's email address. A PDF copy of the invoice will be attached.
+            Enter the recipient&apos;s email address. A PDF copy of the invoice will be attached.
           </DialogDescription>
         </DialogHeader>
 

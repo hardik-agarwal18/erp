@@ -45,11 +45,11 @@ export function EmailHistoryModal({
                   <div className="flex justify-between items-center mb-1">
                     <p className="text-sm font-medium">{log.recipient}</p>
                     <span
-                      className={\`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
-                        \${log.status === "SENT" ? "bg-green-100 text-green-800" :
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium
+                        ${log.status === "SENT" ? "bg-green-100 text-green-800" :
                           log.status === "FAILED" ? "bg-red-100 text-red-800" :
                           "bg-yellow-100 text-yellow-800"}
-                      \`}
+                      `}
                     >
                       {log.status}
                     </span>
