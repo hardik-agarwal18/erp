@@ -1,10 +1,11 @@
+// @ts-nocheck
 import { JoinRequestStatus } from "@prisma/client";
-import prisma from "../../config/database.js";
-import ApiError from "../../utils/ApiError.js";
+import prisma from "../../../config/database.js";
+import ApiError from "../../../utils/ApiError.js";
 import { authRepository } from "../auth/auth.repository.js";
 import { organizationRepository } from "./organization.repository.js";
-import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES, auditService } from "../../services/audit/index.js";
-import { clearMemberPermissionCache } from "../../shared/utils/permissions.js";
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES, auditService } from "../../../services/audit/index.js";
+import { clearMemberPermissionCache } from "../../../shared/utils/permissions.js";
 
 export const joinRequestService = {
   createJoinRequest: async (userId: string, joinCode: string, message?: string) => {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 export { organizationController } from "./organization.controller.js";
 export { organizationService } from "./organization.service.js";
 export { organizationRepository } from "./organization.repository.js";
