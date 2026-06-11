@@ -11,7 +11,7 @@ import { apiRateLimiter } from "./middleware/rateLimit.middleware.js";
 import { errorMiddleware } from "./middleware/error.middleware.js";
 import { sanitizeMiddleware } from "./middleware/sanitize.middleware.js";
 import { idempotencyMiddleware } from "./middleware/idempotency.middleware.js";
-import authRoutes from "./modules/auth/auth.routes.js";
+import authRoutes from "./domains/iam/auth/auth.routes.js";
 import organizationRoutes from "./modules/organizations/organization.routes.js";
 import roleRoutes from "./modules/roles/role.routes.js";
 import permissionRoutes from "./modules/permissions/permission.routes.js";

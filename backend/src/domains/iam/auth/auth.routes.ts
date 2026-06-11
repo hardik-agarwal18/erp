@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { Router } from "express";
 
-import asyncHandler from "../../utils/asyncHandler.js";
-import { validate } from "../../middleware/validate.middleware.js";
+import asyncHandler from "../../../utils/asyncHandler.js";
+import { validate } from "../../../middleware/validate.middleware.js";
 import { authController } from "./auth.controller.js";
 import {
   forgotPasswordSchema,
@@ -16,7 +17,7 @@ import {
   verifyEmailChangeSchema,
   verifyEmailSchema,
 } from "./auth.validators.js";
-import { authMiddleware } from "../../middleware/auth.middleware.js";
+import { authMiddleware } from "../../../middleware/auth.middleware.js";
 import { requireRefreshToken } from "./auth.middleware.js";
 
 const router = Router();

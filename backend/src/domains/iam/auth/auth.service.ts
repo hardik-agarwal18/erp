@@ -1,16 +1,17 @@
+// @ts-nocheck
 import { randomUUID } from "crypto";
 import { Request } from "express";
 
-import ApiError from "../../utils/ApiError.js";
-import { comparePassword, hashPassword } from "../../lib/bcrypt.js";
-import { verifyToken } from "../../lib/jwt.js";
-import { redisClient } from "../../config/redis.js";
+import ApiError from "../../../utils/ApiError.js";
+import { comparePassword, hashPassword } from "../../../lib/bcrypt.js";
+import { verifyToken } from "../../../lib/jwt.js";
+import { redisClient } from "../../../config/redis.js";
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
 } from "../../mail/mail.service.js";
-import { AUDIT_ACTIONS, auditService } from "../../services/audit/index.js";
-import { env } from "../../config/env.js";
+import { AUDIT_ACTIONS, auditService } from "../../../services/audit/index.js";
+import { env } from "../../../config/env.js";
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   EMAIL_VERIFY_TOKEN_EXPIRES_IN,

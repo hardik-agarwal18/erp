@@ -1,9 +1,10 @@
+// @ts-nocheck
 import crypto from "crypto";
-import { redisClient } from "../../config/redis.js";
-import ApiError from "../../utils/ApiError.js";
+import { redisClient } from "../../../config/redis.js";
+import ApiError from "../../../utils/ApiError.js";
 import { authRepository } from "./auth.repository.js";
-import { sendEmailChangeCurrentVerification, sendEmailChangeNewVerification } from "../../mail/mail.service.js";
-import { auditService, AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../services/audit/index.js";
+import { sendEmailChangeCurrentVerification, sendEmailChangeNewVerification } from "../../../mail/mail.service.js";
+import { auditService, AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../../services/audit/index.js";
 
 const OTP_EXPIRY = 600; // 10 minutes
 

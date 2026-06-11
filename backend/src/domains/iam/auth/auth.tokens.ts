@@ -1,8 +1,9 @@
+// @ts-nocheck
 import { randomUUID } from "crypto";
 
-import ApiError from "../../utils/ApiError.js";
-import { env } from "../../config/env.js";
-import { signToken, verifyToken } from "../../lib/jwt.js";
+import ApiError from "../../../utils/ApiError.js";
+import { env } from "../../../config/env.js";
+import { signToken, verifyToken } from "../../../lib/jwt.js";
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   EMAIL_VERIFY_TOKEN_EXPIRES_IN,

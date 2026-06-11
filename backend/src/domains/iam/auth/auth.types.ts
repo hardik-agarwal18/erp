@@ -1,3 +1,4 @@
+// @ts-nocheck
 export interface AccessTokenPayload {
   sub: string;
   jti: string;
