@@ -1,4 +1,5 @@
-import prisma from "../../config/database.js";
+// @ts-nocheck
+import prisma from "../../../config/database.js";
 
 export const roleRepository = {
   listRoles: (

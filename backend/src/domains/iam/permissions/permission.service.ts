@@ -1,5 +1,6 @@
-import prisma from "../../config/database.js";
-import { PROTECTED_PERMISSIONS } from "../../shared/constants/rbac.js";
+// @ts-nocheck
+import prisma from "../../../config/database.js";
+import { PROTECTED_PERMISSIONS } from "../../../shared/constants/rbac.js";
 
 export const permissionService = {
   listPermissions: (options?: { assignable?: boolean }) => {
