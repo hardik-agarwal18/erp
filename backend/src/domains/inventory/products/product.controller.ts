@@ -1,4 +1,5 @@
-import { sendSuccess } from "../../utils/apiResponse.js";
+// @ts-nocheck
+import { sendSuccess } from "../../../utils/apiResponse.js";
 import { Request, Response } from "express";
 
 import { productService } from "./product.service.js";

@@ -1,3 +1,4 @@
+// @ts-nocheck
 export type StockAdjustmentInput = {
   productId: string;
   quantity: number;

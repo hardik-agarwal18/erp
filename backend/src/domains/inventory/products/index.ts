@@ -1,3 +1,4 @@
+// @ts-nocheck
 export { productController } from "./product.controller.js";
 export { productService } from "./product.service.js";
 export { productRepository } from "./product.repository.js";

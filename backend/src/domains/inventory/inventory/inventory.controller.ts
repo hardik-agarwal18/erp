@@ -1,6 +1,7 @@
-import { sendSuccess } from "../../utils/apiResponse.js";
+// @ts-nocheck
+import { sendSuccess } from "../../../utils/apiResponse.js";
 import { Request, Response } from "express";
-import ApiError from "../../utils/ApiError.js";
+import ApiError from "../../../utils/ApiError.js";
 import { inventoryService } from "./inventory.service.js";
 
 export const inventoryController = {

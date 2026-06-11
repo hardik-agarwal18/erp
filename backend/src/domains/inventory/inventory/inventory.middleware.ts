@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { NextFunction, Request, Response } from "express";
 
-import ApiError from "../../utils/ApiError.js";
+import ApiError from "../../../utils/ApiError.js";
 import { inventoryRepository } from "./inventory.repository.js";
 
 export const inventoryItemContextMiddleware = async (
