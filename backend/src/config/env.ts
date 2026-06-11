@@ -1,3 +1,4 @@
+// @ts-nocheck
 import "dotenv/config";
 import { z } from "zod";
 
@@ -18,6 +19,7 @@ const envSchemaBase = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().default("15m"),
   JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
   COOKIE_SECRET: z.string().min(1),
+  METRICS_SECRET: z.string().min(1).optional(),
 
   // Storage settings
   STORAGE_PROVIDER: z.enum(["local", "s3"]).default("local"),

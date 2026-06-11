@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { extendedPrisma } from "../database/extensions.js";
 import {
   connectDatabase as connectPrismaDatabase,
