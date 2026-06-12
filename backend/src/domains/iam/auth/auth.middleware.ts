@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import ApiError from "../../../utils/ApiError.js";
-import { REFRESH_COOKIE_NAME } from "./auth.constants.js";
+import { CSRF_COOKIE_NAME, REFRESH_COOKIE_NAME } from "./auth.constants.js";
 
 export const requireRefreshToken = (
   req: Request,
@@ -13,10 +13,11 @@ export const requireRefreshToken = (
     return next(new ApiError(401, "Refresh token missing"));
   }
 
-  const csrf = req.headers["x-csrf-token"] as string | undefined;
+  const csrfHeader = req.headers["x-csrf-token"] as string | undefined;
+  const csrfCookie = req.cookies?.[CSRF_COOKIE_NAME];
 
-  if (!csrf) {
-    return next(new ApiError(403, "CSRF token missing"));
+  if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
+    return next(new ApiError(403, "Invalid CSRF token"));
   }
 
   return next();
