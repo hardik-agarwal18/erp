@@ -1,8 +1,14 @@
-# Finance Module (Transactions, Payments & Taxes)
+# Finance Module (Transactions, Payments, Taxes & Expenses)
 
-**Locations:** `src/modules/transactions/`, `src/modules/payments/`, `src/modules/taxes/`
+**Locations:**
+- `src/domains/financials/transactions/`
+- `src/domains/financials/payments/`
+- `src/domains/financials/taxes/`
+- `src/domains/financials/expenses/`
 
-Manages financial tracking: transactions (General Ledger entries), incoming/outgoing payments against invoices, and dynamic tax rules.
+Manages financial tracking: transactions (General Ledger entries read-only view), incoming/outgoing payments against invoices, dynamic tax rules, and expense recording.
+
+> **Related modules:** Double-entry accounting (Chart of Accounts, Journal Entries, Trial Balance) is documented in [22-accounting-module.md](./22-accounting-module.md). Purchasing (Purchase Orders, Vendor Invoices) is in [29-purchasing-module.md](./29-purchasing-module.md).
 
 ---
 

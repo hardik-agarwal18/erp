@@ -1,8 +1,8 @@
-# Inventory Module
+# Inventory Module (Core)
 
-**Location:** `src/modules/inventory/`
+**Location:** `src/domains/inventory/inventory/`
 
-Tracks stock levels, movements, adjustments, and warehouse transfers for physical products.
+Tracks stock levels, movements, and manual adjustments at the product level (non-godown-aware). This is the _legacy_ core inventory module that predates the godown-aware architecture. New operations (GRN, Journals, Challans) use godown-scoped `InventoryItem` records directly.
 
 ---
 
@@ -10,16 +10,18 @@ Tracks stock levels, movements, adjustments, and warehouse transfers for physica
 
 | File | Purpose |
 |---|---|
-| `inventory.service.ts` | Stock calculation and adjustment logic with transactions |
+| `inventory.service.ts` | Stock adjustment/transfer logic with Prisma transactions |
 | `inventory.controller.ts` | HTTP request/response handling |
 | `inventory.routes.ts` | Express route definitions with permission guards |
-| `inventory.repository.ts` | Data access for `InventoryItem`, `InventoryMovement` and generic Transactions |
+| `inventory.repository.ts` | Data access for `InventoryItem`, `InventoryMovement`, `Transaction` |
 | `inventory.types.ts` | TypeScript interfaces for payloads |
 | `inventory.validators.ts` | Zod request schemas |
 
 ---
 
 ## Routes
+
+All routes are mounted at `/api/v1/inventory`.
 
 | Method | Path | Auth | Permission | Description |
 |---|---|---|---|---|
@@ -31,6 +33,8 @@ Tracks stock levels, movements, adjustments, and warehouse transfers for physica
 
 Legend: ✅ = `authMiddleware` + `tenantContextMiddleware`
 
+> **Note:** The idempotency middleware is applied globally to this route group in `app.ts`.
+
 ---
 
 ## Types (`inventory.types.ts`)
@@ -39,7 +43,7 @@ Legend: ✅ = `authMiddleware` + `tenantContextMiddleware`
 ```typescript
 {
   productId: string; // UUID
-  quantity: number;  // Can be negative for adjustment
+  quantity: number;  // Can be negative (deduction) or positive (addition)
   referenceId?: string;
 }
 ```
@@ -77,7 +81,7 @@ Legend: ✅ = `authMiddleware` + `tenantContextMiddleware`
 ## Service Functions (`inventory.service.ts`)
 
 ### Internal Helpers
-- `assertPhysicalProduct(organizationId, productId)`: Verifies the product exists and `type === "PHYSICAL"`. Throws `400` if it's a SERVICE.
+- `assertPhysicalProduct(organizationId, productId)`: Verifies the product exists and `type === "PHYSICAL"`. Throws `400` if it's a SERVICE product.
 
 ### `inventoryService.listItems(organizationId, filters, query)`
 Retrieves paginated stock on hand for the organization's physical products. Includes product details.
@@ -136,3 +140,14 @@ Direct Prisma queries rather than using `BaseRepository` due to the need for ato
 | `listMovements` | Returns 200 OK with paginated movement logs |
 | `adjustStock` | Returns 201 Created with `{ item, movement }` |
 | `transferStock` | Returns 200 OK with `{ item, movement }` |
+
+---
+
+## Related Modules
+
+For more advanced inventory operations, see:
+- [Godowns Module](./15-godowns-module.md) – Warehouse management
+- [GRN Module](./16-grn-module.md) – Goods receipt with godown-awareness
+- [Delivery Challans Module](./17-delivery-challans-module.md) – Dispatch with serial/batch tracking
+- [Stock Journals Module](./18-stock-journals-module.md) – Inter-godown transfers
+- [Stock Verifications Module](./19-stock-verifications-module.md) – Physical count & variance reconciliation

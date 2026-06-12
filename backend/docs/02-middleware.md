@@ -108,3 +108,44 @@ Recursively sanitizes all string values in `req.body`, `req.query`, and `req.par
 - Trims whitespace
 
 Handles nested objects and arrays.
+
+---
+
+## `idempotency.middleware.ts` – Idempotency Protection
+
+### `idempotencyMiddleware(req, res, next)`
+Prevents duplicate processing of identical requests for critical write operations (inventory, invoices, payments).
+
+**Flow:**
+1. Reads `Idempotency-Key` header from request.
+2. If key present: checks Redis for a cached response under `idempotency:{key}`.
+3. If cached: returns the cached response immediately (prevents re-processing).
+4. If not cached: proceeds normally and caches the response before sending.
+5. If no key: passes through without idempotency protection.
+
+Applied globally to `/api/v1/inventory`, `/api/v1/invoices`, and `/api/v1/payments` in `app.ts`.
+
+---
+
+## `cache.middleware.ts` – Response Caching
+
+### `cacheMiddleware(ttlSeconds?)`
+Factory function returning middleware that caches successful GET responses in Redis.
+
+**Flow:**
+1. On request: checks Redis cache key derived from request path + query.
+2. Cache hit: returns cached JSON response with `X-Cache: HIT` header.
+3. Cache miss: proceeds, intercepts response, stores in Redis with TTL, returns with `X-Cache: MISS` header.
+
+**Default TTL:** Configurable (default varies by route).
+
+---
+
+## `metrics.middleware.ts` – Prometheus Auth
+
+### `metricsAuth(req, res, next)`
+Basic authentication guard for the `/metrics` Prometheus scrape endpoint.
+
+- Validates `Authorization: Basic {base64(user:pass)}` header against `METRICS_USER` and `METRICS_PASSWORD` env vars.
+- Returns `401` if credentials missing or invalid.
+- Used only on `GET /metrics` route in `app.ts`.
