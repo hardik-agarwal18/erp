@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response } from "express";
 import { getAggregatedQueueMetrics } from "./monitor.js";
 import logger from "../config/logger.js";

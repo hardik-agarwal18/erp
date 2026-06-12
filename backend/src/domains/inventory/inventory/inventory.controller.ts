@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { sendSuccess } from "../../../utils/apiResponse.js";
 import { Request, Response } from "express";
 import ApiError from "../../../utils/ApiError.js";

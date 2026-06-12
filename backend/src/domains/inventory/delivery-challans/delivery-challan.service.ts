@@ -1,5 +1,5 @@
-// @ts-nocheck
-import ApiError from "../../../../utils/ApiError.js";
+
+import ApiError from "../../../utils/ApiError.js";
 import { challanRepository } from "./delivery-challan.repository.js";
 import { CreateDeliveryChallanInput, DeliveryChallanFilters } from "./delivery-challan.types.js";
 import {
@@ -7,7 +7,7 @@ import {
   AUDIT_ENTITY_TYPES,
   auditService,
 } from "../../../services/audit/index.js";
-import prisma from "../../../../config/database.js";
+import prisma from "../../../config/database.js";
 
 export const challanService = {
   create: async (organizationId: string, actorUserId: string, payload: CreateDeliveryChallanInput) => {
@@ -38,7 +38,7 @@ export const challanService = {
   },
 
   dispatch: async (id: string, organizationId: string, actorUserId: string, payload?: any) => {
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       const challan = await tx.deliveryChallan.findFirst({
         where: { id, organizationId, deletedAt: null },
         include: { items: true },

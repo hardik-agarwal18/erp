@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type InvoiceItemInput = {
   productId: string;
   quantity: number;

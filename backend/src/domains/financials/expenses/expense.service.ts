@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import logger from "../../../config/logger.js";
 import ApiError from "../../../utils/ApiError.js";
@@ -6,7 +6,7 @@ import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../services/audit/index.js";
+} from "../../../services/audit/index.js";
 import { expenseRepository } from "./expense.repository.js";
 import { CreateExpenseInput } from "./expense.types.js";
 

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import { CreateApprovalTemplateInput } from "./approvals.types.js";
 import { ApprovalStatus } from "@prisma/client";

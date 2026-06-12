@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { randomUUID } from "crypto";
 import { Request } from "express";
 
@@ -9,7 +9,7 @@ import { redisClient } from "../../../config/redis.js";
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,
-} from "../../mail/mail.service.js";
+} from "../../../mail/mail.service.js";
 import { AUDIT_ACTIONS, auditService } from "../../../services/audit/index.js";
 import { env } from "../../../config/env.js";
 import {

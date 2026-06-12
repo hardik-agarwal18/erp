@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { NextFunction, Request, Response } from "express";
 
 import { customerRepository } from "./customer.repository.js";

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import { BaseRepository } from "../../../database/base.repository.js";
 import { parsePagination } from "../../../shared/utils/pagination.js";

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateExpenseInput = {
   vendorId?: string;
   category:

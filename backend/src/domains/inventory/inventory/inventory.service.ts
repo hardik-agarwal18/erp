@@ -1,11 +1,11 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import ApiError from "../../../utils/ApiError.js";
 import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../../shared/services/audit/index.js";
+} from "../../../services/audit/index.js";
 import { inventoryRepository } from "./inventory.repository.js";
 import {
   InventoryFilters,
@@ -72,6 +72,7 @@ export const inventoryService = {
         tx,
         organizationId,
         payload.productId,
+        payload.godownId,
       );
 
       let item = existingItem;
@@ -84,6 +85,7 @@ export const inventoryService = {
           tx,
           organizationId,
           payload.productId,
+          payload.godownId,
           payload.quantity,
         );
       } else {
@@ -100,6 +102,7 @@ export const inventoryService = {
           tx,
           organizationId,
           payload.productId,
+          payload.godownId,
         );
       }
 
@@ -112,6 +115,7 @@ export const inventoryService = {
         organizationId,
         {
           productId: payload.productId,
+          godownId: payload.godownId,
           type: "ADJUSTMENT",
           quantity: payload.quantity,
           referenceId: payload.referenceId,
@@ -174,6 +178,7 @@ export const inventoryService = {
         tx,
         organizationId,
         payload.productId,
+        payload.fromGodownId,
       );
 
       if (!item || Number(item.quantity) < payload.quantity) {
@@ -191,6 +196,7 @@ export const inventoryService = {
         tx,
         organizationId,
         payload.productId,
+        payload.fromGodownId,
       );
       if (!updatedItem) {
         throw new ApiError(500, "Unable to update inventory");
@@ -201,6 +207,7 @@ export const inventoryService = {
         organizationId,
         {
           productId: payload.productId,
+          godownId: payload.fromGodownId,
           type: "TRANSFER",
           quantity: payload.quantity,
           referenceId: payload.referenceId,

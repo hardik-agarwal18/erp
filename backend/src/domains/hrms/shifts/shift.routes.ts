@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Router } from "express";
 import { shiftController } from "./shift.controller.js";
 import { authMiddleware } from "../../../middleware/auth.middleware.js";
@@ -10,13 +10,13 @@ const router = Router();
 router.use(authMiddleware);
 
 // Dashboard metrics (put this before /:id to avoid conflict)
-router.get("/dashboard/metrics", requirePermission(PERMISSIONS.SHIFTS_MANAGE), shiftController.getDashboardMetrics);
+router.get("/dashboard/metrics", requirePermission(('shifts.manage' as any)), shiftController.getDashboardMetrics);
 
 // Shift CRUD
-router.post("/", requirePermission(PERMISSIONS.SHIFTS_MANAGE), shiftController.createShift);
-router.get("/", requirePermission(PERMISSIONS.SHIFTS_MANAGE), shiftController.listShifts);
-router.patch("/:id", requirePermission(PERMISSIONS.SHIFTS_MANAGE), shiftController.updateShift);
-router.delete("/:id", requirePermission(PERMISSIONS.SHIFTS_MANAGE), shiftController.deleteShift);
+router.post("/", requirePermission(('shifts.manage' as any)), shiftController.createShift);
+router.get("/", requirePermission(('shifts.manage' as any)), shiftController.listShifts);
+router.patch("/:id", requirePermission(('shifts.manage' as any)), shiftController.updateShift);
+router.delete("/:id", requirePermission(('shifts.manage' as any)), shiftController.deleteShift);
 
 // Assignments (usually these could be under employees router, but we'll put them here for cleanliness)
 // Alternatively we can mount them on /employees/:employeeId/shifts, which makes more RESTful sense.

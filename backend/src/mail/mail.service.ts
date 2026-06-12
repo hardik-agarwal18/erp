@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { env } from "../config/env.js";
 import { mailFrom } from "../config/mail.js";
 import prisma from "../config/database.js";

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Router } from "express";
 import { approvalsController } from "./approvals.controller.js";
 import { validate } from "../../../middleware/validate.middleware.js";

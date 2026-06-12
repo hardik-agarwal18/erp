@@ -1,10 +1,10 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import {
   DEFAULT_PERMISSIONS,
   MAX_CUSTOM_ROLES_PER_ORGANIZATION,
   PROTECTED_PERMISSIONS,
-} from "../../shared/constants/rbac.js";
+} from "../../../shared/constants/rbac.js";
 import { clearMembersPermissionCache } from "../../../shared/utils/permissions.js";
 import { slugify } from "../../../shared/utils/slug.js";
 import ApiError from "../../../utils/ApiError.js";
@@ -12,7 +12,7 @@ import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../services/audit/index.js";
+} from "../../../services/audit/index.js";
 
 import { roleRepository } from "./role.repository.js";
 

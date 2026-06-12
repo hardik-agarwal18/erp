@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateStockGroupInput = {
   name: string;
   description?: string;

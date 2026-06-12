@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { randomUUID } from "crypto";
 
 import ApiError from "../../../utils/ApiError.js";

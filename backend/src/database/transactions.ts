@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Prisma, InvoiceStatus, InventoryMovementType, PaymentMethod, ProductType, TransactionType } from "@prisma/client";
 
 import type { DatabaseTransactionClient } from "../config/database.js";

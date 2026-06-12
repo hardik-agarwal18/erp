@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { z } from "zod";
 
 const priceSchema = z.number().min(0);

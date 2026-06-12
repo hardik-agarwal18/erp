@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Prisma, PrismaClient } from "@prisma/client";
 
 import { env } from "../config/env.js";

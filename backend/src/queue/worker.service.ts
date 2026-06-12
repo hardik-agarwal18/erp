@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Worker } from "bullmq";
 import { queueConnection } from "./connection.js";
 import { QueueNames, MailJobPayload } from "./types.js";

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import { parsePagination } from "../../../shared/utils/pagination.js";
 import { TransactionFilters } from "./transaction.types.js";

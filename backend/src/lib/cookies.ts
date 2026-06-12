@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Response } from "express";
 
 import { env } from "../config/env.js";

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { sendSuccess } from "../../../utils/apiResponse.js";
 import { Request, Response } from "express";
 
@@ -51,7 +51,7 @@ export const organizationController = {
   },
 
   listAuditLogs: async (req: Request, res: Response) => {
-    const { auditRepository } = await import("../../services/audit/audit.repository.js");
+    const { auditRepository } = await import("../../../services/audit/audit.repository.js");
     const logs = await auditRepository.listOrganizationLogs(
       req.params.id as string,
       req.query,

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateDeliveryChallanItemInput = {
   productId: string;
   batchId?: string;

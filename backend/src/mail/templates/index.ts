@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 /**
  * Mail templates barrel export.
  */

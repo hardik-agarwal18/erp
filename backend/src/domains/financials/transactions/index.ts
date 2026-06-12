@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export { transactionController } from "./transaction.controller.js";
 export { transactionService } from "./transaction.service.js";
 export { transactionRepository } from "./transaction.repository.js";

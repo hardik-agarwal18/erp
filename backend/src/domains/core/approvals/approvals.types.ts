@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { ApprovalStatus, ApproverType } from "@prisma/client";
 
 export interface CreateApprovalTemplateInput {

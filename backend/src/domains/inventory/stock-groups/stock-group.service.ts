@@ -1,12 +1,12 @@
-// @ts-nocheck
-import ApiError from "../../../shared/utils/ApiError.js";
+
+import ApiError from "../../../utils/ApiError.js";
 import { stockGroupRepository } from "./stock-group.repository.js";
 import { CreateStockGroupInput, StockGroupFilters, UpdateStockGroupInput } from "./stock-group.types.js";
 import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../../shared/services/audit/index.js";
+} from "../../../services/audit/index.js";
 import prisma from "../../../config/database.js";
 
 export const stockGroupService = {

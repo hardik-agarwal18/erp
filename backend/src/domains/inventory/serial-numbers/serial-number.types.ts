@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { SerialNumberStatus } from "@prisma/client";
 
 export interface SerialNumberFilters {

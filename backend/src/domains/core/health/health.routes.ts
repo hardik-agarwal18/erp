@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Router } from "express";
 import { getLiveness, getReadiness } from "./health.controller.js";
 

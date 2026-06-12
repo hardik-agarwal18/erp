@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 
 const resolveDateRange = (startDate?: string, endDate?: string) => {

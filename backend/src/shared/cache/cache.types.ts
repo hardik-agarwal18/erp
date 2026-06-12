@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export interface CacheOptions {
   /** Time to live in seconds */
   ttl?: number;

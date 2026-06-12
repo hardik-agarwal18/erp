@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import type { Prisma } from "@prisma/client";
 import prisma from "../../../config/database.js";
 import type { DatabaseTransactionClient } from "../../../config/database.js";
@@ -7,7 +7,7 @@ import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../services/audit/index.js";
+} from "../../../services/audit/index.js";
 import { taxRepository } from "./tax.repository.js";
 import { CreateTaxInput, UpdateTaxInput } from "./tax.types.js";
 

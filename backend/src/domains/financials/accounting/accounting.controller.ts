@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response } from "express";
 import { accountingService } from "./accounting.service.js";
 

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import client from "prom-client";
 import { registry } from "./registry.js";
 
@@ -73,5 +73,34 @@ export const reportGenerationDurationSeconds = new client.Histogram({
   name: "report_generation_duration_seconds",
   help: "Time taken to generate report exports",
   labelNames: ["reportType"],
+  registers: [registry],
+});
+
+// Cache Metrics
+export const cacheHitsTotal = new client.Counter({
+  name: "cache_hits_total",
+  help: "Total number of cache hits",
+  labelNames: ["domain"],
+  registers: [registry],
+});
+
+export const cacheMissesTotal = new client.Counter({
+  name: "cache_misses_total",
+  help: "Total number of cache misses",
+  labelNames: ["domain"],
+  registers: [registry],
+});
+
+export const cacheSetTotal = new client.Counter({
+  name: "cache_set_total",
+  help: "Total number of cache sets",
+  labelNames: ["domain"],
+  registers: [registry],
+});
+
+export const cacheDeleteTotal = new client.Counter({
+  name: "cache_delete_total",
+  help: "Total number of cache deletes",
+  labelNames: ["domain"],
   registers: [registry],
 });

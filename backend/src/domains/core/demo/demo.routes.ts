@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Router } from "express";
 import { demoController } from "./demo.controller.js";
 import asyncHandler from "../../../utils/asyncHandler.js";

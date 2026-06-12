@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { JoinRequestStatus } from "@prisma/client";
 import prisma from "../../../config/database.js";
 import ApiError from "../../../utils/ApiError.js";

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import ApiError from "../../../utils/ApiError.js";
 import prisma from "../../../config/database.js";
 import { serialNumberRepository } from "./serial-number.repository.js";

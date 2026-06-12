@@ -1,5 +1,5 @@
-// @ts-nocheck
-import ApiError from "../../../shared/utils/ApiError.js";
+
+import ApiError from "../../../utils/ApiError.js";
 import { verificationRepository } from "./stock-verification.repository.js";
 import { CreateStockVerificationInput, CompleteStockVerificationInput, StockVerificationFilters } from "./stock-verification.types.js";
 import {

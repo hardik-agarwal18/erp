@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Router } from "express";
 import { accountingController } from "./accounting.controller.js";
 import { requireAuth } from "../../../middleware/auth.middleware.js";

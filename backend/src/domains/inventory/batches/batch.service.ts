@@ -1,8 +1,8 @@
-// @ts-nocheck
-import ApiError from "../../../../utils/ApiError.js";
+
+import ApiError from "../../../utils/ApiError.js";
 import { batchRepository } from "./batch.repository.js";
 import { BatchFilters, ExpiringBatchFilters, BatchTraceabilityResponse } from "./batch.types.js";
-import prisma from "../../../../config/database.js";
+import prisma from "../../../config/database.js";
 
 const getStatus = (expiryDate?: Date | null): "ACTIVE" | "EXPIRING" | "EXPIRED" => {
   if (!expiryDate) return "ACTIVE";
@@ -20,7 +20,7 @@ export const batchService = {
     const result = await batchRepository.list(organizationId, filters, query);
     
     // Map status
-    const mappedRows = result.rows.map(row => ({
+    const mappedRows = result.rows.map((row: any) => ({
       ...row,
       status: getStatus(row.expiryDate)
     }));
@@ -138,7 +138,7 @@ export const batchService = {
       orderBy: { createdAt: "desc" }
     });
 
-    return movements.map(m => ({
+    return movements.map((m: any) => ({
       date: m.createdAt,
       eventType: m.type,
       referenceId: m.referenceId || "Unknown",

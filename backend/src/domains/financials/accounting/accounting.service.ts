@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { accountingRepository } from "./accounting.repository.js";
 import ApiError from "../../../../utils/ApiError.js";
 import { CreateJournalEntryInput, TrialBalanceFilters } from "./accounting.types.js";

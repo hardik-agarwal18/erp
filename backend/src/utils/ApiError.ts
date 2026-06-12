@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 class ApiError extends Error {
   statusCode: number;
   details?: unknown;

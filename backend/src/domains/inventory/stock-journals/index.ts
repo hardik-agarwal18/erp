@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export * from "./stock-journal.types.js";
 export * from "./stock-journal.validators.js";
 export * from "./stock-journal.repository.js";

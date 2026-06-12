@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Prisma } from "@prisma/client";
 
 import prisma from "../../../config/database.js";
@@ -8,7 +8,7 @@ import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../services/audit/index.js";
+} from "../../../services/audit/index.js";
 import { pdfGenerationQueue } from "../../../queue/queue.service.js";
 import { invoiceRepository } from "./invoice.repository.js";
 import { CreateInvoiceInput, UpdateInvoiceInput } from "./invoice.types.js";

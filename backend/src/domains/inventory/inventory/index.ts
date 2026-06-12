@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export { inventoryController } from "./inventory.controller.js";
 export { inventoryService } from "./inventory.service.js";
 export { inventoryRepository } from "./inventory.repository.js";

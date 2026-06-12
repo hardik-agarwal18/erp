@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export { roleController } from "./role.controller.js";
 export { roleService } from "./role.service.js";
 export { roleRepository } from "./role.repository.js";

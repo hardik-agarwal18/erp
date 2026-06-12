@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { AccountType } from "@prisma/client";
 
 export interface CreateAccountInput {

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreatePaymentInput = {
   invoiceId: string;
   amount: number;

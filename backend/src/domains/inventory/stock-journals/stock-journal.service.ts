@@ -1,5 +1,5 @@
-// @ts-nocheck
-import ApiError from "../../../shared/utils/ApiError.js";
+
+import ApiError from "../../../utils/ApiError.js";
 import { journalRepository } from "./stock-journal.repository.js";
 import { CreateStockJournalInput, StockJournalFilters } from "./stock-journal.types.js";
 import {

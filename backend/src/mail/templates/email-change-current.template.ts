@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import type { MailTemplateResult, EmailChangeVerificationRequest } from "../mail.types.js";
 import { escapeHtml } from "../helpers/escape-html.js";
 import { buildBaseTemplate } from "../helpers/base-template.js";

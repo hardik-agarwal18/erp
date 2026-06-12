@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Prisma } from "@prisma/client";
 
 import prisma, {
@@ -104,11 +104,13 @@ export const inventoryRepository = {
     tx: DatabaseTransactionClient,
     organizationId: string,
     productId: string,
+    godownId?: string,
   ) => {
     return tx.inventoryItem.findFirst({
       where: {
         organizationId,
         productId,
+        ...(godownId ? { godownId } : {}),
         deletedAt: null,
       },
     });
@@ -117,12 +119,14 @@ export const inventoryRepository = {
     tx: DatabaseTransactionClient,
     organizationId: string,
     productId: string,
+    godownId: string,
     quantity: number,
   ) => {
     return tx.inventoryItem.create({
       data: {
         organizationId,
         productId,
+        godownId,
         quantity,
       },
     });
@@ -167,15 +171,17 @@ export const inventoryRepository = {
     payload: {
       productId: string;
       quantity: number;
+      godownId?: string;
       referenceId?: string;
-      type: "ADJUSTMENT" | "TRANSFER";
+      type: "ADJUSTMENT" | "TRANSFER" | "GRN_RECEIPT" | "DELIVERY_DISPATCH";
     },
   ) => {
     return tx.inventoryMovement.create({
       data: {
         organizationId,
         productId: payload.productId,
-        type: payload.type,
+        godownId: payload.godownId as string,
+        type: payload.type as any,
         quantity: payload.quantity,
         referenceId: payload.referenceId,
       },

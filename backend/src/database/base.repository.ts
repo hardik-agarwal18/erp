@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 type QueryWhere = Record<string, unknown>;
 type QueryOptions = {
   orderBy?: Record<string, unknown>;

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import "./monitoring/tracing.js";
 import app from "./app.js";
 

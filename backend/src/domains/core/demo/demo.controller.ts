@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response } from "express";
 import { demoService } from "./demo.service.js";
 import logger from "../../../config/logger.js";

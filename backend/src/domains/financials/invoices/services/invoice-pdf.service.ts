@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import PDFDocument from "pdfkit";
 import { invoiceService } from "../invoice.service.js";
 import { env } from "../../../../config/env.js";

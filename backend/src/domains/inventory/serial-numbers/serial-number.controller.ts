@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response, NextFunction } from "express";
 import { serialNumberService } from "./serial-number.service.js";
 

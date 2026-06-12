@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { redisClient } from "../../config/redis.js";
 import logger from "../../config/logger.js";
 import {
@@ -169,7 +169,7 @@ export class CacheService {
       // NOTE: KEYS command can be slow on large datasets, 
       // SCAN is preferred in production, but for targeted prefix matching it's usually acceptable if limited.
       // We will use SCAN for better performance in production.
-      let cursor = 0;
+      let cursor: any = 0;
       do {
         // @ts-ignore - node-redis scan syntax
         const result = await redisClient.scan(cursor, {

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateGRNItemInput = {
   productId: string;
   orderedQty?: number;
@@ -10,6 +10,7 @@ export type CreateGRNItemInput = {
   expiryDate?: Date | string;
   unitPrice: number;
   serialNumbers?: string[];
+  poItemId?: string;
 };
 
 export type CreateGRNInput = {
@@ -19,6 +20,7 @@ export type CreateGRNInput = {
   godownId: string;
   notes?: string;
   items: CreateGRNItemInput[];
+  purchaseOrderId?: string;
 };
 
 export type GRNFilters = {

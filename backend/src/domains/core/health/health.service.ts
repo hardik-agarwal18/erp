@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { prisma } from "../../../database/prisma.js";
 import { checkRedisHealth } from "../../../config/redis.js";
 import { storageService } from "../../../lib/storage/storage.service.js";

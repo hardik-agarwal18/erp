@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export const CACHE_CONSTANTS = {
   DEFAULT_TTL: parseInt(process.env.CACHE_DEFAULT_TTL || "300", 10),
   DASHBOARD_TTL: parseInt(process.env.CACHE_DASHBOARD_TTL || "60", 10),

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export interface CreateVendorInvoiceInput {
   vendorId: string;
   purchaseOrderId?: string;

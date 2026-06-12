@@ -1,4 +1,5 @@
-// @ts-nocheck
+type DemoSeedingJobPayload = { organizationId: string; organizationName: string; ownerId: string; industry: string; };
+
 import { Job } from "bullmq";
 // // import { any } from "../types.js";
 import { demoRepository } from "../../domains/core/demo/demo.repository.js";

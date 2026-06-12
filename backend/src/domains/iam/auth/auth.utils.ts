@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request } from "express";
 import { createHash } from "crypto";
 

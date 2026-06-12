@@ -1,11 +1,11 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import ApiError from "../../../utils/ApiError.js";
 import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../services/audit/index.js";
+} from "../../../services/audit/index.js";
 import { paymentRepository } from "./payment.repository.js";
 import { CreatePaymentInput } from "./payment.types.js";
 

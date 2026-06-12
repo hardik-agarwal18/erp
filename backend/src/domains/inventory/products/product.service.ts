@@ -1,11 +1,11 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import ApiError from "../../../utils/ApiError.js";
 import {
   AUDIT_ACTIONS,
   AUDIT_ENTITY_TYPES,
   auditService,
-} from "../../../shared/services/audit/index.js";
+} from "../../../services/audit/index.js";
 import { productRepository } from "./product.repository.js";
 import {
   CreateCategoryInput,
@@ -70,15 +70,7 @@ export const productService = {
         },
       });
 
-      if (payload.type === "PHYSICAL") {
-        await tx.inventoryItem.create({
-          data: {
-            organizationId,
-            productId: created.id,
-            quantity: 0,
-          },
-        });
-      }
+
 
       await auditService.record(
         {
@@ -130,20 +122,7 @@ export const productService = {
         },
       });
 
-      if (payload.type === "PHYSICAL") {
-        const existingItem = await tx.inventoryItem.findFirst({
-          where: { organizationId, productId },
-        });
-        if (!existingItem) {
-          await tx.inventoryItem.create({
-            data: {
-              organizationId,
-              productId,
-              quantity: 0,
-            },
-          });
-        }
-      }
+
 
       await auditService.record(
         {

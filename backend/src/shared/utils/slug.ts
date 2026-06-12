@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export const slugify = (value: string) => {
   return value
     .trim()

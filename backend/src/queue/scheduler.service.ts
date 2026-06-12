@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { cleanupQueue } from "./queue.service.js";
 import logger from "../config/logger.js";
 import { env } from "../config/env.js";

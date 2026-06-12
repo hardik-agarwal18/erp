@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateStockJournalItemInput = {
   productId: string;
   batchId?: string;

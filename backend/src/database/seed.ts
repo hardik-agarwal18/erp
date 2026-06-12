@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import "dotenv/config";
 
 import bcrypt from "bcrypt";

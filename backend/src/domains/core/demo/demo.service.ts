@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { randomUUID } from "crypto";
 import prisma from "../../../config/database.js";
 import { hashPassword } from "../../../lib/bcrypt.js";

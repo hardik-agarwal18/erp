@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateStockVerificationItemInput = {
   productId: string;
   batchId?: string;

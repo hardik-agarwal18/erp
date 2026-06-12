@@ -1,5 +1,5 @@
-// @ts-nocheck
-import ApiError from "../../../../utils/ApiError.js";
+
+import ApiError from "../../../utils/ApiError.js";
 import { godownRepository } from "./godown.repository.js";
 import { CreateGodownInput, GodownFilters, UpdateGodownInput } from "./godown.types.js";
 import {
@@ -7,7 +7,7 @@ import {
   AUDIT_ENTITY_TYPES,
   auditService,
 } from "../../../services/audit/index.js";
-import prisma from "../../../../config/database.js";
+import prisma from "../../../config/database.js";
 
 export const godownService = {
   create: async (organizationId: string, actorUserId: string, payload: CreateGodownInput) => {

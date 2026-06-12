@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma, { type DatabaseTransactionClient } from "../../../config/database.js";
 import { parsePagination } from "../../../shared/utils/pagination.js";
 import { SerialNumberFilters } from "./serial-number.types.js";

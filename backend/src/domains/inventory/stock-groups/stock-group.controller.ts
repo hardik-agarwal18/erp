@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response } from "express";
 import { sendSuccess } from "../../../utils/apiResponse.js";
 import { stockGroupService } from "./stock-group.service.js";
@@ -15,7 +15,7 @@ export const stockGroupController = {
 
   update: async (req: Request, res: Response) => {
     const stockGroup = await stockGroupService.update(
-      req.params.id,
+      req.params.id as string,
       req.organization!.id,
       req.user!.id,
       req.body
@@ -25,7 +25,7 @@ export const stockGroupController = {
 
   delete: async (req: Request, res: Response) => {
     await stockGroupService.delete(
-      req.params.id,
+      req.params.id as string,
       req.organization!.id,
       req.user!.id
     );
@@ -33,7 +33,7 @@ export const stockGroupController = {
   },
 
   getById: async (req: Request, res: Response) => {
-    const stockGroup = await stockGroupService.getById(req.params.id, req.organization!.id);
+    const stockGroup = await stockGroupService.getById(req.params.id as string, req.organization!.id);
     sendSuccess(res, { statusCode: 200, data: stockGroup });
   },
 

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma from "../../../../config/database.js";
 import { CreateVendorInvoiceInput } from "./vendor-invoices.types.js";
 import { VendorInvoiceStatus } from "@prisma/client";

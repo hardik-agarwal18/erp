@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { createClient, RedisClientType } from "redis";
 
 import { env } from "./env.js";

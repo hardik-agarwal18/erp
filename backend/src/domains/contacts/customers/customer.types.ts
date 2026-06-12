@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateCustomerInput = {
   name: string;
   email?: string;

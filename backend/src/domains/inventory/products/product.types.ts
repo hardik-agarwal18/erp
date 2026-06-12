@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateProductInput = {
   name: string;
   sku?: string;

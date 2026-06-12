@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { prisma } from "../../../../config/database.js";
 import { Prisma } from "@prisma/client";
 import { EmployeeFilters, DepartmentFilters, DesignationFilters } from "./employee.types.js";

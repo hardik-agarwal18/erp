@@ -1,8 +1,8 @@
-// @ts-nocheck
-import prisma from "../../../../config/database.js";
-import ApiError from "../../../../shared/utils/ApiError.js";
-import { auditService } from "../../../../shared/services/audit/audit.service.js";
-import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../../../shared/services/audit/audit.constants.js";
+
+import prisma from "../../../config/database.js";
+import ApiError from "../../../utils/ApiError.js";
+import { auditService } from "../../../services/audit/audit.service.js";
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../../services/audit/audit.constants.js";
 import { Prisma } from "@prisma/client";
 
 function isNightShiftStr(startTime: string, endTime: string): boolean {
@@ -50,7 +50,7 @@ export const shiftService = {
     await auditService.record({
       organizationId,
       userId: actorUserId,
-      action: AUDIT_ACTIONS.SHIFT_CREATED,
+      action: 'SHIFT_CREATED' as any,
       entityType: AUDIT_ENTITY_TYPES.SHIFT,
       entityId: shift.id,
       metadata: { name: shift.name },
@@ -100,7 +100,7 @@ export const shiftService = {
     await auditService.record({
       organizationId,
       userId: actorUserId,
-      action: AUDIT_ACTIONS.SHIFT_UPDATED,
+      action: 'SHIFT_UPDATED' as any,
       entityType: AUDIT_ENTITY_TYPES.SHIFT,
       entityId: shiftId,
       metadata: { changes: "Updated fields" },
@@ -150,7 +150,7 @@ export const shiftService = {
     await auditService.record({
       organizationId,
       userId: actorUserId,
-      action: AUDIT_ACTIONS.SHIFT_DELETED,
+      action: 'SHIFT_DELETED' as any,
       entityType: AUDIT_ENTITY_TYPES.SHIFT,
       entityId: shiftId,
     });
@@ -227,7 +227,7 @@ export const shiftService = {
     await auditService.record({
       organizationId,
       userId: actorUserId,
-      action: AUDIT_ACTIONS.SHIFT_ASSIGNED,
+      action: 'SHIFT_ASSIGNED' as any,
       entityType: AUDIT_ENTITY_TYPES.EMPLOYEE,
       entityId: employeeId,
       metadata: { shiftId, shiftName: shift.name, effectiveFrom },
@@ -274,7 +274,7 @@ export const shiftService = {
     const assignedCount = activeAssignments.length;
     const unassignedCount = Math.max(0, totalEmployees - assignedCount);
 
-    const nightShiftCount = activeAssignments.filter(a => a.shift.isNightShift).length;
+    const nightShiftCount = activeAssignments.filter((a: any) => a.shift.isNightShift).length;
 
     return {
       totalShifts,

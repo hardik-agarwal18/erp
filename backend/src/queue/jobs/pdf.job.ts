@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Job, Queue } from "bullmq";
 import PDFDocument from "pdfkit";
 import { PdfGenerationJobPayload, QueueNames } from "../types.js";

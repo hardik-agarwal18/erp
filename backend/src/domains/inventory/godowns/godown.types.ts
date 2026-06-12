@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type CreateGodownInput = {
   name: string;
   code?: string;

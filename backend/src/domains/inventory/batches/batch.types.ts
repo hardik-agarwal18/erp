@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export type BatchFilters = {
   search?: string;
   godownId?: string;

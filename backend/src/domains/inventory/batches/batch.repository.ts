@@ -1,5 +1,5 @@
-// @ts-nocheck
-import prisma from "../../../../config/database.js";
+
+import prisma from "../../../config/database.js";
 import { Prisma } from "@prisma/client";
 import { BatchFilters, ExpiringBatchFilters } from "./batch.types.js";
 

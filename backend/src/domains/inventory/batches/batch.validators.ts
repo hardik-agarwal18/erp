@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { z } from "zod";
 
 export const getBatchesSchema = z.object({

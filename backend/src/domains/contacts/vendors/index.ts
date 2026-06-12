@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export { vendorController } from "./vendor.controller.js";
 export { vendorService } from "./vendor.service.js";
 export { vendorRepository } from "./vendor.repository.js";

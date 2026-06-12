@@ -1,7 +1,7 @@
-// @ts-nocheck
+
 import { Prisma } from "@prisma/client";
-import prisma, { type DatabaseTransactionClient } from "../../../../config/database.js";
-import { parsePagination } from "../../../../shared/utils/pagination.js";
+import prisma, { type DatabaseTransactionClient } from "../../../config/database.js";
+import { parsePagination } from "../../../shared/utils/pagination.js";
 import { CreateGodownInput, GodownFilters, UpdateGodownInput } from "./godown.types.js";
 
 type DatabaseClient = DatabaseTransactionClient | typeof prisma;
@@ -75,7 +75,7 @@ export const godownRepository = {
         }),
         prisma.godown.count({ where }),
       ])
-      .then(([items, total]) => ({
+      .then(([items, total]: [any, number]) => ({
         items,
         total,
         page: pagination.page,

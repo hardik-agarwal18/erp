@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Job } from "bullmq";
 import logger from "../../config/logger.js";
 import { storageService } from "../../lib/storage/storage.service.js";

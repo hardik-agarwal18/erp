@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response } from "express";
 import { approvalsService } from "./approvals.service.js";
 import { sendSuccess } from "../../../utils/apiResponse.js";

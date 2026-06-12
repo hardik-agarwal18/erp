@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Prisma } from "@prisma/client";
 import prisma, { type DatabaseTransactionClient } from "../../../config/database.js";
 import { parsePagination } from "../../../shared/utils/pagination.js";

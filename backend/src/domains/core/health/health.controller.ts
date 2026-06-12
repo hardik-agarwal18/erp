@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response } from "express";
 import { getSystemHealth } from "./health.service.js";
 import logger from "../../../config/logger.js";

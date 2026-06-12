@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export { taxController } from "./tax.controller.js";
 export { taxService } from "./tax.service.js";
 export { taxRepository } from "./tax.repository.js";
