@@ -1,4 +1,4 @@
-import { apiClient, setStoredAccessToken } from "@/api/client";
+import { apiClient, setStoredAccessToken, setStoredCsrfToken } from "@/api/client";
 import { apiEndpoints } from "@/api/endpoints";
 import type { ApiResponse } from "@/api/types";
 import type { OrganizationMembership, Permission, SessionUser } from "@/types/app";
@@ -46,6 +46,7 @@ type SwitchWorkspaceResponse = {
 export async function login(payload: LoginPayload) {
   const response = await apiClient.post<ApiResponse<LoginResponse>>(apiEndpoints.auth.login, payload);
   setStoredAccessToken(response.data.data.accessToken);
+  setStoredCsrfToken(response.data.data.csrfToken);
   return response.data.data;
 }
 
@@ -72,17 +73,21 @@ export async function verifyEmailChange(payload: { currentEmailOtp: string; newE
 export async function logout() {
   await apiClient.post(apiEndpoints.auth.logout);
   setStoredAccessToken(null);
+  setStoredCsrfToken(null);
 }
 
 export async function logoutAll() {
   await apiClient.post(apiEndpoints.auth.logoutAll);
   setStoredAccessToken(null);
+  setStoredCsrfToken(null);
 }
 
 export async function refreshToken() {
   const response = await apiClient.post<ApiResponse<RefreshResponse>>(apiEndpoints.auth.refresh);
   const accessToken = response.data.data.accessToken;
+  const csrfToken = response.data.data.csrfToken;
   setStoredAccessToken(accessToken);
+  setStoredCsrfToken(csrfToken);
   return accessToken;
 }
 
@@ -120,6 +125,9 @@ export async function switchWorkspace(organizationId: string) {
   );
 
   setStoredAccessToken(response.data.data.accessToken);
+  if ((response.data.data as any).csrfToken) {
+    setStoredCsrfToken((response.data.data as any).csrfToken);
+  }
   return response.data.data;
 }
 

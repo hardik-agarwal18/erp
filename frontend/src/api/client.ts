@@ -38,6 +38,17 @@ function readStoredCsrfToken() {
   return match ? decodeURIComponent(match[2]) : null;
 }
 
+export function setStoredCsrfToken(csrfToken: string | null) {
+  if (!isBrowser) return;
+  if (csrfToken) {
+    // Store in a frontend cookie so it can be read across tabs and reloads, 
+    // avoiding localStorage while surviving the cross-domain limitation.
+    document.cookie = `csrfToken=${encodeURIComponent(csrfToken)}; path=/; max-age=604800; SameSite=Lax`;
+  } else {
+    document.cookie = `csrfToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  }
+}
+
 function shouldRefresh(error: AxiosError<ApiErrorPayload>) {
   const requestConfig = error.config;
   const requestUrl = requestConfig?.url ?? "";
