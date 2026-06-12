@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { configureApiClient, getStoredAccessToken, getStoredOrganizationId, setStoredAccessToken, setStoredOrganizationId } from "@/api/client";
+import { configureApiClient, getStoredAccessToken, getStoredOrganizationId, setStoredAccessToken, setStoredCsrfToken, setStoredOrganizationId } from "@/api/client";
 import { featurePermissions } from "@/constants/permissions";
 import * as authService from "@/services/auth.service";
 import type { FeatureKey, UserSession, Workspace } from "@/types/app";
@@ -88,6 +88,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const clearSession = useCallback(() => {
     setStoredAccessToken(null);
     setStoredOrganizationId(null);
+    setStoredCsrfToken(null);
     setSession(null);
     setWorkspaces([]);
     setWorkspaceId(null);
