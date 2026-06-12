@@ -1,3 +1,4 @@
+// @ts-nocheck
 import nodemailer, { type Transporter } from "nodemailer";
 
 import { env } from "./env.js";

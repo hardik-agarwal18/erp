@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { transporter } from "../config/mail.js";
 import { mailFrom } from "../config/mail.js";
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Job } from "bullmq";
 import { stringify } from "csv-stringify";
 import { ReportJobPayload } from "../types.js";

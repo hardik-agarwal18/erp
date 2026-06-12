@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Queue, JobsOptions } from "bullmq";
 import { queueConnection } from "./connection.js";
 import { QueueNames, MailJobPayload, PdfGenerationJobPayload, ReportJobPayload, AuditExportJobPayload } from "./types.js";

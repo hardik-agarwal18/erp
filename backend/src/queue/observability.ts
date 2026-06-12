@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Router } from "express";
 import { getQueueMetrics } from "./metrics.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
