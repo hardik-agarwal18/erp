@@ -27,7 +27,7 @@ import taxRoutes from "./domains/financials/taxes/tax.routes.js";
 import transactionRoutes from "./domains/financials/transactions/transaction.routes.js";
 import reportRoutes from "./domains/core/reports/report.routes.js";
 import accountingRoutes from "./domains/financials/accounting/accounting.routes.js";
-import demoRoutes from "./modules/demo/demo.routes.js";
+import demoRoutes from "./domains/core/demo/demo.routes.js";
 import godownRoutes from "./domains/inventory/godowns/godown.routes.js";
 import stockGroupRoutes from "./domains/inventory/stock-groups/stock-group.routes.js";
 import grnRoutes from "./domains/inventory/grn/grn.routes.js";
@@ -98,7 +98,7 @@ app.use("/api/v1/admin/queues", bullBoardAuth, bullBoardRouter);
 import queueObservabilityRoutes from "./queue/observability.js";
 app.use("/api/v1/queues", queueObservabilityRoutes);
 
-import healthRoutes from "./modules/health/health.routes.js";
+import healthRoutes from "./domains/core/health/health.routes.js";
 import { registry } from "./monitoring/registry.js";
 import { metricsAuth } from "./middleware/metrics.middleware.js";
 

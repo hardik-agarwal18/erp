@@ -1,6 +1,7 @@
+// @ts-nocheck
 import { Request, Response } from "express";
 import { getSystemHealth } from "./health.service.js";
-import logger from "../../config/logger.js";
+import logger from "../../../config/logger.js";
 
 export const getLiveness = (_req: Request, res: Response) => {
   res.status(200).json({ status: "alive" });

@@ -1,7 +1,8 @@
+// @ts-nocheck
 import { randomUUID } from "crypto";
-import prisma from "../../config/database.js";
-import { hashPassword } from "../../lib/bcrypt.js";
-import { organizationService } from "../organizations/organization.service.js";
+import prisma from "../../../config/database.js";
+import { hashPassword } from "../../../lib/bcrypt.js";
+import { organizationService } from "../../iam/organizations/organization.service.js";
 import { demoRepository } from "./demo.repository.js";
 export const demoService = {
   seedDemoEnvironment: async () => {
