@@ -36,7 +36,7 @@ export const reportController = {
   },
   exportReport: async (req: Request, res: Response) => {
     const { reportType, startDate, endDate, frequency } = req.body;
-    const { reportsQueue } = await import("../../queue/queue.service.js");
+    const { reportsQueue } = await import("../../../queue/queue.service.js");
     const job = await reportsQueue.add("export-report", {
       organizationId: req.organization!.id,
       userId: req.user!.id,
@@ -48,7 +48,7 @@ export const reportController = {
     sendSuccess(res, { statusCode: 202, data: { jobId: job.id } });
   },
   getExportStatus: async (req: Request, res: Response) => {
-    const { reportsQueue } = await import("../../queue/queue.service.js");
+    const { reportsQueue } = await import("../../../queue/queue.service.js");
     const job = await reportsQueue.getJob(req.params.jobId as string);
     if (!job) {
       return res.status(404).json({ success: false, message: "Export job not found" });

@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { organizationController } from "../../../src/modules/organizations/organization.controller.js";
-import { organizationService } from "../../../src/modules/organizations/organization.service.js";
+import { organizationController } from "../../../src/domains/iam/organizations/organization.controller.js";
+import { organizationService } from "../../../src/domains/iam/organizations/organization.service.js";
 
-jest.mock("../../../src/modules/organizations/organization.service.js");
+jest.mock("../../../src/domains/iam/organizations/organization.service.js");
 
 // We must mock auditRepository locally inside the test because it's dynamically imported in the controller
 jest.mock("../../../src/services/audit/audit.repository.js", () => ({

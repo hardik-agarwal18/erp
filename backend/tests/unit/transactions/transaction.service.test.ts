@@ -1,11 +1,11 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { transactionRepository } from "../../../src/modules/transactions/transaction.repository.js";
+import { transactionRepository } from "../../../src/domains/financials/transactions/transaction.repository.js";
 
-jest.mock("../../../src/modules/transactions/transaction.repository.js");
+jest.mock("../../../src/domains/financials/transactions/transaction.repository.js");
 
-import { transactionService } from "../../../src/modules/transactions/transaction.service.js";
+import { transactionService } from "../../../src/domains/financials/transactions/transaction.service.js";
 
 describe("transactionService", () => {
   beforeEach(() => {

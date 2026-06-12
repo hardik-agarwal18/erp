@@ -19,7 +19,7 @@ jest.mock("../../../src/config/env.js", () => ({
   },
 }));
 
-jest.mock("../../../src/modules/auth/auth.constants.js", () => ({
+jest.mock("../../../src/domains/iam/auth/auth.constants.js", () => ({
   ACCESS_TOKEN_EXPIRES_IN: 900,
   REFRESH_TOKEN_EXPIRES_IN: 604800,
   EMAIL_VERIFY_TOKEN_EXPIRES_IN: 86400,
@@ -35,7 +35,7 @@ import {
   generatePasswordResetToken,
   verifyAccessToken,
   verifyRefreshToken,
-} from "../../../src/modules/auth/auth.tokens.js";
+} from "../../../src/domains/iam/auth/auth.tokens.js";
 import ApiError from "../../../src/utils/ApiError.js";
 
 describe("auth.tokens", () => {

@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { vendorController } from "../../../src/modules/vendors/vendor.controller.js";
-import { vendorService } from "../../../src/modules/vendors/vendor.service.js";
+import { vendorController } from "../../../src/domains/contacts/vendors/vendor.controller.js";
+import { vendorService } from "../../../src/domains/contacts/vendors/vendor.service.js";
 
-jest.mock("../../../src/modules/vendors/vendor.service.js");
+jest.mock("../../../src/domains/contacts/vendors/vendor.service.js");
 
 describe("vendorController", () => {
   let req: Partial<Request>;

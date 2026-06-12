@@ -1,11 +1,11 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { invoiceRepository } from "../../../src/modules/invoices/invoice.repository.js";
+import { invoiceRepository } from "../../../src/domains/financials/invoices/invoice.repository.js";
 import { auditService } from "../../../src/services/audit/index.js";
 import { pdfGenerationQueue } from "../../../src/queue/queue.service.js";
 
-jest.mock("../../../src/modules/invoices/invoice.repository.js");
+jest.mock("../../../src/domains/financials/invoices/invoice.repository.js");
 jest.mock("../../../src/services/audit/index.js", () => ({
   AUDIT_ACTIONS: {
     INVOICE_CREATED: "invoice.created",
@@ -37,7 +37,7 @@ jest.mock("../../../src/config/database.js", () => {
   };
 });
 
-import { invoiceService } from "../../../src/modules/invoices/invoice.service.js";
+import { invoiceService } from "../../../src/domains/financials/invoices/invoice.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
 import prisma from "../../../src/config/database.js";
 

@@ -13,7 +13,7 @@ import {
   checkStorageHealth,
   checkQueueHealth,
   getSystemHealth,
-} from "../../../src/modules/health/health.service.js";
+} from "../../../src/domains/core/health/health.service.js";
 
 describe("healthService", () => {
 

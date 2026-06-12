@@ -1,4 +1,4 @@
-import { reportService } from "../../../src/modules/reports/report.service.js";
+import { reportService } from "../../../src/domains/core/reports/report.service.js";
 import { seedReportData } from "../../helpers/report.helper.js";
 import { createAuthenticatedUser } from "../../helpers/auth.helper.js";
 import { createOrganization } from "../../helpers/organization.helper.js";

@@ -1,15 +1,15 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { organizationRepository } from "../../../src/modules/organizations/organization.repository.js";
-import { authRepository } from "../../../src/modules/auth/auth.repository.js";
+import { organizationRepository } from "../../../src/domains/iam/organizations/organization.repository.js";
+import { authRepository } from "../../../src/domains/iam/auth/auth.repository.js";
 import { sendInvitationEmail } from "../../../src/mail/mail.service.js";
 import { auditService } from "../../../src/services/audit/index.js";
 import { clearMemberPermissionCache, clearMembersPermissionCache } from "../../../src/shared/utils/permissions.js";
 import { slugify } from "../../../src/shared/utils/slug.js";
 
-jest.mock("../../../src/modules/organizations/organization.repository.js");
-jest.mock("../../../src/modules/auth/auth.repository.js");
+jest.mock("../../../src/domains/iam/organizations/organization.repository.js");
+jest.mock("../../../src/domains/iam/auth/auth.repository.js");
 jest.mock("../../../src/mail/mail.service.js");
 jest.mock("../../../src/shared/utils/permissions.js");
 jest.mock("../../../src/shared/utils/slug.js");
@@ -69,7 +69,7 @@ jest.mock("../../../src/config/database.js", () => {
   };
 });
 
-import { organizationService } from "../../../src/modules/organizations/organization.service.js";
+import { organizationService } from "../../../src/domains/iam/organizations/organization.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
 import prisma from "../../../src/config/database.js";
 

@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { roleController } from "../../../src/modules/roles/role.controller.js";
-import { roleService } from "../../../src/modules/roles/role.service.js";
+import { roleController } from "../../../src/domains/iam/roles/role.controller.js";
+import { roleService } from "../../../src/domains/iam/roles/role.service.js";
 
-jest.mock("../../../src/modules/roles/role.service.js");
+jest.mock("../../../src/domains/iam/roles/role.service.js");
 
 describe("roleController", () => {
   let req: Partial<Request>;

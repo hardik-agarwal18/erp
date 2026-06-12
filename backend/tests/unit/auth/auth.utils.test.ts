@@ -14,7 +14,7 @@ import {
   buildVerificationUrl,
   buildPasswordResetUrl,
   buildInvitationUrl,
-} from "../../../src/modules/auth/auth.utils.js";
+} from "../../../src/domains/iam/auth/auth.utils.js";
 
 describe("auth.utils", () => {
   // ── hashToken ─────────────────────────────────────────────────────────────

@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { inventoryRepository } from "../../../src/modules/inventory/inventory.repository.js";
+import { inventoryRepository } from "../../../src/domains/inventory/inventory/inventory.repository.js";
 import { auditService } from "../../../src/services/audit/index.js";
 
-jest.mock("../../../src/modules/inventory/inventory.repository.js");
+jest.mock("../../../src/domains/inventory/inventory/inventory.repository.js");
 jest.mock("../../../src/services/audit/index.js", () => ({
   AUDIT_ACTIONS: {
     INVENTORY_ADJUSTED: "inventory.adjusted",
@@ -29,7 +29,7 @@ jest.mock("../../../src/config/database.js", () => {
   };
 });
 
-import { inventoryService } from "../../../src/modules/inventory/inventory.service.js";
+import { inventoryService } from "../../../src/domains/inventory/inventory/inventory.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
 import prisma from "../../../src/config/database.js";
 

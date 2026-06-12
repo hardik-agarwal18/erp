@@ -1,11 +1,11 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { authController } from "../../../src/modules/auth/auth.controller.js";
-import { authService } from "../../../src/modules/auth/auth.service.js";
+import { authController } from "../../../src/domains/iam/auth/auth.controller.js";
+import { authService } from "../../../src/domains/iam/auth/auth.service.js";
 import { setAuthCookies, clearAuthCookies } from "../../../src/lib/cookies.js";
 
-jest.mock("../../../src/modules/auth/auth.service.js");
+jest.mock("../../../src/domains/iam/auth/auth.service.js");
 jest.mock("../../../src/lib/cookies.js");
 
 import ApiError from "../../../src/utils/ApiError.js";

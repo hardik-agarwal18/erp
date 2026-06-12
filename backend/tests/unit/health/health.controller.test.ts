@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { getLiveness, getReadiness } from "../../../src/modules/health/health.controller.js";
-import { getSystemHealth } from "../../../src/modules/health/health.service.js";
+import { getLiveness, getReadiness } from "../../../src/domains/core/health/health.controller.js";
+import { getSystemHealth } from "../../../src/domains/core/health/health.service.js";
 
-jest.mock("../../../src/modules/health/health.service.js");
+jest.mock("../../../src/domains/core/health/health.service.js");
 
 describe("healthController", () => {
   let req: Partial<Request>;

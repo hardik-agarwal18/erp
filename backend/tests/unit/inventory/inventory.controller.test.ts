@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { inventoryController } from "../../../src/modules/inventory/inventory.controller.js";
-import { inventoryService } from "../../../src/modules/inventory/inventory.service.js";
+import { inventoryController } from "../../../src/domains/inventory/inventory/inventory.controller.js";
+import { inventoryService } from "../../../src/domains/inventory/inventory/inventory.service.js";
 
-jest.mock("../../../src/modules/inventory/inventory.service.js");
+jest.mock("../../../src/domains/inventory/inventory/inventory.service.js");
 
 describe("inventoryController", () => {
   let req: Partial<Request>;

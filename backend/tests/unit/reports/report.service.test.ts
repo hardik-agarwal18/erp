@@ -1,11 +1,11 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { reportRepository } from "../../../src/modules/reports/report.repository.js";
+import { reportRepository } from "../../../src/domains/core/reports/report.repository.js";
 
-jest.mock("../../../src/modules/reports/report.repository.js");
+jest.mock("../../../src/domains/core/reports/report.repository.js");
 
-import { reportService } from "../../../src/modules/reports/report.service.js";
+import { reportService } from "../../../src/domains/core/reports/report.service.js";
 
 describe("reportService", () => {
   beforeEach(() => {

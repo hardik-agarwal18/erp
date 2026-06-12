@@ -5,8 +5,8 @@ import { env } from "../../src/config/env.js";
 import {
   generateAccessToken,
   generateRefreshToken,
-} from "../../src/modules/auth/auth.tokens.js";
-import type { AccessTokenPayload, RefreshTokenPayload } from "../../src/modules/auth/auth.types.js";
+} from "../../src/domains/iam/auth/auth.tokens.js";
+import type { AccessTokenPayload, RefreshTokenPayload } from "../../src/domains/iam/auth/auth.types.js";
 import { verifyToken } from "../../src/lib/jwt.js";
 
 export const getCookieValue = (

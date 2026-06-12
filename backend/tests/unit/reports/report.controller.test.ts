@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { reportController } from "../../../src/modules/reports/report.controller.js";
-import { reportService } from "../../../src/modules/reports/report.service.js";
+import { reportController } from "../../../src/domains/core/reports/report.controller.js";
+import { reportService } from "../../../src/domains/core/reports/report.service.js";
 
-jest.mock("../../../src/modules/reports/report.service.js");
+jest.mock("../../../src/domains/core/reports/report.service.js");
 jest.mock("../../../src/queue/queue.service.js", () => ({
   reportsQueue: {
     add: jest.fn().mockResolvedValue({ id: "job1" }),

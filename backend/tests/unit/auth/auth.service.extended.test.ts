@@ -29,7 +29,7 @@ jest.mock("../../../src/lib/bcrypt.js", () => ({
   hashPassword: jest.fn(),
 }));
 
-jest.mock("../../../src/modules/auth/auth.repository.js", () => ({
+jest.mock("../../../src/domains/iam/auth/auth.repository.js", () => ({
   authRepository: {
     findUserByEmail: jest.fn(),
     findUserById: jest.fn(),
@@ -56,14 +56,14 @@ jest.mock("../../../src/modules/auth/auth.repository.js", () => ({
   },
 }));
 
-jest.mock("../../../src/modules/auth/auth.tokens.js", () => ({
+jest.mock("../../../src/domains/iam/auth/auth.tokens.js", () => ({
   generateAccessToken: jest.fn(),
   generateRefreshToken: jest.fn(),
   generateEmailVerificationToken: jest.fn(),
   generatePasswordResetToken: jest.fn(),
 }));
 
-jest.mock("../../../src/modules/auth/auth.utils.js", () => ({
+jest.mock("../../../src/domains/iam/auth/auth.utils.js", () => ({
   hashToken: jest.fn(),
   getRequestMetadata: jest.fn(),
   buildVerificationUrl: jest.fn(),
@@ -91,7 +91,7 @@ jest.mock("../../../src/services/audit/index.js", () => ({
   },
 }));
 
-jest.mock("../../../src/modules/auth/auth.constants.js", () => ({
+jest.mock("../../../src/domains/iam/auth/auth.constants.js", () => ({
   ACCESS_TOKEN_EXPIRES_IN: 900,
   REFRESH_TOKEN_EXPIRES_IN: 604800,
   EMAIL_VERIFY_TOKEN_EXPIRES_IN: 86400,
@@ -102,22 +102,22 @@ jest.mock("../../../src/modules/auth/auth.constants.js", () => ({
 
 import { verifyToken } from "../../../src/lib/jwt.js";
 import { comparePassword, hashPassword } from "../../../src/lib/bcrypt.js";
-import { authRepository } from "../../../src/modules/auth/auth.repository.js";
+import { authRepository } from "../../../src/domains/iam/auth/auth.repository.js";
 import {
   generateAccessToken,
   generateRefreshToken,
   generateEmailVerificationToken,
   generatePasswordResetToken,
-} from "../../../src/modules/auth/auth.tokens.js";
+} from "../../../src/domains/iam/auth/auth.tokens.js";
 import {
   hashToken,
   getRequestMetadata,
   buildVerificationUrl,
   buildPasswordResetUrl,
-} from "../../../src/modules/auth/auth.utils.js";
+} from "../../../src/domains/iam/auth/auth.utils.js";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../../../src/mail/mail.service.js";
 import { auditService } from "../../../src/services/audit/index.js";
-import { authService } from "../../../src/modules/auth/auth.service.js";
+import { authService } from "../../../src/domains/iam/auth/auth.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
 import { Request } from "express";
 

@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { productController } from "../../../src/modules/products/product.controller.js";
-import { productService } from "../../../src/modules/products/product.service.js";
+import { productController } from "../../../src/domains/inventory/products/product.controller.js";
+import { productService } from "../../../src/domains/inventory/products/product.service.js";
 
-jest.mock("../../../src/modules/products/product.service.js");
+jest.mock("../../../src/domains/inventory/products/product.service.js");
 
 describe("productController", () => {
   let req: Partial<Request>;

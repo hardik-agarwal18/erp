@@ -128,6 +128,8 @@ exports[`Phase 5B RBAC Permission Integrity should snapshot the owner permission
   "sales.create",
   "sales.update",
   "sales.delete",
+  "sales.send",
+  "sales.export",
   "purchasing.view",
   "purchasing.create",
   "purchasing.update",

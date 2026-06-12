@@ -24,7 +24,7 @@ jest.mock("pdfkit", () => {
   });
 });
 
-import { invoiceRepository } from "../../../src/modules/invoices/invoice.repository.js";
+import { invoiceRepository } from "../../../src/domains/financials/invoices/invoice.repository.js";
 import { storageService } from "../../../src/lib/storage/storage.service.js";
 
 import { mailQueue } from "../../../src/queue/queue.service.js";

@@ -9,7 +9,7 @@ jest.mock("../../../src/config/database.js", () => ({
   }
 }));
 
-import { permissionService } from "../../../src/modules/permissions/permission.service.js";
+import { permissionService } from "../../../src/domains/iam/permissions/permission.service.js";
 import prisma from "../../../src/config/database.js";
 
 describe("permissionService", () => {

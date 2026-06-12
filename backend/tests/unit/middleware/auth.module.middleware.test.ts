@@ -1,8 +1,8 @@
 import { jest } from "@jest/globals";
 import { Request, Response, NextFunction } from "express";
-import { requireRefreshToken } from "../../../src/modules/auth/auth.middleware.js";
+import { requireRefreshToken } from "../../../src/domains/iam/auth/auth.middleware.js";
 import ApiError from "../../../src/utils/ApiError.js";
-import { REFRESH_COOKIE_NAME } from "../../../src/modules/auth/auth.constants.js";
+import { REFRESH_COOKIE_NAME } from "../../../src/domains/iam/auth/auth.constants.js";
 
 function makeRes(): Partial<Response> {
   return {} as Partial<Response>;

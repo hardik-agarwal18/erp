@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { permissionController } from "../../../src/modules/permissions/permission.controller.js";
-import { permissionService } from "../../../src/modules/permissions/permission.service.js";
+import { permissionController } from "../../../src/domains/iam/permissions/permission.controller.js";
+import { permissionService } from "../../../src/domains/iam/permissions/permission.service.js";
 
-jest.mock("../../../src/modules/permissions/permission.service.js");
+jest.mock("../../../src/domains/iam/permissions/permission.service.js");
 
 describe("permissionController", () => {
   let req: Partial<Request>;

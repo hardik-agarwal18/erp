@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { customerRepository } from "../../../src/modules/customers/customer.repository.js";
+import { customerRepository } from "../../../src/domains/contacts/customers/customer.repository.js";
 import { auditService } from "../../../src/services/audit/index.js";
 
-jest.mock("../../../src/modules/customers/customer.repository.js");
+jest.mock("../../../src/domains/contacts/customers/customer.repository.js");
 jest.mock("../../../src/services/audit/index.js", () => ({
   AUDIT_ACTIONS: {
     CUSTOMER_CREATED: "customer.created",
@@ -37,7 +37,7 @@ jest.mock("../../../src/config/database.js", () => {
   };
 });
 
-import { customerService } from "../../../src/modules/customers/customer.service.js";
+import { customerService } from "../../../src/domains/contacts/customers/customer.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
 import prisma from "../../../src/config/database.js";
 

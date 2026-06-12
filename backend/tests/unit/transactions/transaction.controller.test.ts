@@ -1,10 +1,10 @@
 import { jest } from "@jest/globals";
 import { Request, Response } from "express";
 
-import { transactionController } from "../../../src/modules/transactions/transaction.controller.js";
-import { transactionService } from "../../../src/modules/transactions/transaction.service.js";
+import { transactionController } from "../../../src/domains/financials/transactions/transaction.controller.js";
+import { transactionService } from "../../../src/domains/financials/transactions/transaction.service.js";
 
-jest.mock("../../../src/modules/transactions/transaction.service.js");
+jest.mock("../../../src/domains/financials/transactions/transaction.service.js");
 
 describe("transactionController", () => {
   let req: Partial<Request>;

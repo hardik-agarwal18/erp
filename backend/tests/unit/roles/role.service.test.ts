@@ -1,12 +1,12 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { roleRepository } from "../../../src/modules/roles/role.repository.js";
+import { roleRepository } from "../../../src/domains/iam/roles/role.repository.js";
 import { clearMembersPermissionCache } from "../../../src/shared/utils/permissions.js";
 import { slugify } from "../../../src/shared/utils/slug.js";
 import { auditService } from "../../../src/services/audit/index.js";
 
-jest.mock("../../../src/modules/roles/role.repository.js");
+jest.mock("../../../src/domains/iam/roles/role.repository.js");
 jest.mock("../../../src/shared/utils/permissions.js");
 jest.mock("../../../src/shared/utils/slug.js");
 jest.mock("../../../src/services/audit/index.js", () => {
@@ -34,7 +34,7 @@ jest.mock("../../../src/config/database.js", () => {
   };
 });
 
-import { roleService } from "../../../src/modules/roles/role.service.js";
+import { roleService } from "../../../src/domains/iam/roles/role.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
 import prisma from "../../../src/config/database.js";
 

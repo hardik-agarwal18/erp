@@ -1,15 +1,15 @@
 import { jest } from "@jest/globals";
 
 // Mocking dependencies
-import { authRepository } from "../../../src/modules/auth/auth.repository.js";
+import { authRepository } from "../../../src/domains/iam/auth/auth.repository.js";
 import { redisClient } from "../../../src/config/redis.js";
 import { sendPasswordResetEmail, sendVerificationEmail } from "../../../src/mail/mail.service.js";
 import { auditService } from "../../../src/services/audit/index.js";
 import { comparePassword, hashPassword } from "../../../src/lib/bcrypt.js";
 import { verifyToken } from "../../../src/lib/jwt.js";
-import { generateAccessToken, generateEmailVerificationToken, generatePasswordResetToken, generateRefreshToken } from "../../../src/modules/auth/auth.tokens.js";
+import { generateAccessToken, generateEmailVerificationToken, generatePasswordResetToken, generateRefreshToken } from "../../../src/domains/iam/auth/auth.tokens.js";
 
-jest.mock("../../../src/modules/auth/auth.repository.js");
+jest.mock("../../../src/domains/iam/auth/auth.repository.js");
 jest.mock("../../../src/queue/connection.js", () => ({
   queueConnection: { duplicate: jest.fn().mockReturnThis() },
 }));
@@ -42,7 +42,7 @@ jest.mock("../../../src/services/audit/index.js", () => ({
 }));
 jest.mock("../../../src/lib/bcrypt.js");
 jest.mock("../../../src/lib/jwt.js");
-jest.mock("../../../src/modules/auth/auth.tokens.js");
+jest.mock("../../../src/domains/iam/auth/auth.tokens.js");
 jest.mock("../../../src/config/env.js", () => ({
   env: {
     EMAIL_VERIFY_SECRET: "test-secret",
@@ -50,7 +50,7 @@ jest.mock("../../../src/config/env.js", () => ({
     JWT_REFRESH_SECRET: "test-secret",
   }
 }));
-jest.mock("../../../src/modules/auth/auth.utils.js", () => ({
+jest.mock("../../../src/domains/iam/auth/auth.utils.js", () => ({
   hashToken: jest.fn().mockReturnValue("mocked-hash"),
   getRequestMetadata: jest.fn().mockReturnValue({ device: "TestAgent", ipAddress: "127.0.0.1" }),
   buildVerificationUrl: jest.fn().mockReturnValue("http://localhost/verify"),
@@ -58,7 +58,7 @@ jest.mock("../../../src/modules/auth/auth.utils.js", () => ({
   buildInvitationUrl: jest.fn().mockReturnValue("http://localhost/invite"),
 }));
 
-import { authService } from "../../../src/modules/auth/auth.service.js";
+import { authService } from "../../../src/domains/iam/auth/auth.service.js";
 import ApiError from "../../../src/utils/ApiError.js";
 
 describe("authService", () => {

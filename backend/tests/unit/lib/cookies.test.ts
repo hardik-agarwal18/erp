@@ -6,7 +6,7 @@ jest.mock("../../../src/config/env.js", () => ({
   env: { NODE_ENV: "production" },
 }));
 
-jest.mock("../../../src/modules/auth/auth.constants.js", () => ({
+jest.mock("../../../src/domains/iam/auth/auth.constants.js", () => ({
   REFRESH_COOKIE_NAME: "refreshToken",
   CSRF_COOKIE_NAME: "csrfToken",
   REFRESH_TOKEN_EXPIRES_IN: 604800, // 7 days in seconds

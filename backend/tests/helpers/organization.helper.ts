@@ -1,4 +1,4 @@
-import { organizationService } from "../../src/modules/organizations/organization.service.js";
+import { organizationService } from "../../src/domains/iam/organizations/organization.service.js";
 import { prisma } from "../setup/testDb.js";
 
 export const createOrganization = async (
