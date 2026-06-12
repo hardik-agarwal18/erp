@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 
 import ApiError from "../../../utils/ApiError.js";
-import { REFRESH_COOKIE_NAME } from "./auth.constants.js";
+import { CSRF_COOKIE_NAME, REFRESH_COOKIE_NAME } from "./auth.constants.js";
 
 export const requireRefreshToken = (
   req: Request,
