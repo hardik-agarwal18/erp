@@ -3,7 +3,7 @@
 import type { ComponentType } from "react";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { Activity, ArrowLeftRight, BarChart3, Boxes, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star, X } from "lucide-react";
+import { Activity, ArrowLeftRight, BarChart3, Boxes, Briefcase, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star, X } from "lucide-react";
 
 import { appConfig } from "@/config/app-config";
 import { cn } from "@/lib/utils";
@@ -61,6 +61,15 @@ const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
       { label: "Vendor Directory", href: "/vendors", icon: Truck, feature: "vendors" },
       { label: "Procurement", href: "/purchases", icon: ShoppingCart, feature: "purchases" },
       { label: "Transactions", href: "/transactions", icon: ArrowLeftRight, feature: "transactions" },
+      {
+        label: "Human Resources",
+        icon: Briefcase,
+        feature: "hrms",
+        children: [
+          { label: "Dashboard", href: "/hrms" },
+          { label: "Directory", href: "/hrms/employees" },
+        ],
+      },
       { label: "Audit Logs", href: "/audit-logs", icon: Activity, feature: "audit_logs" },
       { label: "Taxes", href: "/taxes", icon: Settings2, feature: "taxes" },
       {

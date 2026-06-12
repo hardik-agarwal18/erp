@@ -94,4 +94,9 @@ export const apiEndpoints = {
     list: "/taxes",
     details: (taxId: string) => `/taxes/${taxId}`,
   },
+  hrms: {
+    dashboard: "/hrms/dashboard",
+    employees: "/hrms/employees",
+    employeeDetails: (employeeId: string) => `/hrms/employees/${employeeId}`,
+  },
 } as const;

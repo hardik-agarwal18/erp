@@ -49,7 +49,7 @@ export type NavigationItem = {
   feature: FeatureKey;
 };
 
-export type FeatureKey = "dashboard" | "customers" | "vendors" | "invoices" | "inventory" | "purchases" | "products" | "transactions" | "expenses" | "payments" | "reports" | "organizations" | "audit_logs" | "taxes";
+export type FeatureKey = "dashboard" | "customers" | "vendors" | "invoices" | "inventory" | "purchases" | "products" | "transactions" | "expenses" | "payments" | "reports" | "organizations" | "audit_logs" | "taxes" | "hrms";
 
 export type KpiMetric = {
   label: string;
@@ -338,4 +338,48 @@ export type Tax = {
   workspaceId: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export type EmployeeStatus = "ACTIVE" | "INACTIVE" | "TERMINATED" | "SUSPENDED" | "PROBATION";
+
+export type EmploymentType = "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERN" | "FREELANCE";
+
+export type Gender = "MALE" | "FEMALE" | "OTHER";
+
+export type Department = {
+  id: string;
+  name: string;
+  code?: string;
+  description?: string;
+  isActive: boolean;
+};
+
+export type Designation = {
+  id: string;
+  name: string;
+  level?: number;
+  description?: string;
+  isActive: boolean;
+};
+
+export type Employee = {
+  id: string;
+  employeeCode?: string;
+  firstName: string;
+  lastName: string;
+  officialEmail?: string;
+  personalEmail?: string;
+  phone?: string;
+  alternatePhone?: string;
+  dateOfBirth?: string;
+  gender?: Gender;
+  joiningDate: string;
+  confirmationDate?: string;
+  terminationDate?: string;
+  employmentType: EmploymentType;
+  status: EmployeeStatus;
+  isActive: boolean;
+  department?: Department;
+  designation?: Designation;
+  manager?: Employee;
 };
