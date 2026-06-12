@@ -7,7 +7,6 @@ import type { ApiErrorPayload } from "./types";
 const DEFAULT_TIMEOUT_MS = 15_000;
 const ACCESS_TOKEN_STORAGE_KEY = "pl.accessToken";
 const ACTIVE_ORGANIZATION_STORAGE_KEY = "pl.activeOrganizationId";
-const CSRF_COOKIE_NAME = "csrfToken";
 
 type AuthRuntimeConfig = {
   getAccessToken: () => string | null;
@@ -33,13 +32,10 @@ let refreshPromise: Promise<string | null> | null = null;
 
 const isBrowser = typeof window !== "undefined";
 
-function readCookie(name: string) {
-  if (!isBrowser) {
-    return null;
-  }
-
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
+function readStoredCsrfToken() {
+  if (!isBrowser) return null;
+  const match = document.cookie.match(new RegExp('(^| )csrfToken=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : null;
 }
 
 function shouldRefresh(error: AxiosError<ApiErrorPayload>) {
@@ -66,7 +62,7 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const accessToken = runtimeConfig.getAccessToken();
   const organizationId = runtimeConfig.getOrganizationId();
-  const csrfToken = readCookie(CSRF_COOKIE_NAME);
+  const csrfToken = readStoredCsrfToken();
 
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
@@ -76,7 +72,8 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     config.headers["x-organization-id"] = organizationId;
   }
 
-  if (csrfToken) {
+  const SAFE_METHODS = ["GET", "HEAD", "OPTIONS"];
+  if (csrfToken && config.method && !SAFE_METHODS.includes(config.method.toUpperCase())) {
     config.headers["x-csrf-token"] = csrfToken;
   }
 

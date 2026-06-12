@@ -13,10 +13,11 @@ export const requireRefreshToken = (
     return next(new ApiError(401, "Refresh token missing"));
   }
 
-  const csrf = req.headers["x-csrf-token"] as string | undefined;
+  const csrfHeader = req.headers["x-csrf-token"] as string | undefined;
+  const csrfCookie = req.cookies?.[CSRF_COOKIE_NAME];
 
-  if (!csrf) {
-    return next(new ApiError(403, "CSRF token missing"));
+  if (!csrfHeader || !csrfCookie || csrfHeader !== csrfCookie) {
+    return next(new ApiError(403, "Invalid CSRF token"));
   }
 
   return next();

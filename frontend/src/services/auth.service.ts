@@ -21,6 +21,7 @@ type ResetPasswordPayload = {
 
 type LoginResponse = {
   accessToken: string;
+  csrfToken: string;
   user: SessionUser;
   organizations: OrganizationMembership[];
   activeOrganization: OrganizationMembership | null;
@@ -33,6 +34,7 @@ type MeResponse = SessionUser & {
 
 type RefreshResponse = {
   accessToken: string;
+  csrfToken: string;
 };
 
 type SwitchWorkspaceResponse = {

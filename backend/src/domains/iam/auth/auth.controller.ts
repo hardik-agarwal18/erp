@@ -36,6 +36,7 @@ export const authController = {
       message: "Login successful",
       data: {
         accessToken,
+        csrfToken,           // returned in body so frontend can store cross-domain
         user: {
           id: user.id,
           name: user.name,
@@ -94,6 +95,7 @@ export const authController = {
       message: "Token refreshed",
       data: {
         accessToken: tokens.accessToken,
+        csrfToken: tokens.csrfToken,  // new CSRF token for the rotated session
       },
     });
   },
