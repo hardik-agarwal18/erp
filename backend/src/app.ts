@@ -35,7 +35,7 @@ import stockGroupRoutes from "./domains/inventory/stock-groups/stock-group.route
 // import journalRoutes from "./domains/inventory/stock-journals/stock-journal.routes.js";
 // import verificationRoutes from "./domains/inventory/stock-verifications/stock-verification.routes.js";
 import batchRoutes from "./domains/inventory/batches/batch.routes.js";
-// import serialRoutes from "./domains/inventory/serial-numbers/serial-number.routes.js";
+import serialRoutes from "./domains/inventory/serial-numbers/serial-number.routes.js";
 import employeeRoutes from "./domains/hrms/employees/employee.routes.js";
 import departmentRoutes from "./domains/hrms/employees/department.routes.js";
 import designationRoutes from "./domains/hrms/employees/designation.routes.js";
@@ -143,7 +143,7 @@ app.use("/api/v1/stock-groups", stockGroupRoutes);
 // app.use("/api/v1/stock-journals", journalRoutes);
 // app.use("/api/v1/stock-verifications", verificationRoutes);
 app.use("/api/v1/batches", batchRoutes);
-// app.use("/api/v1/serial-numbers", serialRoutes);
+app.use("/api/v1/serial-numbers", serialRoutes);
 app.use("/api/v1/employees", employeeRoutes);
 app.use("/api/v1/departments", departmentRoutes);
 app.use("/api/v1/designations", designationRoutes);
