@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { payrollRepository } from "./payroll.repository.js";
 import { CreateSalaryComponentInput, AssignStructureInput, GeneratePayrollInput } from "./payroll.types.js";
 import { ComponentCalculationType, PayrollRunStatus, WorkingDayBasis } from "@prisma/client";

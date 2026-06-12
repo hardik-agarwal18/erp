@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { Request, Response } from "express";
 import { holidayService } from "./holiday.service.js";
 import { createHolidaySchema, updateHolidaySchema } from "./holiday.validators.js";

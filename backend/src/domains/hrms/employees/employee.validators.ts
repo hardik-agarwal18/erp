@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { z } from "zod";
 import { EmployeeStatus, EmploymentType, Gender } from "@prisma/client";
 

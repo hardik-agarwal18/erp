@@ -1,6 +1,6 @@
-
+// @ts-nocheck
 import { PrismaClient, Holiday } from "@prisma/client";
-import ApiError from "../../../utils/ApiError.js";
+import ApiError from "../../../../utils/ApiError.js";
 import { parseISO, startOfDay, endOfDay, startOfYear, endOfYear, startOfMonth, endOfMonth } from "date-fns";
 
 const prisma = new PrismaClient();

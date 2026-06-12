@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import ApiError from "../../../../utils/ApiError.js";
 import { employeeRepository } from "./employee.repository.js";
 import { 

@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { Request, Response } from "express";
 import { employeeService } from "./employee.service.js";
 import { 

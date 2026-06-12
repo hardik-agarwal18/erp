@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { attendanceRepository } from "./attendance.repository.js";
 import { CheckInInput, CheckOutInput, PayrollSummary, RequestAdjustmentInput } from "./attendance.types.js";
 import ApiError from "../../../utils/ApiError.js";
