@@ -16,30 +16,35 @@ import { startScheduler } from "./queue/scheduler.service.js";
 import { closeQueues } from "./queue/queue.service.js";
 import { closeQueueConnection } from "./queue/connection.js";
 
+
 let server: ReturnType<typeof app.listen> | undefined;
 
 const startServer = async (): Promise<void> => {
+
   try {
+    // Bind the HTTP port FIRST so Render/cloud platforms detect it immediately
+    await new Promise<void>((resolve) => {
+      server = app.listen(env.PORT, () => {
+        logger.info(`Server running on port ${env.PORT}`);
+        resolve();
+      });
+    });
+
     // Redis
     await connectRedis();
     logger.info("Redis connected");
 
-    // SMTP
+    // SMTP (non-fatal — log and continue if not configured)
     const smtpReady = await verifyConnection();
-
     if (!smtpReady) {
-      logger.error("SMTP verification failed");
-      process.exit(1);
+      logger.warn("SMTP verification failed — email features will be unavailable");
     }
 
-    // Workers
+    // Workers & scheduler
     startWorkers();
     await startScheduler();
 
-    // HTTP Server
-    server = app.listen(env.PORT, () => {
-      logger.info(`Server running on port ${env.PORT}`);
-    });
+    logger.info("All services initialised successfully");
   } catch (error) {
     logger.error({ error }, "Application startup failed");
     process.exit(1);
@@ -47,6 +52,7 @@ const startServer = async (): Promise<void> => {
 };
 
 void startServer();
+
 
 const shutdown = async (signal: string): Promise<void> => {
   logger.info(`${signal} received, shutting down gracefully`);
