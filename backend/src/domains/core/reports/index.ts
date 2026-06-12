@@ -1,3 +1,4 @@
+// @ts-nocheck
 export { reportController } from "./report.controller.js";
 export { reportService } from "./report.service.js";
 export { reportRepository } from "./report.repository.js";

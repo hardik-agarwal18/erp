@@ -25,7 +25,7 @@ import paymentRoutes from "./domains/financials/payments/payment.routes.js";
 import expenseRoutes from "./domains/financials/expenses/expense.routes.js";
 import taxRoutes from "./domains/financials/taxes/tax.routes.js";
 import transactionRoutes from "./domains/financials/transactions/transaction.routes.js";
-import reportRoutes from "./modules/reports/report.routes.js";
+import reportRoutes from "./domains/core/reports/report.routes.js";
 import accountingRoutes from "./domains/financials/accounting/accounting.routes.js";
 import demoRoutes from "./modules/demo/demo.routes.js";
 import godownRoutes from "./domains/inventory/godowns/godown.routes.js";

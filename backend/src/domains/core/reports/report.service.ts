@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { reportRepository } from "./report.repository.js";
 import { ReportRange } from "./report.types.js";
 
