@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import prisma from "../../../config/database.js";
 import { ApplyForLeaveInput } from "./leaves.types.js";
 import { LeaveStatus } from "@prisma/client";

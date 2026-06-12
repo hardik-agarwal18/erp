@@ -1,5 +1,5 @@
-// @ts-nocheck
-import prisma from "../../../../config/database.js";
+
+import prisma from "../../../config/database.js";
 import { AttendanceStatus } from "@prisma/client";
 
 export const attendanceRepository = {
@@ -35,6 +35,7 @@ export const attendanceRepository = {
         checkIn,
         notes,
       },
+      include: { employee: true },
     });
   },
 
@@ -42,6 +43,7 @@ export const attendanceRepository = {
     return prisma.attendanceRecord.update({
       where: { id },
       data: updates,
+      include: { employee: true },
     });
   },
 

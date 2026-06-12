@@ -61,8 +61,9 @@ export const vendorInvoicesService = {
       const mismatchReasons: string[] = [];
 
       for (const invItem of invoice.items) {
-        if (!invItem.poItemId) continue;
-        const poItem = po.items.find(i => i.id === invItem.poItemId);
+        const poItemId = (invItem as any).poItemId;
+        if (!poItemId) continue;
+        const poItem = po.items.find(i => i.id === poItemId);
         if (!poItem) continue;
 
         const maxAllowedQty = Math.min(Number(poItem.quantity), Number(poItem.receivedQuantity));
@@ -83,9 +84,10 @@ export const vendorInvoicesService = {
     if (invoice.purchaseOrderId) {
       await prisma.$transaction(async (tx) => {
         for (const item of invoice.items) {
-          if (item.poItemId) {
+          const poItemId = (item as any).poItemId;
+          if (poItemId) {
             await tx.purchaseOrderItem.update({
-              where: { id: item.poItemId },
+              where: { id: poItemId },
               data: { billedQuantity: { increment: item.quantity } }
             });
           }

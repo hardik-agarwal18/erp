@@ -343,8 +343,8 @@ export const invoiceService = {
 
       // We need to use the default direct dispatcher for now, or the exported dispatcher from mailService
       // To avoid circular dependency, I'll import sendMail or the configured dispatcher
-      const { default: transporter } = await import("../../config/mail.js");
-      const { DirectMailDispatcher, defaultProvider, defaultProviderName } = await import("../../mail/mail.service.js");
+      const { default: transporter } = await import("../../../config/mail.js");
+      const { DirectMailDispatcher, defaultProvider, defaultProviderName } = await import("../../../mail/mail.service.js");
       
       const mailDispatcher = new DirectMailDispatcher(defaultProvider, defaultProviderName);
 
@@ -352,8 +352,8 @@ export const invoiceService = {
         to: email,
         invoiceNumber: invoice.invoiceNumber,
         customerName: invoice.customer.name,
-        amountDue: invoice.balance?.toString() ?? invoice.totalAmount.toString(),
-        organizationName: invoice.organization.name,
+        amountDue: invoice.totalAmount.toString(),
+        organizationName: invoice.organizationId,
         pdfBuffer,
       });
 

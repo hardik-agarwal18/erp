@@ -34,6 +34,7 @@ export const verificationRepository = {
         godownId: data.godownId,
         scheduledDate: data.scheduledDate,
         notes: data.notes,
+        status: "DRAFT",
         items: {
           create: data.items,
         },

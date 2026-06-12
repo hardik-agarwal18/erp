@@ -25,7 +25,7 @@ export const invoicePdfService = {
         // Header
         doc
           .fontSize(20)
-          .text(invoice.organization.name, 50, 50)
+          .text(invoice.organizationId, 50, 50)
           .fontSize(10)
           .text("INVOICE", 400, 50, { align: "right" });
 

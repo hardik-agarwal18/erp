@@ -177,7 +177,7 @@ export const approvalsService = {
       throw new ApiError(404, "Approval instance not found");
     }
 
-    if (instance.status !== ApprovalStatus.PENDING && instance.status !== ApprovalStatus.DRAFT) {
+    if (instance.status !== ApprovalStatus.PENDING) {
       throw new ApiError(400, `Cannot cancel instance in ${instance.status} status.`);
     }
 

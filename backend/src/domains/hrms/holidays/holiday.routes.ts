@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Router } from "express";
 import { holidayController } from "./holiday.controller.js";
 import { authMiddleware } from "../../../middleware/auth.middleware.js";
@@ -15,4 +14,4 @@ router.get("/:id", requirePermission(PERMISSIONS.HOLIDAYS_MANAGE), holidayContro
 router.patch("/:id", requirePermission(PERMISSIONS.HOLIDAYS_MANAGE), holidayController.updateHoliday);
 router.delete("/:id", requirePermission(PERMISSIONS.HOLIDAYS_MANAGE), holidayController.deleteHoliday);
 
-export { router as holidayRoutes };
+export default router

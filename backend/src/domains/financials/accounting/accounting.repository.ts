@@ -1,5 +1,5 @@
 
-import { prisma } from "../../../../config/database.js";
+import { prisma } from "../../../config/database.js";
 import { CreateAccountInput, CreateJournalEntryInput } from "./accounting.types.js";
 import { AccountType, Prisma } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";

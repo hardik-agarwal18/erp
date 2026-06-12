@@ -1,6 +1,5 @@
-// @ts-nocheck
+
 import { z } from "zod";
-import { AttendanceStatus } from "@prisma/client";
 
 export const checkInSchema = z.object({
   body: z.object({
@@ -22,7 +21,7 @@ export const requestAdjustmentSchema = z.object({
   body: z.object({
     employeeId: z.string().uuid(),
     date: z.string().datetime(),
-    newStatus: z.nativeEnum(AttendanceStatus),
+    newStatus: z.enum(["PRESENT", "ABSENT", "LATE", "HALF_DAY"]),
     newCheckIn: z.string().datetime().optional(),
     newCheckOut: z.string().datetime().optional(),
     reason: z.string().min(5),

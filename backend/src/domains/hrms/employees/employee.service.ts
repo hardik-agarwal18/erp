@@ -1,5 +1,5 @@
-// @ts-nocheck
-import ApiError from "../../../../utils/ApiError.js";
+
+import ApiError from "../../../utils/ApiError.js";
 import { employeeRepository } from "./employee.repository.js";
 import { 
   CreateEmployeeInput, 
@@ -12,8 +12,8 @@ import {
   UpdateDesignationInput,
   DesignationFilters
 } from "./employee.types.js";
-import { prisma } from "../../../../config/database.js";
-import { auditService } from "../../../../services/audit/audit.service.js";
+import { prisma } from "../../../config/database.js";
+import { auditService } from "../../../services/audit/audit.service.js";
 
 export const employeeService = {
   // ----------------------------------------------------

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { payrollRepository } from "./payroll.repository.js";
 import { CreateSalaryComponentInput, AssignStructureInput, GeneratePayrollInput } from "./payroll.types.js";
 import { ComponentCalculationType, PayrollRunStatus, WorkingDayBasis } from "@prisma/client";
@@ -191,6 +191,7 @@ export const payrollService = {
         if (empGross > 0 || empDeds > 0) {
           await tx.payslip.create({
             data: {
+              organizationId,
               payrollRunId: run.id,
               employeeId: emp.id,
               grossPay: empGross,

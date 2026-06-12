@@ -39,6 +39,7 @@ export const grnRepository = {
         receivedDate: data.receivedDate,
         godownId: data.godownId,
         notes: data.notes,
+        status: "DRAFT",
         items: {
           create: data.items.map(i => ({
             productId: i.productId,

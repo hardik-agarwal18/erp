@@ -40,7 +40,14 @@ import employeeRoutes from "./domains/hrms/employees/employee.routes.js";
 import departmentRoutes from "./domains/hrms/employees/department.routes.js";
 import designationRoutes from "./domains/hrms/employees/designation.routes.js";
 import shiftRoutes from "./domains/hrms/shifts/shift.routes.js";
-
+import approvalRoutes from "./domains/core/approvals/approvals.routes.js";
+import attendanceRoutes from "./domains/hrms/attendance/attendance.routes.js";
+import leaveRoutes from "./domains/hrms/leaves/leaves.routes.js";
+import payrollRoutes from "./domains/hrms/payroll/payroll.routes.js";
+import holidayRoutes from "./domains/hrms/holidays/holiday.routes.js";
+import purchaseOrderRoutes from "./domains/financials/purchasing/purchase-orders/purchase-orders.routes.js";
+import vendorInvoiceRoutes from "./domains/financials/purchasing/vendor-invoices/vendor-invoices.routes.js";
+import invitationRoutes from "./domains/iam/invitations/invitation.routes.js";
 const app = express();
 
 app.set("trust proxy", 1);
@@ -83,7 +90,7 @@ app.use(
           .map((origin) => origin.trim())
           .filter(Boolean)
       : env.APP_URL,
-    credentials: true,
+      credentials: true,
   }),
 );
 app.use(express.json({ limit: "10kb" }));
@@ -118,7 +125,7 @@ app.use("/api/v1/demo", demoRoutes);
 app.use("/api/v1/organizations", organizationRoutes);
 app.use("/api/v1/roles", roleRoutes);
 app.use("/api/v1/permissions", permissionRoutes);
-// app.use("/api/v1/invitations", invitationRoutes);
+app.use("/api/v1/invitations", invitationRoutes);
 app.use("/api/v1/customers", customerRoutes);
 app.use("/api/v1/vendors", vendorRoutes);
 app.use("/api/v1/products", productRoutes);

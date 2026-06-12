@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { attendanceRepository } from "./attendance.repository.js";
 import { CheckInInput, CheckOutInput, PayrollSummary, RequestAdjustmentInput } from "./attendance.types.js";
 import ApiError from "../../../utils/ApiError.js";
@@ -105,9 +105,9 @@ export const attendanceService = {
     let status = record.status;
 
     if (policy) {
-      if (workedMinutes < policy.halfDayMinutes) {
+      if (workedMinutes < (policy.halfDayMinutes || 240)) {
         status = AttendanceStatus.ABSENT;
-      } else if (workedMinutes < policy.fullDayMinutes) {
+      } else if (workedMinutes < (policy.fullDayMinutes || 480)) {
         status = AttendanceStatus.HALF_DAY;
       }
     }

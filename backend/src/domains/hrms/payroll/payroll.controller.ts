@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { Request, Response } from "express";
 import { payrollService } from "./payroll.service.js";
 import { payrollRepository } from "./payroll.repository.js";

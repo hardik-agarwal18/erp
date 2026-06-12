@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { leavesRepository } from "./leaves.repository.js";
 import { ApplyForLeaveInput } from "./leaves.types.js";
 import ApiError from "../../../utils/ApiError.js";

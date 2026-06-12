@@ -634,7 +634,7 @@ export const organizationService = {
       user = await authRepository.createUser({
         name,
         email: invitation.email,
-        password: await import("../../../shared/utils/bcrypt.js").then(({ hashPassword }) =>
+        password: await import("../../../lib/bcrypt.js").then(({ hashPassword }) =>
           hashPassword(password),
         ),
       });

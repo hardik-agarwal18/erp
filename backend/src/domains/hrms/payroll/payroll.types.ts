@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { ComponentCalculationType, WorkingDayBasis } from "@prisma/client";
 
 export interface CreateSalaryComponentInput {

@@ -85,7 +85,7 @@ export const purchaseOrdersService = {
     await approvalsService.submitForApproval(organizationId, "PURCHASE_ORDER", id, userId);
 
     // Update PO Status
-    const updated = await purchaseOrdersRepository.updateStatus(id, PurchaseOrderStatus.PENDING_APPROVAL);
+    const updated = await purchaseOrdersRepository.updateStatus(id, PurchaseOrderStatus.ISSUED);
     return updated;
   },
 };

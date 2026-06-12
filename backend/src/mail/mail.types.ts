@@ -125,7 +125,11 @@ export interface InvitationEmailRequest {
 export interface InvoiceEmailRequest {
   to: string;
   invoiceNumber: string;
-  downloadUrl: string;
+  customerName?: string;
+  amountDue?: string;
+  organizationName?: string;
+  pdfBuffer?: Buffer;
+  downloadUrl?: string;
 }
 
 /**

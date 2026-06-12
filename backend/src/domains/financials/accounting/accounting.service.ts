@@ -1,6 +1,6 @@
 
 import { accountingRepository } from "./accounting.repository.js";
-import ApiError from "../../../../utils/ApiError.js";
+import ApiError from "../../../utils/ApiError.js";
 import { CreateJournalEntryInput, TrialBalanceFilters } from "./accounting.types.js";
 import { AccountType } from "@prisma/client";
 

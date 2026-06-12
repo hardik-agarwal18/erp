@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { AttendanceStatus } from "@prisma/client";
 
 export interface CheckInInput {

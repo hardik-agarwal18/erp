@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 export interface ApplyForLeaveInput {
   employeeId: string;
   leaveTypeId: string;

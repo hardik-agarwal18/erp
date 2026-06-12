@@ -71,6 +71,10 @@ export const PERMISSIONS = {
   // Reports
   REPORTS_VIEW: "reports.view",
   REPORTS_EXPORT: "reports.export",
+
+  // HRMS
+  HOLIDAYS_MANAGE: "holidays.manage",
+  SHIFTS_MANAGE: "shifts.manage",
 } as const;
 
 export type PermissionType = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

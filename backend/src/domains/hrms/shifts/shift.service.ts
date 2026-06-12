@@ -1,8 +1,8 @@
-// @ts-nocheck
-import prisma from "../../../../config/database.js";
-import ApiError from "../../../../shared/utils/ApiError.js";
-import { auditService } from "../../../../shared/services/audit/audit.service.js";
-import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../../../shared/services/audit/audit.constants.js";
+
+import prisma from "../../../config/database.js";
+import ApiError from "../../../utils/ApiError.js";
+import { auditService } from "../../../services/audit/audit.service.js";
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from "../../../services/audit/audit.constants.js";
 import { Prisma } from "@prisma/client";
 
 function isNightShiftStr(startTime: string, endTime: string): boolean {

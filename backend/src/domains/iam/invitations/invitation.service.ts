@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { organizationService } from "../organizations/organization.service.js";
 
 export const invitationService = {
