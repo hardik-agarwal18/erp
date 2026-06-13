@@ -83,4 +83,30 @@ export const payrollRepository = {
       },
     });
   },
+
+  getPayslipsByEmployee: async (organizationId: string, employeeId: string) => {
+    return prisma.payslip.findMany({
+      where: { organizationId, employeeId },
+      include: {
+        payrollRun: true,
+      },
+      orderBy: { id: "desc" },
+    });
+  },
+
+  getPayslipById: async (organizationId: string, id: string) => {
+    return prisma.payslip.findFirst({
+      where: { id, organizationId },
+      include: {
+        lineItems: true,
+        employee: {
+          include: {
+            department: true,
+            designation: true,
+          }
+        },
+        payrollRun: true,
+      },
+    });
+  },
 };

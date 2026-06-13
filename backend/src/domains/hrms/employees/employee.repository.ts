@@ -36,7 +36,7 @@ export const employeeRepository = {
   },
 
   listEmployees: async (organizationId: string, filters: EmployeeFilters) => {
-    const { page = 1, limit = 20, search, departmentId, designationId, status, employmentType, managerId, isDriver } = filters;
+    const { page = 1, limit = 20, search, departmentId, designationId, status, employmentType, managerId, isDriver, joinedBefore, joinedAfter } = filters;
     const skip = (page - 1) * limit;
 
     const where: Prisma.EmployeeWhereInput = {
@@ -48,6 +48,12 @@ export const employeeRepository = {
       ...(employmentType && { employmentType }),
       ...(managerId && { managerId }),
       ...(isDriver !== undefined && { isDriver }),
+      ...((joinedBefore || joinedAfter) && {
+        joiningDate: {
+          ...(joinedBefore && { lte: joinedBefore }),
+          ...(joinedAfter && { gte: joinedAfter }),
+        }
+      }),
       ...(search && {
         OR: [
           { firstName: { contains: search, mode: "insensitive" } },

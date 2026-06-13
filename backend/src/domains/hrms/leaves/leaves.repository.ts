@@ -63,6 +63,18 @@ export const leavesRepository = {
     });
   },
 
+  getBalancesByEmployee: async (organizationId: string, employeeId: string) => {
+    return prisma.leaveBalance.findMany({
+      where: {
+        organizationId,
+        employeeId,
+      },
+      include: {
+        leaveType: true,
+      },
+    });
+  },
+
   deductBalance: async (organizationId: string, employeeId: string, leaveTypeId: string, days: number) => {
     return prisma.leaveBalance.update({
       where: {

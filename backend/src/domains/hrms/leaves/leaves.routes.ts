@@ -25,6 +25,18 @@ router.post(
 );
 
 router.get(
+  "/balances/me",
+  requirePermission("LEAVES_READ"),
+  leavesController.getMyBalances
+);
+
+router.get(
+  "/balances/:employeeId",
+  requirePermission("LEAVES_READ"),
+  leavesController.getEmployeeBalances
+);
+
+router.get(
   "/",
   requirePermission("LEAVES_READ"),
   leavesController.listApplications

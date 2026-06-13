@@ -85,6 +85,8 @@ export interface EmployeeFilters {
   employmentType?: EmploymentType;
   managerId?: string;
   isDriver?: boolean;
+  joinedBefore?: Date;
+  joinedAfter?: Date;
 }
 
 export interface DepartmentFilters {
