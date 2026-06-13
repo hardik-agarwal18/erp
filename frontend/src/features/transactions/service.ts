@@ -33,21 +33,26 @@ function mapTransaction(transaction: BackendTransaction) {
   };
 }
 
-export async function getTransactions() {
+export async function getTransactions(page: number = 1, limit: number = 100) {
   const response = await apiClient.get<ApiResponse<PaginatedResponse<BackendTransaction>>>(apiEndpoints.transactions.list, {
-    params: { page: 1, limit: 100 },
+    params: { page, limit },
   });
 
   const transactions = response.data.data.items.map(mapTransaction);
 
   return {
     summary: {
-      totalTransactions: transactions.length,
+      totalTransactions: response.data.data.total,
       pendingTransactions: 0,
       exceptions: 0,
       netMovement: transactions.reduce((sum, transaction) => sum + (transaction.direction === "inflow" ? transaction.amount : transaction.amount * -1), 0),
     },
     transactions,
+    meta: {
+      total: response.data.data.total,
+      page: response.data.data.page,
+      limit: response.data.data.limit,
+    },
     reconciliations: [] as any[],
     alerts: [] as any[],
   };

@@ -6,13 +6,23 @@ import { AppShell } from "@/components/layout/app-shell";
 import { getEmployees } from "@/services/hrms.service";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Edit2, Filter } from "lucide-react";
 import Link from "next/link";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { getDepartments, getDesignations } from "@/services/hrms.service";
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
+  TableHeader,
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
@@ -22,11 +32,42 @@ import { Badge } from "@/components/ui/badge";
 export default function EmployeesPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [departmentId, setDepartmentId] = useState("");
+  const [designationId, setDesignationId] = useState("");
+  const [joinedBefore, setJoinedBefore] = useState("");
+  const [joinedAfter, setJoinedAfter] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["hrms", "employees", search, page],
-    queryFn: () => getEmployees({ search, page, limit: 10 }),
+    queryKey: ["hrms", "employees", search, page, departmentId, designationId, joinedBefore, joinedAfter],
+    queryFn: () => getEmployees({ 
+      search, 
+      page, 
+      limit: 10,
+      departmentId: departmentId || undefined,
+      designationId: designationId || undefined,
+      joinedBefore: joinedBefore || undefined,
+      joinedAfter: joinedAfter || undefined,
+    }),
   });
+
+  const { data: departmentsData } = useQuery({
+    queryKey: ["hrms", "departments"],
+    queryFn: () => getDepartments(),
+  });
+
+  const { data: designationsData } = useQuery({
+    queryKey: ["hrms", "designations"],
+    queryFn: () => getDesignations(),
+  });
+
+  const clearFilters = () => {
+    setDepartmentId("");
+    setDesignationId("");
+    setJoinedBefore("");
+    setJoinedAfter("");
+    setIsFilterOpen(false);
+  };
 
   return (
     <AppShell activePath="/hrms/employees">
@@ -53,6 +94,73 @@ export default function EmployeesPage() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          
+          <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="ml-2 flex gap-2">
+                <Filter className="h-4 w-4" />
+                Filters
+                {(departmentId || designationId || joinedBefore || joinedAfter) && (
+                  <Badge variant="info" className="ml-1 h-5 w-5 rounded-full p-0 flex items-center justify-center">!</Badge>
+                )}
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Filter Employees</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="department">Department</Label>
+                  <Select
+                    id="department"
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                  >
+                    <option value="">All Departments</option>
+                    {departmentsData?.items?.map((dept: any) => (
+                      <option key={dept.id} value={dept.id}>{dept.name}</option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="designation">Role (Designation)</Label>
+                  <Select
+                    id="designation"
+                    value={designationId}
+                    onChange={(e) => setDesignationId(e.target.value)}
+                  >
+                    <option value="">All Roles</option>
+                    {designationsData?.items?.map((desig: any) => (
+                      <option key={desig.id} value={desig.id}>{desig.name}</option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="joinedAfter">Joined After</Label>
+                  <Input
+                    id="joinedAfter"
+                    type="date"
+                    value={joinedAfter}
+                    onChange={(e) => setJoinedAfter(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="joinedBefore">Joined Before</Label>
+                  <Input
+                    id="joinedBefore"
+                    type="date"
+                    value={joinedBefore}
+                    onChange={(e) => setJoinedBefore(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <Button variant="ghost" onClick={clearFilters}>Clear Filters</Button>
+                <Button onClick={() => setIsFilterOpen(false)}>Apply Filters</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {error ? (
@@ -62,15 +170,16 @@ export default function EmployeesPage() {
         ) : (
           <div className="rounded-md border">
             <Table>
-              <TableHead>
+              <TableHeader>
                 <TableRow>
                   <TableHeaderCell>Name</TableHeaderCell>
                   <TableHeaderCell>Email</TableHeaderCell>
                   <TableHeaderCell>Role</TableHeaderCell>
                   <TableHeaderCell>Status</TableHeaderCell>
                   <TableHeaderCell>Joined</TableHeaderCell>
+                  <TableHeaderCell className="text-right">Actions</TableHeaderCell>
                 </TableRow>
-              </TableHead>
+              </TableHeader>
               <TableBody>
                 {isLoading ? (
                   Array.from({ length: 5 }).map((_, i) => (
@@ -80,11 +189,12 @@ export default function EmployeesPage() {
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                   ))
                 ) : data?.items?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
+                    <TableCell colSpan={6} className="h-24 text-center">
                       No employees found.
                     </TableCell>
                   </TableRow>
@@ -110,6 +220,13 @@ export default function EmployeesPage() {
                       </TableCell>
                       <TableCell>
                         {new Date(employee.joiningDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Link href={`/hrms/employees/${employee.id}/edit`}>
+                          <Button variant="ghost" size="icon">
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))

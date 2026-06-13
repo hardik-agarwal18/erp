@@ -13,7 +13,7 @@ export function Topbar() {
   const { workspace, workspaces, setWorkspaceById, session } = useWorkspace();
 
   return (
-    <header className="flex h-[72px] items-center justify-between gap-4 border-b border-slate-200 bg-white/90 px-5 backdrop-blur">
+    <header className="flex h-[72px] items-center justify-between gap-4 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-950/90 px-5 backdrop-blur">
       <div className="flex items-center gap-3">
         <Select className="w-[220px]" value={workspace.id} onChange={(event) => setWorkspaceById(event.target.value)}>
           {workspaces.map((item) => (
@@ -33,7 +33,7 @@ export function Topbar() {
         <Button size="icon" variant="outline">
           <Bell className="h-4 w-4" />
         </Button>
-        <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2">
+        <div className="flex items-center gap-3 rounded-xl border bg-card text-card-foreground dark:border-slate-800 dark:bg-slate-950 px-3 py-2">
           <Avatar>
             <AvatarFallback>{session.initials}</AvatarFallback>
           </Avatar>

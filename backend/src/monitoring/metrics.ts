@@ -46,6 +46,13 @@ export const queueJobsWaiting = new client.Gauge({
   registers: [registry],
 });
 
+export const queueJobLatencySeconds = new client.Histogram({
+  name: "queue_job_latency_seconds",
+  help: "Time spent waiting in the queue before processing",
+  labelNames: ["queueName"],
+  registers: [registry],
+});
+
 // Storage Metrics
 export const storageUploadsTotal = new client.Counter({
   name: "storage_uploads_total",

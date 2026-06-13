@@ -16,7 +16,10 @@ export type CreateInvoiceInput = {
 };
 
 export type UpdateInvoiceInput = {
+  customerId?: string;
+  issueDate?: string;
   status?: "DRAFT" | "ISSUED" | "CANCELLED";
   dueDate?: string;
   notes?: string;
+  items?: InvoiceItemInput[];
 };

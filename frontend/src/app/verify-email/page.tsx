@@ -37,7 +37,7 @@ function VerifyEmailContent() {
         <CardDescription>Connected directly to the backend verification flow.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className={status === "error" ? "text-sm text-rose-600" : "text-sm text-slate-600"}>{message}</p>
+        <p className={status === "error" ? "text-sm text-rose-600 dark:text-rose-400" : "text-sm text-slate-600 dark:text-slate-400"}>{message}</p>
         <Button asChild className="w-full">
           <Link href="/login">{status === "success" ? "Continue to sign in" : "Back to sign in"}</Link>
         </Button>
@@ -48,7 +48,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(30,41,59,0.08),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-4">
+    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(30,41,59,0.08),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_24%),linear-gradient(180deg,#020617_0%,#0f172a_100%)] px-4">
       <Suspense fallback={<div>Loading verification...</div>}>
         <VerifyEmailContent />
       </Suspense>

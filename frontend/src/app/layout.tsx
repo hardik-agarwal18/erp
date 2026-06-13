@@ -8,6 +8,7 @@ import { UiStoreProvider } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { ToastProvider } from "@/hooks/use-toast";
+import { ThemeProvider } from "@/providers/theme-provider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -18,14 +19,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.variable, "font-sans")}>
         <QueryProvider>
           <WorkspaceProvider>
             <UiStoreProvider>
               <ToastProvider>
-                {children}
-                <Toaster />
+                <ThemeProvider
+                  attribute="class"
+                  defaultTheme="system"
+                  enableSystem
+                  disableTransitionOnChange
+                >
+                  {children}
+                  <Toaster />
+                </ThemeProvider>
               </ToastProvider>
             </UiStoreProvider>
           </WorkspaceProvider>

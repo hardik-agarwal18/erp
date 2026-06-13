@@ -79,7 +79,7 @@ describe("auth.utils", () => {
     it("should build the correct URL with encoded token", () => {
       const url = buildVerificationUrl("my.token+special=");
       expect(url).toBe(
-        "http://localhost:5000/api/v1/auth/verify-email?token=my.token%2Bspecial%3D",
+        "http://localhost:5000/verify-email?token=my.token%2Bspecial%3D",
       );
     });
 

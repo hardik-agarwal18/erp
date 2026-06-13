@@ -149,7 +149,7 @@ export default function ProfileSettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column: Quick Profile Card */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="overflow-hidden border-slate-200/60 shadow-sm transition-all duration-300 hover:shadow-md">
+          <Card className="overflow-hidden border-border/60 shadow-sm transition-all duration-300 hover:shadow-md">
             {/* Gradient Header */}
             <div className="h-28 bg-gradient-to-r from-blue-600 to-indigo-600 relative">
               <div className="absolute inset-0 bg-black/10" />
@@ -157,7 +157,7 @@ export default function ProfileSettingsPage() {
             
             {/* Profile Avatar overlapping header */}
             <div className="px-6 relative -mt-12 flex justify-center">
-              <div className="group relative h-24 w-24 rounded-full bg-white p-1 shadow-lg ring-1 ring-slate-100 transition-transform duration-300 hover:scale-105">
+              <div className="group relative h-24 w-24 rounded-full bg-card p-1 shadow-lg ring-1 ring-slate-100 transition-transform duration-300 hover:scale-105">
                 <div className="h-full w-full rounded-full bg-slate-100 flex items-center justify-center text-slate-600 text-2xl font-bold overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
                   {session?.initials}
                 </div>
@@ -169,8 +169,8 @@ export default function ProfileSettingsPage() {
             </div>
 
             <CardContent className="pt-4 text-center pb-6">
-              <h3 className="text-lg font-semibold text-slate-900 tracking-tight">{session?.name || "User"}</h3>
-              <p className="text-sm text-slate-500 mb-4">{session?.email}</p>
+              <h3 className="text-lg font-semibold text-foreground tracking-tight">{session?.name || "User"}</h3>
+              <p className="text-sm text-muted-foreground mb-4">{session?.email}</p>
               
               <div className="inline-flex items-center justify-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
                 <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
@@ -183,8 +183,8 @@ export default function ProfileSettingsPage() {
         {/* Right Column: Forms & Settings */}
         <div className="lg:col-span-2 space-y-6">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <Card className="border-slate-200/60 shadow-sm transition-all duration-300 hover:shadow-md">
-              <CardHeader className="border-b border-slate-100/50 bg-slate-50/50 pb-4">
+            <Card className="border-border/60 shadow-sm transition-all duration-300 hover:shadow-md">
+              <CardHeader className="border-b border-border/50 bg-slate-50/50 pb-4">
                 <div className="space-y-1">
                   <CardTitle className="text-lg text-slate-800">Personal Information</CardTitle>
                   <CardDescription>Update your contact details and how you are identified.</CardDescription>
@@ -225,18 +225,18 @@ export default function ProfileSettingsPage() {
                         {...register("email")}
                       />
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">If you change your email, you will need to re-verify your account.</p>
+                    <p className="text-xs text-muted-foreground mt-1">If you change your email, you will need to re-verify your account.</p>
                     {errors.email && <p className="text-sm text-rose-500 font-medium">{errors.email.message}</p>}
                   </div>
                 </div>
               </CardContent>
               
-              <div className="flex items-center justify-end gap-3 bg-slate-50/80 border-t border-slate-100 py-4 px-6 rounded-b-xl">
+              <div className="flex items-center justify-end gap-3 bg-slate-50/80 border-t border-border py-4 px-6 rounded-b-xl">
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={handleCancel}
-                  className="text-slate-600 hover:text-slate-900"
+                  className="text-slate-600 hover:text-foreground"
                   disabled={!isDirty || updateProfile.isPending}
                 >
                   Discard Changes
@@ -253,22 +253,22 @@ export default function ProfileSettingsPage() {
           </form>
 
           {/* Security Settings Card */}
-          <Card className="border-slate-200/60 shadow-sm transition-all duration-300 hover:shadow-md">
-            <CardHeader className="border-b border-slate-100/50 bg-slate-50/50 pb-4">
+          <Card className="border-border/60 shadow-sm transition-all duration-300 hover:shadow-md">
+            <CardHeader className="border-b border-border/50 bg-slate-50/50 pb-4">
               <div className="space-y-1">
                 <CardTitle className="text-lg text-slate-800">Security</CardTitle>
                 <CardDescription>Manage your password and authentication settings.</CardDescription>
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-slate-200 rounded-xl bg-white hover:border-slate-300 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 border border-border rounded-xl bg-card hover:border-slate-300 transition-colors">
                 <div className="flex items-start sm:items-center gap-4">
                   <div className="p-2.5 bg-indigo-50 rounded-lg text-indigo-600 shrink-0">
                     <KeyRound className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900">Password</p>
-                    <p className="text-sm text-slate-500 mt-0.5">Ensure your account is using a long, random password to stay secure.</p>
+                    <p className="font-semibold text-foreground">Password</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Ensure your account is using a long, random password to stay secure.</p>
                   </div>
                 </div>
                 <Button 
@@ -308,43 +308,43 @@ export default function ProfileSettingsPage() {
           
           <div className="p-6 space-y-6">
             <p className="text-sm text-slate-600 text-center">
-              We&apos;ve sent verification codes to both your current email (<strong className="text-slate-900">{session?.email}</strong>) and your new email (<strong className="text-slate-900">{pendingEmail}</strong>).
+              We&apos;ve sent verification codes to both your current email (<strong className="text-foreground">{session?.email}</strong>) and your new email (<strong className="text-foreground">{pendingEmail}</strong>).
             </p>
             
             <div className="space-y-5">
               <div className="space-y-3">
-                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex justify-center">Current Email Code</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex justify-center">Current Email Code</Label>
                 <div className="flex justify-center">
                   <InputOTP maxLength={6} value={currentEmailOtp} onChange={(val) => setCurrentEmailOtp(val)}>
                     <InputOTPGroup>
-                      <InputOTPSlot index={0} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={1} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={2} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={0} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={1} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={2} className="w-12 h-14 text-2xl font-bold bg-card" />
                     </InputOTPGroup>
                     <InputOTPSeparator />
                     <InputOTPGroup>
-                      <InputOTPSlot index={3} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={4} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={5} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={3} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={4} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={5} className="w-12 h-14 text-2xl font-bold bg-card" />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
               </div>
               
               <div className="space-y-3">
-                <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex justify-center">New Email Code</Label>
+                <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex justify-center">New Email Code</Label>
                 <div className="flex justify-center">
                   <InputOTP maxLength={6} value={newEmailOtp} onChange={(val) => setNewEmailOtp(val)}>
                     <InputOTPGroup>
-                      <InputOTPSlot index={0} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={1} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={2} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={0} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={1} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={2} className="w-12 h-14 text-2xl font-bold bg-card" />
                     </InputOTPGroup>
                     <InputOTPSeparator />
                     <InputOTPGroup>
-                      <InputOTPSlot index={3} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={4} className="w-12 h-14 text-2xl font-bold bg-white" />
-                      <InputOTPSlot index={5} className="w-12 h-14 text-2xl font-bold bg-white" />
+                      <InputOTPSlot index={3} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={4} className="w-12 h-14 text-2xl font-bold bg-card" />
+                      <InputOTPSlot index={5} className="w-12 h-14 text-2xl font-bold bg-card" />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
@@ -352,8 +352,8 @@ export default function ProfileSettingsPage() {
             </div>
           </div>
           
-          <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-100 sm:justify-between flex-row">
-            <Button variant="ghost" onClick={() => setShowOtpModal(false)} className="text-slate-500 hover:text-slate-700">Cancel</Button>
+          <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-border sm:justify-between flex-row">
+            <Button variant="ghost" onClick={() => setShowOtpModal(false)} className="text-muted-foreground hover:text-slate-700">Cancel</Button>
             <Button 
               onClick={handleVerifyOtp} 
               disabled={verifyEmailChange.isPending || currentEmailOtp.length !== 6 || newEmailOtp.length !== 6}

@@ -229,22 +229,99 @@ export const invoiceService = {
       throw new ApiError(404, "Invoice not found");
     }
 
+    const hasRestrictedEdits = payload.customerId !== undefined || payload.issueDate !== undefined || payload.items !== undefined;
+    if (existing.status !== "DRAFT" && hasRestrictedEdits) {
+      throw new ApiError(400, "Cannot edit line items, customer, or issue date for invoices that are not DRAFT");
+    }
+
+    let finalSubtotal = Number(existing.subtotal);
+    let finalTaxAmount = Number(existing.taxAmount);
+    let finalDiscountAmount = Number(existing.discountAmount);
+    let finalTotalAmount = Number(existing.totalAmount);
+    let finalCustomerId = payload.customerId ?? existing.customerId;
+    let finalIssueDate = payload.issueDate ? new Date(payload.issueDate) : existing.issueDate;
+    let newItemsData: any[] | null = null;
+
+    if (payload.items && payload.items.length > 0) {
+      const productIds = payload.items.map((item) => item.productId);
+      const uniqueProductIds = Array.from(new Set(productIds));
+      const products = await invoiceRepository.findProductsByIds(
+        organizationId,
+        uniqueProductIds,
+      );
+
+      if (products.length !== uniqueProductIds.length) {
+        throw new ApiError(400, "One or more products were not found");
+      }
+
+      const productById = new Map(products.map((product) => [product.id, product]));
+
+      const lineItems = payload.items.map((item) => {
+        const product = productById.get(item.productId)!;
+        const unitPrice = item.unitPrice ?? Number(product.sellingPrice);
+        const discountAmount = item.discountAmount ?? 0;
+        const lineSubtotal = unitPrice * item.quantity;
+        const taxableAmount = Math.max(lineSubtotal - discountAmount, 0);
+        const taxRate = product.tax ? Number(product.tax.rate) : 0;
+        const taxAmount = (taxableAmount * taxRate) / 100;
+        const lineTotal = taxableAmount + taxAmount;
+
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice,
+          taxAmount,
+          discountAmount,
+          lineTotal,
+          lineSubtotal,
+        };
+      });
+
+      finalSubtotal = lineItems.reduce((sum, item) => sum + item.lineSubtotal, 0);
+      finalDiscountAmount = lineItems.reduce((sum, item) => sum + item.discountAmount, 0);
+      finalTaxAmount = lineItems.reduce((sum, item) => sum + item.taxAmount, 0);
+      finalTotalAmount = lineItems.reduce((sum, item) => sum + item.lineTotal, 0);
+      newItemsData = lineItems;
+    }
+
     const updated = await prisma.$transaction(async (tx) => {
       const nextStatus = payload.status ?? existing.status;
 
-      const updatedCount = await invoiceRepository.updateInvoiceForOrganization(
-        tx,
-        organizationId,
-        invoiceId,
-        {
+      const updatedInvoiceCount = await tx.invoice.updateMany({
+        where: { id: invoiceId, organizationId },
+        data: {
           status: nextStatus,
           dueDate: payload.dueDate ? new Date(payload.dueDate) : undefined,
           notes: payload.notes,
+          customerId: finalCustomerId,
+          issueDate: finalIssueDate,
+          subtotal: finalSubtotal,
+          taxAmount: finalTaxAmount,
+          discountAmount: finalDiscountAmount,
+          totalAmount: finalTotalAmount,
         },
-      );
+      });
 
-      if (updatedCount.count !== 1) {
+      if (updatedInvoiceCount.count !== 1) {
         throw new ApiError(404, "Invoice not found");
+      }
+
+      if (newItemsData) {
+        await tx.invoiceItem.deleteMany({
+          where: { invoiceId },
+        });
+
+        await tx.invoiceItem.createMany({
+          data: newItemsData.map((item) => ({
+            invoiceId,
+            productId: item.productId,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            taxAmount: item.taxAmount,
+            discountAmount: item.discountAmount,
+            lineTotal: item.lineTotal,
+          })),
+        });
       }
 
       if (existing.status === "DRAFT" && nextStatus === "ISSUED") {
@@ -300,9 +377,9 @@ export const invoiceService = {
               invoiceId: invoiceId,
               invoiceNumber: existing.invoiceNumber,
               customerId: existing.customerId,
-              subtotal: Number(existing.subtotal),
-              taxAmount: Number(existing.taxAmount),
-              totalAmount: Number(existing.totalAmount),
+              subtotal: finalSubtotal,
+              taxAmount: finalTaxAmount,
+              totalAmount: finalTotalAmount,
               currency: "INR",
               issuedAt: new Date().toISOString(),
               cogsAmount: totalCogs,

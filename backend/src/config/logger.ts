@@ -1,10 +1,42 @@
-
 import { AsyncLocalStorage } from "node:async_hooks";
 import pino from "pino";
+import fs from "node:fs";
+import path from "node:path";
 
 import { env } from "./env.js";
 
 export const loggerContext = new AsyncLocalStorage<Map<string, string>>();
+
+const logDir = path.join(process.cwd(), "logs");
+if (!fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+
+const targets = [
+  {
+    target: "pino/file",
+    options: { destination: path.join(logDir, "app.log") },
+    level: env.NODE_ENV === "production" ? "info" : env.NODE_ENV === "test" ? "error" : "debug",
+  },
+  env.NODE_ENV === "production"
+    ? {
+        target: "pino/file",
+        options: { destination: 1 }, // stdout
+        level: "info",
+      }
+    : {
+        target: "pino-pretty",
+        options: {
+          colorize: true,
+          translateTime: "SYS:standard",
+        },
+        level: env.NODE_ENV === "test" ? "error" : "debug",
+      },
+];
+
+const transport = pino.transport({
+  targets: targets as any,
+});
 
 const logger = pino(
   {
@@ -41,15 +73,7 @@ const logger = pino(
 
     timestamp: pino.stdTimeFunctions.isoTime,
   },
-  env.NODE_ENV === "production"
-    ? undefined
-    : pino.transport({
-        target: "pino-pretty",
-        options: {
-          colorize: true,
-          translateTime: "SYS:standard",
-        },
-      }),
+  transport
 );
 
 export default logger;

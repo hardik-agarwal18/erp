@@ -67,7 +67,9 @@ export default function EmployeeDetailPage() {
             </Badge>
           </div>
           <div className="flex space-x-2">
-            <Button variant="outline">Edit Profile</Button>
+            <Link href={`/hrms/employees/${employee.id}/edit`}>
+              <Button variant="outline">Edit Profile</Button>
+            </Link>
           </div>
         </div>
 

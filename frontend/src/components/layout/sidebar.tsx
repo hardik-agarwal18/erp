@@ -3,13 +3,14 @@
 import type { ComponentType } from "react";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { Activity, ArrowLeftRight, BarChart3, Boxes, Briefcase, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star, X } from "lucide-react";
+import { Activity, ArrowLeftRight, BarChart3, Boxes, Briefcase, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star, X, CheckSquare } from "lucide-react";
 
 import { appConfig } from "@/config/app-config";
 import { cn } from "@/lib/utils";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { useUiStore } from "@/store/ui-store";
 import type { FeatureKey } from "@/types/app";
+import { approvalService } from "@/services/approval.service";
 
 type SidebarItem = {
   label: string;
@@ -17,6 +18,7 @@ type SidebarItem = {
   icon: ComponentType<{ className?: string }>;
   feature?: FeatureKey;
   children?: Array<{ label: string; href: string }>;
+  badge?: number;
 };
 
 const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
@@ -24,19 +26,38 @@ const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
     label: "Operations",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Approvals", href: "/approvals", icon: CheckSquare, feature: "approvals" },
       { label: "Reports", href: "/reports", icon: FileSpreadsheet, feature: "reports" },
       {
-        label: "Accounting",
-        icon: WalletCards,
+        label: "Sales",
+        icon: UsersRound,
         feature: "customers",
         children: [
           { label: "Customers", href: "/customers" },
-          { label: "Vendors", href: "/vendors" },
           { label: "Invoices", href: "/invoices" },
-          { label: "Payments", href: "/payments" },
+        ],
+      },
+      {
+        label: "Purchases",
+        icon: ShoppingCart,
+        feature: "purchases",
+        children: [
+          { label: "Vendors", href: "/vendors" },
+          { label: "Purchase Orders", href: "/purchases" },
           { label: "Expenses", href: "/expenses" },
-          { label: "Purchases", href: "/purchases" },
-          { label: "Transactions", href: "/transactions" },
+        ],
+      },
+      {
+        label: "Accounting",
+        icon: WalletCards,
+        feature: "reports",
+        children: [
+          { label: "Accounts", href: "/accounting/accounts" },
+          { label: "Journals", href: "/accounting/journals" },
+          { label: "Fiscal Years", href: "/accounting/fiscal-years" },
+          { label: "Trial Balance", href: "/accounting/trial-balance" },
+          { label: "Profit & Loss", href: "/accounting/profit-loss" },
+          { label: "Balance Sheet", href: "/accounting/balance-sheet" },
         ],
       },
       {
@@ -57,9 +78,6 @@ const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
   {
     label: "Administration",
     items: [
-      { label: "Customer Directory", href: "/customers", icon: UsersRound, feature: "customers" },
-      { label: "Vendor Directory", href: "/vendors", icon: Truck, feature: "vendors" },
-      { label: "Procurement", href: "/purchases", icon: ShoppingCart, feature: "purchases" },
       { label: "Transactions", href: "/transactions", icon: ArrowLeftRight, feature: "transactions" },
       {
         label: "Human Resources",
@@ -68,6 +86,12 @@ const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
         children: [
           { label: "Dashboard", href: "/hrms" },
           { label: "Directory", href: "/hrms/employees" },
+          { label: "Attendance", href: "/hrms/attendance" },
+          { label: "Leaves", href: "/hrms/leaves" },
+          { label: "Expense Claims", href: "/hrms/claims" },
+          { label: "Payroll", href: "/hrms/payroll" },
+          { label: "Shifts", href: "/hrms/shifts" },
+          { label: "Holidays", href: "/hrms/holidays" },
         ],
       },
       { label: "Audit Logs", href: "/audit-logs", icon: Activity, feature: "audit_logs" },
@@ -100,6 +124,16 @@ export function Sidebar({ activePath }: { activePath: string }) {
   const { workspace, canAccess } = useWorkspace();
   const { sidebarOpen, setSidebarOpen } = useUiStore();
   const activeLookup = useMemo(() => activePath, [activePath]);
+
+  const [pendingApprovalsCount, setPendingApprovalsCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (canAccess("approvals") && isMounted) {
+      approvalService.getPendingApprovals()
+        .then(res => setPendingApprovalsCount(res.data?.length || 0))
+        .catch(console.error);
+    }
+  }, [canAccess, isMounted, activePath]);
 
   // Close mobile sidebar on route change
   useEffect(() => {
@@ -206,6 +240,11 @@ export function Sidebar({ activePath }: { activePath: string }) {
         {!collapsed && (
           <>
             <span className={cn("flex-1 truncate", isNested && "text-[13px]")}>{label}</span>
+            {label === "Approvals" && pendingApprovalsCount > 0 && (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-[10px] font-medium text-white">
+                {pendingApprovalsCount}
+              </span>
+            )}
             <button
               onClick={(e) => toggleFavorite(e, href)}
               className={cn(

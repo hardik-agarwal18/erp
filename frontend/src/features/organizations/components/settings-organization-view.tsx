@@ -181,7 +181,7 @@ export function SettingsOrganizationView() {
                       setValue("currency", e.target.value.toUpperCase(), { shouldDirty: true, shouldValidate: true });
                     }
                   })}
-                  placeholder="e.g. USD, EUR"
+                  placeholder="e.g. INR, USD"
                 />
                 {errors.currency && <p className="text-sm text-rose-500 font-medium">{errors.currency.message}</p>}
               </div>

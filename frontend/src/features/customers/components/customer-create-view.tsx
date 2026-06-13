@@ -35,7 +35,7 @@ export function CustomerCreateView() {
             status: "active",
             segment: "smb",
             gstin: "",
-            currency: "USD",
+            currency: "INR",
             paymentTerms: "",
             creditLimit: 0,
             owner: "",

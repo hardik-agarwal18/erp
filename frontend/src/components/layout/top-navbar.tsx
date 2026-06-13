@@ -8,6 +8,7 @@ import { NotificationCenter } from "./notification-center";
 import { ProfileMenu } from "./profile-menu";
 import { SearchBar } from "./search-bar";
 import { WorkspaceSwitcher } from "./workspace-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/store/ui-store";
 
@@ -49,6 +50,7 @@ export function TopNavbar({ activePath }: { activePath: string }) {
             <WorkspaceSwitcher />
           </div>
 
+          <ThemeToggle />
           <NotificationCenter />
           <ProfileMenu />
         </div>

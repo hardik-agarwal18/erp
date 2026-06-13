@@ -12,10 +12,11 @@ export const demoController = {
         data: result,
       });
     } catch (error) {
+      console.error("SEED DEMO ERROR:", error);
       logger.error({ error }, "Failed to seed demo environment");
       res.status(500).json({
         success: false,
-        message: "Failed to generate demo environment",
+        message: error instanceof Error ? error.message : "Failed",
       });
     }
   },

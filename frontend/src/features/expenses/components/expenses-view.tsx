@@ -43,8 +43,8 @@ export function ExpensesView() {
     return <ModuleError title="Expenses unavailable" message="We could not load expenses for this workspace." retry={() => query.refetch()} />;
   }
 
-  if (data && expenses.length === 0) {
-    return <EmptyState title="No expenses found" description="Create your first expense to track outflows." actionLabel="Create expense" />;
+  if (!data?.expenses.length) {
+    return <EmptyState title="No expenses found" description="Create your first expense to track outflows." actionLabel="Create expense" actionUrl="/expenses/create" />;
   }
 
   return (

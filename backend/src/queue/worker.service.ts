@@ -7,7 +7,9 @@ import { processPdfGenerationJob } from "./jobs/pdf.job.js";
 import { processCleanupJob } from "./jobs/storage-cleanup.job.js";
 import { processReportJob } from "./jobs/report-export.job.js";
 import { processAuditExportJob } from "./jobs/audit-export.job.js";
-import { queueJobsCompletedTotal, queueJobsFailedTotal } from "../monitoring/metrics.js";
+import { processOutboxRelayJob } from "./jobs/outbox-relay.job.js";
+import { processAccountingJob } from "./jobs/accounting.job.js";
+import { queueJobsCompletedTotal, queueJobsFailedTotal, queueJobLatencySeconds } from "../monitoring/metrics.js";
 import logger from "../config/logger.js";
 import { env } from "../config/env.js";
 
@@ -39,6 +41,11 @@ export const startWorkers = () => {
 
   // Helper to attach observability listeners
   const attachWorkerObservability = (worker: Worker, queueName: string) => {
+    worker.on("active", (job) => {
+      const latencyMs = Date.now() - job.timestamp;
+      queueJobLatencySeconds.labels(queueName).observe(latencyMs / 1000);
+    });
+
     worker.on("completed", (job) => {
       const durationMs = (job.finishedOn || Date.now()) - (job.processedOn || job.timestamp);
       queueJobsCompletedTotal.labels(queueName).inc();
@@ -86,6 +93,14 @@ export const startWorkers = () => {
   // Audit Worker
   const auditWorker = new Worker(QueueNames.AUDIT_EXPORTS, withLoggerContext(processAuditExportJob), { connection: queueConnection.duplicate() as any, concurrency: 1, prefix });
   attachWorkerObservability(auditWorker, QueueNames.AUDIT_EXPORTS);
+
+  // Outbox Relay Worker
+  const outboxRelayWorker = new Worker(QueueNames.OUTBOX_RELAY, withLoggerContext(processOutboxRelayJob), { connection: queueConnection.duplicate() as any, concurrency: 1, prefix });
+  attachWorkerObservability(outboxRelayWorker, QueueNames.OUTBOX_RELAY);
+
+  // Accounting Worker
+  const accountingWorker = new Worker(QueueNames.ACCOUNTING, withLoggerContext(processAccountingJob), { connection: queueConnection.duplicate() as any, concurrency: 5, prefix });
+  attachWorkerObservability(accountingWorker, QueueNames.ACCOUNTING);
 };
 
 export const shutdownWorkers = async () => {

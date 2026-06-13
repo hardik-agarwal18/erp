@@ -49,7 +49,7 @@ export type NavigationItem = {
   feature: FeatureKey;
 };
 
-export type FeatureKey = "dashboard" | "customers" | "vendors" | "invoices" | "inventory" | "purchases" | "products" | "transactions" | "expenses" | "payments" | "reports" | "organizations" | "audit_logs" | "taxes" | "hrms";
+export type FeatureKey = "dashboard" | "customers" | "vendors" | "invoices" | "inventory" | "purchases" | "products" | "transactions" | "expenses" | "payments" | "reports" | "organizations" | "audit_logs" | "taxes" | "hrms" | "approvals";
 
 export type KpiMetric = {
   label: string;
@@ -76,6 +76,7 @@ export type InvoiceStatus = "draft" | "sent" | "partial" | "paid" | "overdue";
 
 export type InvoiceLineItem = {
   id: string;
+  productId?: string;
   description: string;
   quantity: number;
   unitPrice: number;
@@ -85,6 +86,7 @@ export type InvoiceLineItem = {
 export type Invoice = {
   id: string;
   invoiceNumber: string;
+  customerId?: string;
   customer: string;
   issueDate?: string;
   dueDate: string;
@@ -340,6 +342,7 @@ export type Tax = {
   updatedAt: string;
 };
 
+
 export type EmployeeStatus = "ACTIVE" | "INACTIVE" | "TERMINATED" | "SUSPENDED" | "PROBATION";
 
 export type EmploymentType = "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERN" | "FREELANCE";
@@ -352,6 +355,8 @@ export type Department = {
   code?: string;
   description?: string;
   isActive: boolean;
+  headEmployeeId?: string;
+  budgetLimit?: number;
 };
 
 export type Designation = {
@@ -382,4 +387,69 @@ export type Employee = {
   department?: Department;
   designation?: Designation;
   manager?: Employee;
+  profileImageUrl?: string;
+};
+
+export type StockJournalType = "ADJUSTMENT" | "DAMAGE" | "LOSS" | "PRODUCTION" | "TRANSFER" | "OPENING_STOCK";
+
+export type StockJournal = {
+  id: string;
+  organizationId: string;
+  type: StockJournalType;
+  date: string;
+  notes?: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GRN = {
+  id: string;
+  organizationId: string;
+  vendorId?: string;
+  poNumber?: string;
+  grnNumber: string;
+  date: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ApprovalEntity = "LEAVE" | "PAYROLL" | "EXPENSE" | "PURCHASE_ORDER" | "VENDOR" | string;
+
+export type ApprovalInstance = {
+  id: string;
+  entityType: ApprovalEntity;
+  entityId: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  currentStepIndex: number;
+  requesterId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PayrollRunStatus = "DRAFT" | "PROCESSING" | "PENDING_APPROVAL" | "APPROVED" | "COMPLETED" | "CANCELLED";
+
+export type PayrollRun = {
+  id: string;
+  month: number;
+  year: number;
+  status: PayrollRunStatus;
+  totalGrossPay: number;
+  totalDeductions: number;
+  totalNetPay: number;
+  employeeCount: number;
+  processedBy?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Payslip = {
+  id: string;
+  employeeId: string;
+  payrollRunId: string;
+  grossPay: number;
+  deductions: number;
+  netPay: number;
+  status: string;
 };

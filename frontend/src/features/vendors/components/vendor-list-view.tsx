@@ -50,7 +50,7 @@ export function VendorListView() {
   }
 
   if (!data?.vendors.length) {
-    return <EmptyState title="No vendors found" description="Create your first vendor to start procurement and AP workflows." actionLabel="Create vendor" />;
+    return <EmptyState title="No vendors found" description="Create your first vendor to start procurement and AP workflows." actionLabel="Create vendor" actionUrl="/vendors/create" />;
   }
 
   const { summary } = data;

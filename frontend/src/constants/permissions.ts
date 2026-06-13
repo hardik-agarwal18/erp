@@ -15,5 +15,6 @@ export const featurePermissions: Record<FeatureKey, string[]> = {
   organizations: ["organization.view", "organization.settings"],
   audit_logs: ["audit.read"],
   taxes: ["finance.settings"],
-  hrms: ["hrms.view", "hrms.manage"],
+  hrms: ["member.view", "holidays.manage", "shifts.manage"],
+  approvals: [],
 };

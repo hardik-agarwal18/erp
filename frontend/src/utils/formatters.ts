@@ -25,5 +25,5 @@ export function formatDateLabel(date: string) {
 }
 
 export function formatNumber(value: number) {
-  return new Intl.NumberFormat("en-US").format(value);
+  return new Intl.NumberFormat("en-IN").format(value);
 }
