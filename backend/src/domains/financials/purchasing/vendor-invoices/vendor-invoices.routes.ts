@@ -30,6 +30,12 @@ router.get(
   vendorInvoicesController.getById
 );
 
+router.get(
+  "/:id/match-summary",
+  requirePermission("PURCHASES_READ"),
+  vendorInvoicesController.getMatchSummary
+);
+
 router.post(
   "/:id/post",
   requirePermission("PURCHASES_CREATE"),

@@ -129,6 +129,8 @@ export const invoiceService = {
         },
       );
 
+      let totalCogs = 0;
+
       if (status === "ISSUED") {
         for (const item of lineItems) {
           if (item.productType !== "PHYSICAL") {
@@ -142,6 +144,9 @@ export const invoiceService = {
           if (!inventory || Number(inventory.quantity) < item.quantity) {
             throw new ApiError(400, "Insufficient stock for invoice item");
           }
+
+          const unitCost = Number(inventory.averageCost) || 0;
+          totalCogs += unitCost * item.quantity;
 
           await invoiceRepository.decrementInventoryItem(
             tx,
@@ -184,6 +189,27 @@ export const invoiceService = {
           documentType: "INVOICE",
           organizationId,
         });
+
+        // Fire Accounting Event via Outbox
+        await (tx as any).outboxEvent.create({
+          data: {
+            organizationId,
+            aggregateType: "SalesInvoice",
+            aggregateId: created.id,
+            eventType: "SalesInvoiceIssued",
+            payload: {
+              invoiceId: created.id,
+              invoiceNumber: invoiceNumber,
+              customerId: payload.customerId,
+              subtotal,
+              taxAmount,
+              totalAmount,
+              currency: "INR",
+              issuedAt: created.issueDate.toISOString(),
+              cogsAmount: totalCogs,
+            },
+          },
+        });
       }
 
       return created;
@@ -222,6 +248,7 @@ export const invoiceService = {
       }
 
       if (existing.status === "DRAFT" && nextStatus === "ISSUED") {
+        let totalCogs = 0;
         const items = await invoiceRepository.listInvoiceItems(tx, invoiceId);
         for (const item of items) {
           if (item.product.type !== "PHYSICAL") {
@@ -238,6 +265,10 @@ export const invoiceService = {
           ) {
             throw new ApiError(400, "Insufficient stock for invoice item");
           }
+
+          const unitCost = Number(inventory.averageCost) || 0;
+          totalCogs += unitCost * Number(item.quantity);
+
           await invoiceRepository.decrementInventoryItem(
             tx,
             organizationId,
@@ -256,6 +287,27 @@ export const invoiceService = {
           documentId: invoiceId,
           documentType: "INVOICE",
           organizationId,
+        });
+
+        // Fire Accounting Event via Outbox
+        await (tx as any).outboxEvent.create({
+          data: {
+            organizationId,
+            aggregateType: "SalesInvoice",
+            aggregateId: invoiceId,
+            eventType: "SalesInvoiceIssued",
+            payload: {
+              invoiceId: invoiceId,
+              invoiceNumber: existing.invoiceNumber,
+              customerId: existing.customerId,
+              subtotal: Number(existing.subtotal),
+              taxAmount: Number(existing.taxAmount),
+              totalAmount: Number(existing.totalAmount),
+              currency: "INR",
+              issuedAt: new Date().toISOString(),
+              cogsAmount: totalCogs,
+            },
+          },
         });
       }
 
@@ -335,47 +387,15 @@ export const invoiceService = {
       },
     });
 
-    try {
-      const pdfBuffer = await invoicePdfService.generateInvoicePdf({
-        invoiceId,
-        organizationId,
-      });
+    await pdfGenerationQueue.add("generate-invoice-pdf", {
+      documentId: invoiceId,
+      documentType: "INVOICE",
+      organizationId,
+      targetEmail: email,
+      emailLogId: emailLog.id,
+    });
 
-      // We need to use the default direct dispatcher for now, or the exported dispatcher from mailService
-      // To avoid circular dependency, I'll import sendMail or the configured dispatcher
-      const { default: transporter } = await import("../../../config/mail.js");
-      const { DirectMailDispatcher, defaultProvider, defaultProviderName } = await import("../../../mail/mail.service.js");
-      
-      const mailDispatcher = new DirectMailDispatcher(defaultProvider, defaultProviderName);
-
-      await mailDispatcher.sendInvoiceEmail({
-        to: email,
-        invoiceNumber: invoice.invoiceNumber,
-        customerName: invoice.customer.name,
-        amountDue: invoice.totalAmount.toString(),
-        organizationName: invoice.organizationId,
-        pdfBuffer,
-      });
-
-      await prisma.invoiceEmailLog.update({
-        where: { id: emailLog.id },
-        data: {
-          status: "SENT",
-          sentAt: new Date(),
-        },
-      });
-
-      return { success: true };
-    } catch (error: any) {
-      await prisma.invoiceEmailLog.update({
-        where: { id: emailLog.id },
-        data: {
-          status: "FAILED",
-          error: error.message,
-        },
-      });
-      throw new ApiError(500, "Failed to send invoice email");
-    }
+    return { success: true };
   },
 
   getInvoiceEmailHistory: async (organizationId: string, invoiceId: string) => {
@@ -400,3 +420,4 @@ export const invoiceService = {
     return logs;
   },
 };
+
