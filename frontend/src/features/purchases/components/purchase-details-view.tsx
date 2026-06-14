@@ -54,7 +54,7 @@ export function PurchaseDetailsView({ purchaseId }: { purchaseId: string }) {
           { label: "PO Value", value: formatCurrency(order.amount), detail: "Current order commitment across all lines." },
           { label: "Outstanding", value: formatCurrency(order.outstandingBalance), detail: "Amount still open for billing or payment." },
           { label: "Received Qty", value: `${totalReceived}/${totalOrdered}`, detail: "Received quantity against ordered quantity." },
-          { label: "Terms", value: order.paymentTerms, detail: "Commercial terms for supplier settlement." },
+          { label: "Terms", value: `${order.paymentTerms} Days`, detail: "Commercial terms for supplier settlement." },
         ]}
       />
 

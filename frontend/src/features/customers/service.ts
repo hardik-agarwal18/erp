@@ -68,7 +68,7 @@ function mapLedgerToCustomer(ledger: CustomerLedgerResponse): Customer {
     segment: customer.creditLimit && customer.creditLimit >= 100_000 ? "enterprise" : customer.creditLimit && customer.creditLimit >= 25_000 ? "mid_market" : "smb",
     gstin: customer.gstNumber ?? "",
     currency: "INR",
-    paymentTerms: "Net 30",
+    paymentTerms: 30,
     creditLimit: Number(customer.creditLimit ?? 0),
     outstandingBalance: ledger.outstandingBalance,
     totalRevenue,

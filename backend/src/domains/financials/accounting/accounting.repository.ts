@@ -187,23 +187,23 @@ export const accountingRepository = {
 
   // TRIAL BALANCE
   getTrialBalance: async (organizationId: string, startDate?: Date, endDate?: Date) => {
-    const whereClause: Prisma.JournalLineWhereInput = {
-      entry: {
-        organizationId,
-        isPosted: true,
-      },
+    const entryWhere: Prisma.JournalEntryWhereInput = {
+      organizationId,
+      isPosted: true,
     };
 
     if (startDate || endDate) {
       const dateFilter: any = {};
       if (startDate) dateFilter.gte = startDate;
       if (endDate) dateFilter.lte = endDate;
-      
-      whereClause.entry = {
-        ...whereClause.entry,
-        postedAt: dateFilter,
-      };
+      entryWhere.postedAt = dateFilter;
     }
+
+    const matchingEntries = await prisma.journalEntry.findMany({
+      where: entryWhere,
+      select: { id: true },
+    });
+    const entryIds = matchingEntries.map(e => e.id);
 
     const lines = await prisma.journalLine.groupBy({
       by: ["accountId"],
@@ -211,7 +211,9 @@ export const accountingRepository = {
         debit: true,
         credit: true,
       },
-      where: whereClause,
+      where: {
+        entryId: { in: entryIds },
+      },
     });
 
     // Get account details

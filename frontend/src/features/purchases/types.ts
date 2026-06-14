@@ -46,7 +46,7 @@ export type PurchaseFormValues = {
   expectedDate: string;
   warehouse: string;
   approvalStage: string;
-  paymentTerms: string;
+  paymentTerms: number;
   buyer: string;
   notes: string;
   lineItems: PurchaseLineItemFormValues[];

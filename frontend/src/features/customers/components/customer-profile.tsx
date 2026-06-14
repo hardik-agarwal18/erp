@@ -22,7 +22,7 @@ export function CustomerProfile({ customer }: { customer: Customer }) {
           <ProfileField label="Email" value={customer.email} />
           <ProfileField label="Phone" value={customer.phone} />
           <ProfileField label="Segment" value={customer.segment.replace("_", " ")} />
-          <ProfileField label="Payment Terms" value={customer.paymentTerms} />
+          <ProfileField label="Payment Terms" value={customer.paymentTerms ? `${customer.paymentTerms} Days` : "Due on receipt"} />
           <ProfileField label="Credit Limit" value={formatCurrency(customer.creditLimit)} />
           <ProfileField label="Outstanding Balance" value={formatCurrency(customer.outstandingBalance)} />
         </div>

@@ -54,7 +54,7 @@ export function ProductEditView({ productId }: { productId: string }) {
             supplierCode: product.supplier.vendorId.replace("ven-", "").toUpperCase(),
             supplierLeadTimeDays: product.supplier.leadTimeDays,
             supplierMinimumOrderQuantity: product.supplier.minimumOrderQuantity,
-            supplierPaymentTerms: product.supplier.paymentTerms,
+            supplierPaymentTerms: product.supplier.paymentTerms || 0,
             costPrice: product.pricing.costPrice,
             salePrice: product.pricing.salePrice,
             wholesalePrice: product.pricing.wholesalePrice,

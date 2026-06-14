@@ -74,7 +74,7 @@ function mapInvoice(invoice: BackendInvoice): Invoice {
     balance: Math.max(Number(invoice.totalAmount || 0) - paidAmount, 0),
     salesRep: "ERP",
     currency: "INR",
-    paymentTerms: "Net 30",
+    paymentTerms: 30,
     notes: invoice.notes ?? "",
     billingAddress: invoice.customer?.address ?? "",
     lineItems: invoice.items?.map((item) => ({

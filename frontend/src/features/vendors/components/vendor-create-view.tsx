@@ -36,7 +36,7 @@ export function VendorCreateView() {
             category: "services",
             gstin: "",
             currency: "INR",
-            paymentTerms: "",
+            paymentTerms: 0,
             leadTimeDays: 0,
             accountManager: "",
             billingAddress: "",

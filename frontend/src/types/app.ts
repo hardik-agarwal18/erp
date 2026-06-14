@@ -95,7 +95,7 @@ export type Invoice = {
   balance: number;
   salesRep: string;
   currency?: string;
-  paymentTerms?: string;
+  paymentTerms?: number;
   notes?: string;
   billingAddress?: string;
   lineItems?: InvoiceLineItem[];
@@ -132,7 +132,7 @@ export type PurchaseOrder = {
   amount: number;
   approvalStage: string;
   workspaceId: string;
-  paymentTerms: string;
+  paymentTerms: number;
   outstandingBalance: number;
   buyer?: string;
   notes?: string;
@@ -178,7 +178,7 @@ export type Customer = {
   segment: CustomerSegment;
   gstin: string;
   currency: string;
-  paymentTerms: string;
+  paymentTerms: number;
   creditLimit: number;
   outstandingBalance: number;
   totalRevenue: number;
@@ -233,7 +233,7 @@ export type Vendor = {
   category: VendorCategory;
   gstin: string;
   currency: string;
-  paymentTerms: string;
+  paymentTerms: number;
   leadTimeDays: number;
   outstandingBalance: number;
   totalSpend: number;
@@ -257,7 +257,7 @@ export type ProductSupplier = {
   vendorName: string;
   leadTimeDays: number;
   minimumOrderQuantity: number;
-  paymentTerms: string;
+  paymentTerms: number;
   lastPurchaseDate: string;
 };
 

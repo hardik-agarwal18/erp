@@ -117,7 +117,7 @@ export function CustomerForm({
             </div>
             <div>
               <Label htmlFor="customer-payment-terms">Payment Terms</Label>
-              <Input id="customer-payment-terms" {...form.register("paymentTerms")} />
+              <Input type="number" id="customer-payment-terms" {...form.register("paymentTerms")} />
             </div>
             <div>
               <Label htmlFor="customer-credit-limit">Credit Limit</Label>

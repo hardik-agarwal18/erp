@@ -114,7 +114,7 @@ export function ProductForm({
             </div>
             <div className="lg:col-span-2">
               <Label htmlFor="supplier-terms">Payment Terms</Label>
-              <Input id="supplier-terms" {...form.register("supplierPaymentTerms")} />
+              <Input type="number" id="supplier-terms" {...form.register("supplierPaymentTerms")} />
             </div>
           </div>
 

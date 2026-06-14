@@ -76,7 +76,7 @@ export function PurchaseEditor({
             </div>
             <div>
               <Label htmlFor="po-terms">Payment Terms</Label>
-              <Input id="po-terms" {...form.register("paymentTerms")} />
+              <Input type="number" id="po-terms" {...form.register("paymentTerms")} />
             </div>
           </div>
 

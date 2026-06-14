@@ -36,7 +36,7 @@ export function CustomerCreateView() {
             segment: "smb",
             gstin: "",
             currency: "INR",
-            paymentTerms: "",
+            paymentTerms: 0,
             creditLimit: 0,
             owner: "",
             billingAddress: "",

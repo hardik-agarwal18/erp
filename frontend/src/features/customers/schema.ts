@@ -12,7 +12,7 @@ export const customerFormSchema = z.object({
   segment: z.enum(["enterprise", "mid_market", "smb"]),
   gstin: z.string().trim().optional().or(z.literal("")),
   currency: z.string().trim().min(3).max(3),
-  paymentTerms: z.string().trim().optional().or(z.literal("")),
+  paymentTerms: z.coerce.number().int().nonnegative().optional(),
   creditLimit: z.coerce.number().nonnegative().optional(),
   owner: z.string().trim().optional().or(z.literal("")),
   billingAddress: z.string().trim().optional().or(z.literal("")),

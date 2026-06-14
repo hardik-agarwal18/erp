@@ -26,7 +26,7 @@ export function InvoicePreview({ invoice }: { invoice: Invoice }) {
             <div>Invoice: {invoice.invoiceNumber}</div>
             <div>Issue Date: {invoice.issueDate ?? "Pending"}</div>
             <div>Due Date: {invoice.dueDate}</div>
-            <div>Payment Terms: {invoice.paymentTerms ?? "Standard terms"}</div>
+            <div>Payment Terms: {invoice.paymentTerms ? `${invoice.paymentTerms} Days` : "Due on receipt"}</div>
           </div>
         </div>
 

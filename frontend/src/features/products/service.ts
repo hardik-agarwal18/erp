@@ -81,7 +81,7 @@ function mapProduct(product: BackendProduct, categories: BackendCategory[], item
       vendorName: "Not linked",
       leadTimeDays: 0,
       minimumOrderQuantity: 0,
-      paymentTerms: "Net 30",
+      paymentTerms: 30,
       lastPurchaseDate: product.updatedAt.slice(0, 10),
     },
     pricing: {

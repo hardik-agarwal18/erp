@@ -6,7 +6,7 @@ import asyncHandler from "../../../utils/asyncHandler.js";
 
 export const accountingController = {
   getTrialBalance: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const { startDate, endDate } = req.query;
 
     const filters = {
@@ -19,7 +19,7 @@ export const accountingController = {
   }),
 
   getProfitAndLoss: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const { startDate, endDate } = req.query;
 
     const filters = {
@@ -32,7 +32,7 @@ export const accountingController = {
   }),
 
   getBalanceSheet: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const { asOfDate } = req.query;
 
     const bs = await accountingService.getBalanceSheet(organizationId, asOfDate ? new Date(asOfDate as string) : undefined);
@@ -40,7 +40,7 @@ export const accountingController = {
   }),
 
   getAccountsReceivableAging: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const { asOfDate } = req.query;
     
     const aging = await agingService.getAccountsReceivableAging(organizationId, asOfDate ? new Date(asOfDate as string) : undefined);
@@ -48,7 +48,7 @@ export const accountingController = {
   }),
 
   getAccountsPayableAging: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const { asOfDate } = req.query;
     
     const aging = await agingService.getAccountsPayableAging(organizationId, asOfDate ? new Date(asOfDate as string) : undefined);
@@ -56,25 +56,25 @@ export const accountingController = {
   }),
 
   listAccounts: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const accounts = await accountingService.listAccounts(organizationId);
     res.json({ success: true, data: accounts });
   }),
 
   createAccount: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const account = await accountingService.createAccount(organizationId, req.body);
     res.status(201).json({ success: true, data: account });
   }),
 
   updateAccount: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const account = await accountingService.updateAccount(organizationId, req.params.id as string, req.body);
     res.json({ success: true, data: account });
   }),
 
   listJournals: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const { startDate, endDate, referenceType, accountId, page, limit } = req.query;
 
     const filters = {
@@ -91,19 +91,19 @@ export const accountingController = {
   }),
 
   getJournalById: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const journal = await accountingService.getJournalById(organizationId, req.params.id as string);
     res.json({ success: true, data: journal });
   }),
 
   postJournal: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const journal = await accountingService.postJournalEntry(organizationId, req.body);
     res.status(201).json({ success: true, data: journal });
   }),
 
   reverseJournal: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const { reversalDate } = req.body;
     const date = reversalDate ? new Date(reversalDate as string) : undefined;
     const journal = await accountingService.reverseJournalEntry(organizationId, req.params.id as string, date);
@@ -111,13 +111,13 @@ export const accountingController = {
   }),
 
   listFiscalYears: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const years = await accountingService.listFiscalYears(organizationId);
     res.json({ success: true, data: years });
   }),
 
   createFiscalYear: asyncHandler(async (req: Request, res: Response) => {
-    const organizationId = req.user!.organizationId as string;
+    const organizationId = req.member!.organizationId as string;
     const year = await accountingService.createFiscalYear(organizationId, req.body);
     res.status(201).json({ success: true, data: year });
   }),

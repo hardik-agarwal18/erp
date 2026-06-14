@@ -93,7 +93,7 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
           { label: "Balance", value: formatCurrency(invoice.balance, invoice.currency ?? "INR"), detail: "Remaining unpaid balance." },
           { label: "Due Date", value: invoice.dueDate, detail: "Customer payment due date." },
           { label: "Status", value: invoice.status, detail: "Current invoice lifecycle stage." },
-          { label: "Terms", value: invoice.paymentTerms ?? "Standard", detail: "Commercial payment terms on this invoice." },
+          { label: "Terms", value: invoice.paymentTerms ? `${invoice.paymentTerms} Days` : "Due on receipt", detail: "Commercial payment terms on this invoice." },
         ]}
       />
 

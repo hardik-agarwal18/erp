@@ -98,7 +98,7 @@ export function VendorForm({
             </div>
             <div>
               <Label htmlFor="vendor-payment-terms">Payment Terms</Label>
-              <Input id="vendor-payment-terms" {...form.register("paymentTerms")} />
+              <Input type="number" id="vendor-payment-terms" {...form.register("paymentTerms")} />
             </div>
             <div>
               <Label htmlFor="vendor-lead-time">Lead Time (days)</Label>

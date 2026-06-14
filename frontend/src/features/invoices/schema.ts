@@ -15,7 +15,7 @@ export const invoiceFormSchema = z.object({
   issueDate: z.string().trim().min(8),
   dueDate: z.string().trim().min(8),
   salesRep: requiredTextSchema,
-  paymentTerms: requiredTextSchema,
+  paymentTerms: z.coerce.number().int().nonnegative(),
   notes: z.string().trim().min(4),
   billingAddress: requiredTextSchema,
   lineItems: z.array(invoiceLineItemSchema).min(1),

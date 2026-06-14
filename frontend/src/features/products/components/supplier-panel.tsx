@@ -7,7 +7,7 @@ export function SupplierPanel({ product }: { product: Product }) {
     ["Vendor reference", product.supplier.vendorId],
     ["Lead time", `${product.supplier.leadTimeDays} days`],
     ["Minimum order", `${product.supplier.minimumOrderQuantity} ${product.unitOfMeasure}`],
-    ["Payment terms", product.supplier.paymentTerms],
+    ["Payment terms", product.supplier.paymentTerms ? `${product.supplier.paymentTerms} Days` : "Due on receipt"],
     ["Last purchase", product.supplier.lastPurchaseDate],
   ];
 
