@@ -60,7 +60,6 @@ export const accountingRepository = {
         postedAt: data.postedAt || new Date(),
         lines: {
           create: data.lines.map((line) => ({
-            organizationId,
             accountId: line.accountId,
             debit: new Prisma.Decimal(line.debit.toString()),
             credit: new Prisma.Decimal(line.credit.toString()),
@@ -115,7 +114,6 @@ export const accountingRepository = {
           postedAt: reversalDate || new Date(),
           lines: {
             create: original.lines.map(line => ({
-              organizationId,
               accountId: line.accountId,
               // Swap debits and credits
               debit: line.credit as any,
@@ -194,8 +192,14 @@ export const accountingRepository = {
 
     if (startDate || endDate) {
       const dateFilter: any = {};
-      if (startDate) dateFilter.gte = startDate;
-      if (endDate) dateFilter.lte = endDate;
+      if (startDate) {
+        dateFilter.gte = startDate;
+      }
+      if (endDate) {
+        const endOfDay = new Date(endDate);
+        endOfDay.setUTCHours(23, 59, 59, 999);
+        dateFilter.lte = endOfDay;
+      }
       entryWhere.postedAt = dateFilter;
     }
 
@@ -253,13 +257,14 @@ export const accountingRepository = {
   },
 
   // FISCAL YEAR
-  createFiscalYear: async (organizationId: string, name: string, startDate: Date, endDate: Date) => {
+  createFiscalYear: async (organizationId: string, name: string, startDate: Date, endDate: Date, isActive: boolean = true) => {
     return prisma.fiscalYear.create({
       data: {
         organizationId,
         name,
         startDate,
         endDate,
+        isActive,
       },
     });
   },

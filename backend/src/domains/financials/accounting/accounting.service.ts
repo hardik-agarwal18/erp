@@ -326,14 +326,28 @@ export const accountingService = {
     });
   },
 
-  postExpenseJournal: async (organizationId: string, expenseId: string, description: string, amount: number) => {
-    const mappings = await accountingRepository.getDefaultAccountMapping(organizationId);
-    if (!mappings || !mappings.apAccountId) {
-      throw new ApiError(500, "Missing default accounting mappings for AP.");
+  postExpenseJournal: async (organizationId: string, expenseId: string, description: string, amount: number, category?: string) => {
+    const accounts = await accountingRepository.listAccounts(organizationId);
+    
+    // Attempt to match category to specific expense account
+    const categoryMapping: Record<string, string> = {
+      "SALARY": "Salary Expense",
+      "RENT": "Rent Expense",
+      "UTILITIES": "Electricity Expense",
+      "MARKETING": "Marketing Expense",
+      "TRAVEL": "Travel Expense",
+      "SOFTWARE": "Software Expense",
+      "OTHER": "Office Expense"
+    };
+    
+    const targetAccountName = category ? categoryMapping[category] : undefined;
+    let expAccount = accounts.find((a: any) => a.name === targetAccountName);
+    
+    // Fallback to first EXPENSE account
+    if (!expAccount) {
+      expAccount = accounts.find((a: any) => a.type === "EXPENSE");
     }
 
-    const accounts = await accountingRepository.listAccounts(organizationId);
-    const expAccount = accounts.find((a: any) => a.type === "EXPENSE");
     const cashAccount = accounts.find((a: any) => a.name === "Cash" || a.code === "1000");
 
     if (!expAccount || !cashAccount) {
