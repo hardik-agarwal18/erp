@@ -82,6 +82,9 @@ model Organization {
   inventoryValuationSnapshots InventoryValuationSnapshot[]
   outboxEvents                OutboxEvent[]
   expenseClaims               ExpenseClaim[]
+  vendorPayments              VendorPayment[]
+  bankAccounts                BankAccount[]
+  bankTransactions            BankTransaction[]
 
   @@index([ownerId])
 }
@@ -447,6 +450,8 @@ model Payment {
   deletedAt      DateTime?
   invoice        Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bankAccount    BankAccount?  @relation(fields: [bankAccountId], references: [id])
+  bankAccountId  String?
 
   @@index([organizationId])
   @@index([organizationId, paymentDate])
@@ -466,6 +471,8 @@ model Expense {
   deletedAt      DateTime?
   organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   vendor         Vendor?         @relation(fields: [vendorId], references: [id])
+  bankAccount    BankAccount?    @relation(fields: [bankAccountId], references: [id])
+  bankAccountId  String?
 
   @@index([organizationId])
   @@index([organizationId, category])
@@ -881,9 +888,9 @@ model ExpenseClaim {
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
 
-  employee       Employee           @relation(fields: [employeeId], references: [id])
-  approvedBy     User?              @relation("ExpenseClaimApprovedBy", fields: [approvedById], references: [id])
-  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+  approvedBy   User?        @relation("ExpenseClaimApprovedBy", fields: [approvedById], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, employeeId])
 }
@@ -1102,48 +1109,50 @@ model ApprovalAction {
 }
 
 model Account {
-  id             String        @id @default(uuid())
+  id             String                 @id @default(uuid())
   organizationId String
   code           String
   name           String
   type           AccountType
-  normalBalance  BalanceType   @default(DEBIT)
+  normalBalance  BalanceType            @default(DEBIT)
   parentId       String?
-  isSystem       Boolean       @default(false)
-  isActive       Boolean       @default(true)
-  parent         Account?      @relation("AccountHierarchy", fields: [parentId], references: [id])
-  children       Account[]     @relation("AccountHierarchy")
+  isSystem       Boolean                @default(false)
+  isActive       Boolean                @default(true)
+  parent         Account?               @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children       Account[]              @relation("AccountHierarchy")
   journalLines   JournalLine[]
   systemMappings SystemAccountMapping[]
-  organization   Organization  @relation(fields: [organizationId], references: [id])
+  organization   Organization           @relation(fields: [organizationId], references: [id])
+  bankAccount    BankAccount?
 
   @@unique([organizationId, code])
 }
 
 model SystemAccountMapping {
-  id             String       @id @default(uuid())
+  id             String @id @default(uuid())
   organizationId String
   mappingKey     String
   accountId      String
-  
-  organization   Organization @relation(fields: [organizationId], references: [id])
-  account        Account      @relation(fields: [accountId], references: [id])
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  account      Account      @relation(fields: [accountId], references: [id])
 
   @@unique([organizationId, mappingKey])
 }
 
 model JournalEntry {
-  id             String        @id @default(uuid())
-  organizationId String
-  entryNumber    String
-  description    String
-  referenceType  String?
-  referenceId    String?
-  isPosted       Boolean       @default(false)
-  postedAt       DateTime?
-  createdAt      DateTime      @default(now())
-  lines          JournalLine[]
-  organization   Organization  @relation(fields: [organizationId], references: [id])
+  id              String           @id @default(uuid())
+  organizationId  String
+  entryNumber     String
+  description     String
+  referenceType   String?
+  referenceId     String?
+  isPosted        Boolean          @default(false)
+  postedAt        DateTime?
+  createdAt       DateTime         @default(now())
+  lines           JournalLine[]
+  organization    Organization     @relation(fields: [organizationId], references: [id])
+  bankTransaction BankTransaction?
 
   @@unique([organizationId, entryNumber])
 }
@@ -1221,6 +1230,28 @@ model VendorInvoice {
   organization    Organization        @relation(fields: [organizationId], references: [id])
   vendor          Vendor              @relation(fields: [vendorId], references: [id])
   purchaseOrder   PurchaseOrder?      @relation(fields: [purchaseOrderId], references: [id])
+  vendorPayments  VendorPayment[]
+}
+
+model VendorPayment {
+  id             String        @id @default(uuid())
+  organizationId String
+  invoiceId      String
+  amount         Decimal
+  paymentMethod  PaymentMethod
+  paymentDate    DateTime
+  reference      String?
+  bankAccountId  String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  invoice      VendorInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bankAccount  BankAccount?  @relation(fields: [bankAccountId], references: [id])
+
+  @@index([organizationId])
+  @@index([organizationId, paymentDate])
 }
 
 model VendorInvoiceItem {
@@ -1514,9 +1545,55 @@ model OutboxEvent {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now()) @updatedAt
 
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([status, nextRetryAt])
   @@index([organizationId])
 }
 
+model BankAccount {
+  id              String   @id @default(uuid())
+  organizationId  String
+  name            String
+  accountNumber   String?
+  bankName        String?
+  branchName      String?
+  ifscCode        String?
+  currency        String   @default("INR")
+  linkedAccountId String   @unique // Link to GL Account in Chart of Accounts
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  linkedAccount  Account           @relation(fields: [linkedAccountId], references: [id], onDelete: Restrict)
+  transactions   BankTransaction[]
+  expenses       Expense[]
+  payments       Payment[]
+  vendorPayments VendorPayment[]
+
+  @@index([organizationId])
+}
+
+model BankTransaction {
+  id              String   @id @default(uuid())
+  organizationId  String
+  bankAccountId   String
+  type            String // "DEPOSIT", "WITHDRAWAL", "BANK_FEE", "INTEREST"
+  amount          Decimal
+  reference       String? // Cheque number, UTR, etc.
+  description     String?
+  transactionDate DateTime
+  status          String   @default("CLEARED") // "PENDING", "CLEARED", "RECONCILED"
+  journalEntryId  String?  @unique // Link to GL Journal Entry
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bankAccount  BankAccount   @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  @@index([organizationId])
+  @@index([bankAccountId])
+  @@index([transactionDate])
+}

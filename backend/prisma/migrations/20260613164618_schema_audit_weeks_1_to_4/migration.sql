@@ -42,47 +42,47 @@ DROP INDEX "InvoiceItem_invoiceId_idx";
 DROP INDEX "InvoiceItem_productId_idx";
 
 -- AlterTable
-ALTER TABLE "DeliveryChallanItem" ADD COLUMN     "organizationId" TEXT NOT NULL;
+ALTER TABLE "DeliveryChallanItem" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id';
 
 -- AlterTable
-ALTER TABLE "EmailLog" ADD COLUMN     "organizationId" TEXT NOT NULL;
+ALTER TABLE "EmailLog" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id';
 
 -- AlterTable
 ALTER TABLE "GoodsReceiptNote" ADD COLUMN     "vendorInvoiceId" TEXT;
 
 -- AlterTable
-ALTER TABLE "GoodsReceiptNoteItem" ADD COLUMN     "organizationId" TEXT NOT NULL;
+ALTER TABLE "GoodsReceiptNoteItem" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id';
 
 -- AlterTable
-ALTER TABLE "InvoiceItem" ADD COLUMN     "organizationId" TEXT NOT NULL,
+ALTER TABLE "InvoiceItem" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id',
 ADD COLUMN     "taxRate" DECIMAL(65,30);
 
 -- AlterTable
 ALTER TABLE "JournalEntry" ADD COLUMN     "sourceEventId" TEXT;
 
 -- AlterTable
-ALTER TABLE "JournalLine" ADD COLUMN     "organizationId" TEXT NOT NULL;
+ALTER TABLE "JournalLine" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id';
 
 -- AlterTable
 ALTER TABLE "Payment" ADD COLUMN     "customerId" TEXT,
 ALTER COLUMN "invoiceId" DROP NOT NULL;
 
 -- AlterTable
-ALTER TABLE "PayslipLineItem" ADD COLUMN     "organizationId" TEXT NOT NULL;
+ALTER TABLE "PayslipLineItem" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id';
 
 -- AlterTable
-ALTER TABLE "PurchaseOrderItem" ADD COLUMN     "organizationId" TEXT NOT NULL,
+ALTER TABLE "PurchaseOrderItem" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id',
 ADD COLUMN     "taxRate" DECIMAL(65,30);
 
 -- AlterTable
-ALTER TABLE "StockJournalItem" ADD COLUMN     "organizationId" TEXT NOT NULL;
+ALTER TABLE "StockJournalItem" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id';
 
 -- AlterTable
-ALTER TABLE "StockVerificationItem" ADD COLUMN     "organizationId" TEXT NOT NULL;
+ALTER TABLE "StockVerificationItem" ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id';
 
 -- AlterTable
 ALTER TABLE "VendorInvoiceItem" ADD COLUMN     "grnItemId" TEXT,
-ADD COLUMN     "organizationId" TEXT NOT NULL,
+ADD COLUMN     "organizationId" TEXT NOT NULL DEFAULT 'default-org-id',
 ADD COLUMN     "taxRate" DECIMAL(65,30);
 
 -- CreateTable
