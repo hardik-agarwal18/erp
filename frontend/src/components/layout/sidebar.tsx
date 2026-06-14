@@ -3,7 +3,7 @@
 import type { ComponentType } from "react";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
-import { Activity, ArrowLeftRight, BarChart3, Boxes, Briefcase, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star, X, CheckSquare } from "lucide-react";
+import { Activity, ArrowLeftRight, BarChart3, Boxes, Briefcase, ChevronDown, ChevronLeft, ChevronRight, FileSpreadsheet, LayoutDashboard, Settings2, ShoppingCart, Truck, UsersRound, WalletCards, Star, X, CheckSquare, Landmark } from "lucide-react";
 
 import { appConfig } from "@/config/app-config";
 import { cn } from "@/lib/utils";
@@ -60,7 +60,7 @@ const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
           { label: "Balance Sheet", href: "/accounting/balance-sheet" },
         ],
       },
-      {
+      { label: "Treasury", icon: Landmark, feature: "reports", children: [ { label: "Accounts", href: "/treasury/accounts" }, { label: "Transactions", href: "/treasury/transactions" } ] }, {
         label: "Inventory",
         icon: Boxes,
         feature: "inventory",

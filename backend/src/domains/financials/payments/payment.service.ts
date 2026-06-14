@@ -7,6 +7,7 @@ import {
   auditService,
 } from "../../../services/audit/index.js";
 import { paymentRepository } from "./payment.repository.js";
+import { accountingService } from "../accounting/accounting.service.js";
 import { CreatePaymentInput } from "./payment.types.js";
 
 const resolveInvoiceStatus = (totalPaid: number, totalAmount: number) => {

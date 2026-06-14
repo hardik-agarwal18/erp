@@ -21,6 +21,7 @@ export const paymentRepository = {
         paymentMethod: payload.paymentMethod,
         paymentDate: new Date(payload.paymentDate),
         reference: payload.reference,
+        bankAccountId: payload.bankAccountId,
       },
     });
   },
@@ -86,6 +87,7 @@ export const paymentRepository = {
         paymentMethod: payload.paymentMethod,
         paymentDate: new Date(payload.paymentDate),
         reference: payload.reference,
+        bankAccountId: payload.bankAccountId,
       },
     });
   },

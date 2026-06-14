@@ -15,6 +15,8 @@ import { InvoiceStatusBadge } from "./invoice-status-badge";
 import { InvoiceSummary } from "./invoice-summary";
 import { SendEmailModal } from "./send-email-modal";
 import { EmailHistoryModal } from "./email-history-modal";
+import { RecordPaymentModal } from "./record-payment-modal";
+import { CreditCard } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronDown, Download, Mail, History } from "lucide-react";
 import { downloadInvoicePdf } from "../service";
@@ -25,6 +27,7 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
   const query = useInvoiceDetailQuery(invoiceId);
   const [isSendEmailOpen, setIsSendEmailOpen] = useState(false);
   const [isEmailHistoryOpen, setIsEmailHistoryOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   if (query.isError) {
     return <ModuleError title="Invoice unavailable" message="We could not load the selected invoice record." retry={() => query.refetch()} />;
@@ -72,6 +75,10 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
                 }}>
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsPaymentModalOpen(true)}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  Record Payment
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setIsSendEmailOpen(true)}>
                   <Mail className="mr-2 h-4 w-4" />
@@ -133,6 +140,13 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
         onClose={() => setIsSendEmailOpen(false)}
         invoiceId={invoice.id}
         // If we had customer email in mapInvoice we could pass it here, but we default to empty for now
+      />
+
+      <RecordPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        invoiceId={invoice.id}
+        balance={invoice.balance}
       />
 
       <EmailHistoryModal

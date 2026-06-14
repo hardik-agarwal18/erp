@@ -1,3 +1,4 @@
+import prisma from "../../../config/database.js";
 
 import { accountingRepository } from "./accounting.repository.js";
 import ApiError from "../../../utils/ApiError.js";
@@ -290,7 +291,7 @@ export const accountingService = {
     });
   },
 
-  postPaymentJournal: async (organizationId: string, paymentId: string, invoiceNumber: string, amount: number, paymentMethod: string) => {
+  postPaymentJournal: async (organizationId: string, paymentId: string, invoiceNumber: string, amount: number, paymentMethod: string, bankAccountId?: string) => {
     const mappings = await accountingRepository.getDefaultAccountMapping(organizationId);
     if (!mappings || !mappings.arAccountId) {
       throw new ApiError(500, "Missing default accounting mappings for AR. Please configure default accounts.");
@@ -326,7 +327,7 @@ export const accountingService = {
     });
   },
 
-  postExpenseJournal: async (organizationId: string, expenseId: string, description: string, amount: number, category?: string) => {
+  postExpenseJournal: async (organizationId: string, expenseId: string, description: string, amount: number, category?: string, bankAccountId?: string) => {
     const accounts = await accountingRepository.listAccounts(organizationId);
     
     // Attempt to match category to specific expense account
@@ -391,6 +392,42 @@ export const accountingService = {
   },
 
   // REPORTING
+  postVendorPaymentJournal: async (organizationId: string, paymentId: string, invoiceNumber: string, amount: number, paymentMethod: string, bankAccountId?: string) => {
+    const mappings = await accountingRepository.getDefaultAccountMapping(organizationId);
+    if (!mappings || !mappings.apAccountId) {
+      throw new ApiError(500, "Missing default accounting mappings for AP. Please configure default accounts.");
+    }
+
+    const accounts = await accountingRepository.listAccounts(organizationId);
+    const cashAccount = accounts.find((a: any) => a.name === "Cash" || a.code === "1000");
+    const fallbackBankAccount = accounts.find((a: any) => a.name === "Bank" || a.code === "1010");
+    
+    let creditAccountId = ["BANK_TRANSFER", "UPI", "CARD", "CHEQUE"].includes(paymentMethod) ? fallbackBankAccount?.id : cashAccount?.id;
+
+    if (bankAccountId) {
+      const bankAccount = await prisma.bankAccount.findUnique({ where: { id: bankAccountId } });
+      if (bankAccount) {
+        creditAccountId = bankAccount.linkedAccountId;
+      }
+    }
+
+    if (!creditAccountId) {
+      throw new ApiError(500, "Missing credit account. Please configure default accounts or provide a valid bank account.");
+    }
+
+    const lines = [
+      { accountId: mappings.apAccountId, debit: amount, credit: 0 },
+      { accountId: creditAccountId, debit: 0, credit: amount },
+    ];
+
+    return accountingService.postJournalEntry(organizationId, {
+      description: "Payment to vendor for Invoice " + invoiceNumber,
+      referenceType: "VENDOR_PAYMENT",
+      referenceId: paymentId,
+      lines,
+    });
+  },
+
   getTrialBalance: async (organizationId: string, filters: TrialBalanceFilters) => {
     const lines = await accountingRepository.getTrialBalance(organizationId, filters.startDate, filters.endDate);
     
@@ -497,5 +534,6 @@ export const accountingService = {
     }
   }
 };
+
 
 

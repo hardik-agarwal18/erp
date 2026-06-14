@@ -6,6 +6,7 @@ export const paymentFormSchema = z.object({
   paymentMethod: z.string().min(1, "Payment method is required"),
   paymentDate: z.string().min(1, "Payment date is required"),
   reference: z.string().optional(),
+  bankAccountId: z.string().optional(),
 });
 
 export type PaymentFormSchema = z.infer<typeof paymentFormSchema>;

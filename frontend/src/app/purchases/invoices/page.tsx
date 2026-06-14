@@ -12,10 +12,14 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { purchasesService } from "@/services/purchases.service";
+import { RecordVendorPaymentModal } from "@/features/purchases/components/record-vendor-payment-modal";
+import { useState } from "react";
+import { CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function VendorBillsPage() {
   const router = useRouter();
+  const [paymentModalState, setPaymentModalState] = useState<{isOpen: boolean; invoiceId: string; balance: number}>({ isOpen: false, invoiceId: "", balance: 0 });
   
   const { data: invoicesResponse, isLoading } = useQuery({
     queryKey: ["vendor-invoices"],
@@ -134,6 +138,15 @@ export default function VendorBillsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {paymentModalState.isOpen && (
+        <RecordVendorPaymentModal
+          isOpen={paymentModalState.isOpen}
+          onClose={() => setPaymentModalState({ ...paymentModalState, isOpen: false })}
+          invoiceId={paymentModalState.invoiceId}
+          balance={paymentModalState.balance}
+        />
+      )}
     </div>
   );
 }

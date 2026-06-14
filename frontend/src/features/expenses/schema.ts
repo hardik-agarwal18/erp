@@ -6,6 +6,7 @@ export const expenseFormSchema = z.object({
   expenseDate: z.string().min(1, "Expense date is required"),
   description: z.string().optional(),
   vendorId: z.string().optional(),
+  bankAccountId: z.string().optional(),
 });
 
 export type ExpenseFormSchema = z.infer<typeof expenseFormSchema>;

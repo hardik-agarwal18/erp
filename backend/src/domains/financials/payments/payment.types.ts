@@ -5,4 +5,5 @@ export type CreatePaymentInput = {
   paymentMethod: "CASH" | "BANK_TRANSFER" | "UPI" | "CARD" | "CHEQUE" | "OTHER";
   paymentDate: string;
   reference?: string;
+  bankAccountId?: string;
 };

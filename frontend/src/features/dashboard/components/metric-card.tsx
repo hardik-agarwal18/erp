@@ -13,13 +13,14 @@ export interface MetricCardProps {
   label: string;
   value: string | number;
   trend?: number;
+  trendDirection?: "up-is-good" | "down-is-good";
   detail?: string;
   href?: string;
   sparkline?: ReactNode;
   visibleForRoles?: string[];
 }
 
-export function MetricCard({ label, value, trend, detail, href, sparkline }: MetricCardProps) {
+export function MetricCard({ label, value, trend, trendDirection = "up-is-good", detail, href, sparkline }: MetricCardProps) {
   const [timeframe, setTimeframe] = useState("last_month");
 
   const isCompareDetail = typeof detail === "string" && detail.startsWith("vs ");
@@ -31,6 +32,17 @@ export function MetricCard({ label, value, trend, detail, href, sparkline }: Met
     timeframe === "7_days" ? Number((trend * 0.2).toFixed(1)) : trend
   ) : undefined;
 
+  let variant: "default" | "success" | "danger" | "neutral" = "neutral";
+  if (displayTrend !== undefined) {
+    if (displayTrend > 0) {
+      variant = trendDirection === "up-is-good" ? "success" : "danger";
+    } else if (displayTrend < 0) {
+      variant = trendDirection === "up-is-good" ? "danger" : "success";
+    } else {
+      variant = "neutral";
+    }
+  }
+
   const content = (
     <Card className={cn(
       "relative overflow-hidden transition-all duration-200 bg-card",
@@ -41,8 +53,8 @@ export function MetricCard({ label, value, trend, detail, href, sparkline }: Met
         <div className="mt-3 flex items-end justify-between gap-3">
           <p className="text-2xl font-semibold text-foreground">{value}</p>
           {displayTrend !== undefined && (
-            <Badge variant={displayTrend >= 0 ? "success" : "danger"}>
-              {displayTrend >= 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : <ArrowDown className="mr-1 h-3 w-3" />}
+            <Badge variant={variant as any}>
+              {displayTrend > 0 ? <ArrowUp className="mr-1 h-3 w-3" /> : displayTrend < 0 ? <ArrowDown className="mr-1 h-3 w-3" /> : null}
               {Math.abs(displayTrend)}%
             </Badge>
           )}

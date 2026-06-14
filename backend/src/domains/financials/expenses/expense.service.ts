@@ -35,6 +35,7 @@ export const expenseService = {
           amount: payload.amount,
           expenseDate: new Date(payload.expenseDate),
           description: payload.description,
+          bankAccountId: payload.bankAccountId,
         },
       });
 

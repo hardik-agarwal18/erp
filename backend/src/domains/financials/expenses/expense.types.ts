@@ -12,4 +12,5 @@ export type CreateExpenseInput = {
   amount: number;
   expenseDate: string;
   description?: string;
+  bankAccountId?: string;
 };

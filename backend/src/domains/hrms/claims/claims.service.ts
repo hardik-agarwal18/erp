@@ -1,5 +1,6 @@
 import { prisma } from "../../../config/database.js";
 import { ExpenseClaimStatus } from "./claims.validators.js";
+import { expenseService } from "../../financials/expenses/expense.service.js";
 
 export const claimsService = {
   submitClaim: async (organizationId: string, employeeId: string, data: {
@@ -54,7 +55,13 @@ export const claimsService = {
   },
 
   updateStatus: async (id: string, organizationId: string, approvedById: string, status: ExpenseClaimStatus) => {
-    return prisma.expenseClaim.update({
+    const claim = await prisma.expenseClaim.findUnique({
+      where: { id, organizationId }
+    });
+
+    if (!claim) throw new Error("Claim not found");
+
+    const updated = await prisma.expenseClaim.update({
       where: { id, organizationId },
       data: {
         status,
@@ -66,6 +73,23 @@ export const claimsService = {
         approvedBy: { select: { name: true } }
       }
     });
+
+    if (status === "APPROVED" && claim.status !== "APPROVED") {
+      // Auto-generate Expense
+      let category: "SALARY"|"RENT"|"UTILITIES"|"MARKETING"|"TRAVEL"|"SOFTWARE"|"OTHER" = "OTHER";
+      const catUpper = claim.category.toUpperCase();
+      if (["SALARY", "RENT", "UTILITIES", "MARKETING", "TRAVEL", "SOFTWARE"].includes(catUpper)) {
+        category = catUpper as any;
+      }
+      await expenseService.createExpense(organizationId, approvedById, {
+        amount: Number(claim.amount),
+        category,
+        expenseDate: new Date().toISOString(),
+        description: `HRMS Expense Claim: ${claim.description || claim.category}`,
+      });
+    }
+
+    return updated;
   }
 };
 

@@ -32,3 +32,14 @@ export const goodsReceivedNoteSchema = z.object({
 
 export type PurchaseOrderSchema = z.infer<typeof purchaseOrderSchema>;
 export type GoodsReceivedNoteSchema = z.infer<typeof goodsReceivedNoteSchema>;
+
+export const vendorPaymentFormSchema = z.object({
+  invoiceId: z.string().min(1, "Invoice ID is required"),
+  amount: z.coerce.number().positive("Amount must be greater than zero"),
+  paymentMethod: z.string().min(1, "Payment method is required"),
+  paymentDate: z.string().min(1, "Payment date is required"),
+  reference: z.string().optional(),
+  bankAccountId: z.string().optional(),
+});
+
+export type VendorPaymentFormSchema = z.infer<typeof vendorPaymentFormSchema>;

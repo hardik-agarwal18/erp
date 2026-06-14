@@ -49,6 +49,11 @@ export const purchasesService = {
     return res.data;
   },
 
+  createVendorPayment: async (id: string, data: any) => {
+    const res = await apiClient.post(apiEndpoints.purchases.payments.create(id), data);
+    return res.data;
+  },
+
   postInvoice: async (id: string) => {
     const res = await apiClient.post<{ data: VendorInvoice }>(apiEndpoints.purchases.postInvoice(id), {});
     return res.data;

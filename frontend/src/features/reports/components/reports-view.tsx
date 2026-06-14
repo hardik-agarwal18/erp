@@ -208,6 +208,7 @@ export function ReportsView() {
                 label={metric.label} 
                 value={displayValue} 
                 trend={metric.trend} 
+                trendDirection={metric.label === "Expenses" ? "down-is-good" : "up-is-good"}
                 detail={metric.detail} 
               />
             );

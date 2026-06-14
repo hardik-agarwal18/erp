@@ -1,6 +1,7 @@
 
 import { Router } from "express";
 import { vendorInvoicesController } from "./vendor-invoices.controller.js";
+import { vendorPaymentsController } from "./vendor-payments.controller.js";
 import { validate } from "../../../../middleware/validate.middleware.js";
 import { authMiddleware } from "../../../../middleware/auth.middleware.js";
 import { requirePermission, tenantContextMiddleware } from "../../../../middleware/tenant.middleware.js";
@@ -49,4 +50,17 @@ router.post(
   vendorInvoicesController.requestOverride
 );
 
+router.post(
+  "/:id/payments",
+  requirePermission(PERMISSIONS.PURCHASING_CREATE),
+  vendorPaymentsController.createPayment
+);
+
+router.get(
+  "/:id/payments",
+  requirePermission(PERMISSIONS.PURCHASING_VIEW),
+  vendorPaymentsController.listPayments
+);
+
 export default router;
+

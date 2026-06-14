@@ -132,14 +132,14 @@ export default function BalanceSheetPage() {
                         report.liabilities.map(acc => (
                           <tr key={acc.accountId} className="hover:bg-slate-50 dark:hover:bg-slate-900/30">
                             <td className="p-4 pl-6">{acc.accountCode} - {acc.accountName}</td>
-                            <td className="p-4 text-right font-medium">{formatCurrency(Math.abs(acc.netBalance))}</td>
+                            <td className="p-4 text-right font-medium">{formatCurrency(acc.netBalance)}</td>
                           </tr>
                         ))
                       )}
                       <tr className="bg-rose-50 dark:bg-rose-900/20 font-semibold text-base border-t-2 border-rose-200 dark:border-rose-800">
                         <td className="p-4 text-slate-900 dark:text-slate-100">Total Liabilities</td>
                         <td className="p-4 text-right text-rose-700 dark:text-rose-400">
-                          {formatCurrency(Math.abs(report.totals.liabilities))}
+                          {formatCurrency(report.totals.liabilities)}
                         </td>
                       </tr>
                     </tbody>
@@ -160,14 +160,14 @@ export default function BalanceSheetPage() {
                         report.equity.map(acc => (
                           <tr key={acc.accountId} className="hover:bg-slate-50 dark:hover:bg-slate-900/30">
                             <td className="p-4 pl-6">{acc.accountCode} - {acc.accountName}</td>
-                            <td className="p-4 text-right font-medium">{formatCurrency(Math.abs(acc.netBalance))}</td>
+                            <td className="p-4 text-right font-medium">{formatCurrency(acc.netBalance)}</td>
                           </tr>
                         ))
                       )}
                       <tr className="bg-purple-50 dark:bg-purple-900/20 font-semibold text-base border-t-2 border-purple-200 dark:border-purple-800">
                         <td className="p-4 text-slate-900 dark:text-slate-100">Total Equity</td>
                         <td className="p-4 text-right text-purple-700 dark:text-purple-400">
-                          {formatCurrency(Math.abs(report.totals.equity))}
+                          {formatCurrency(report.totals.equity)}
                         </td>
                       </tr>
                     </tbody>
@@ -179,7 +179,7 @@ export default function BalanceSheetPage() {
                 <CardContent className="p-4 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/20">
                   <span className="text-lg font-semibold text-slate-900 dark:text-slate-100">Total Liabilities & Equity</span>
                   <span className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                    {formatCurrency(Math.abs(report.totals.liabilities + report.totals.equity))}
+                    {formatCurrency(report.totals.liabilities + report.totals.equity)}
                   </span>
                 </CardContent>
               </Card>

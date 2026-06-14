@@ -92,6 +92,10 @@ export const apiEndpoints = {
     matchSummary: (id: string) => `/vendor-invoices/${id}/match-summary`,
     createInvoice: "/vendor-invoices",
     postInvoice: (id: string) => `/vendor-invoices/${id}/post`,
+      payments: {
+        list: (id: string) => `/vendor-invoices/${id}/payments`,
+        create: (id: string) => `/vendor-invoices/${id}/payments`,
+      },
     orders: {
       list: "/purchase-orders",
       details: (id: string) => `/purchase-orders/${id}`,

@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { BankAccountSelector } from "../../treasury/components/bank-account-selector";
+import { Controller } from "react-hook-form";
 import { expenseFormSchema, type ExpenseFormSchema } from "../schema";
 
 export function ExpenseForm({
