@@ -21,7 +21,7 @@ export type ProductFormValues = {
   supplierCode: string;
   supplierLeadTimeDays: number;
   supplierMinimumOrderQuantity: number;
-  supplierPaymentTerms: string;
+  supplierPaymentTerms: number;
   costPrice: number;
   salePrice: number;
   wholesalePrice: number;

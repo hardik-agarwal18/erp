@@ -1,17 +1,18 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
 
 import { useWorkspace } from "@/hooks/use-workspace";
 import { queryKeys } from "@/lib/query-keys";
 import { createBankReconciliation, getReconciliations, getTransactionById, getTransactions } from "../service";
 
-export function useTransactionsQuery() {
+export function useTransactionsQuery(page: number = 1, limit: number = 10) {
   const { workspace } = useWorkspace();
 
   return useQuery({
-    queryKey: queryKeys.transactions(workspace.id),
-    queryFn: getTransactions,
+    queryKey: [...queryKeys.transactions(workspace.id), page, limit],
+    queryFn: () => getTransactions(page, limit),
+    placeholderData: keepPreviousData,
   });
 }
 

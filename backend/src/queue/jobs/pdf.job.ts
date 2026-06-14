@@ -54,17 +54,26 @@ export const processPdfGenerationJob = async (job: Job<PdfGenerationJobPayload>)
   
   logger.info({ storagePath }, "PDF stored successfully");
 
-  if (invoice.customer?.email) {
+  const targetEmail = job.data.targetEmail || invoice.customer?.email;
+  if (targetEmail) {
     const signedUrl = await storageService.getSignedUrl(storagePath);
     
     await mailQueue.add("invoice-email", {
       type: "invoice",
       payload: {
-        to: invoice.customer.email,
+        to: targetEmail,
         invoiceNumber: invoice.invoiceNumber,
         downloadUrl: signedUrl
       }
     });
+
+    if (job.data.emailLogId) {
+      const prisma = (await import("../../config/database.js")).default;
+      await prisma.invoiceEmailLog.update({
+        where: { id: job.data.emailLogId },
+        data: { status: "SENT", sentAt: new Date() },
+      }).catch(err => logger.error({ err, emailLogId: job.data.emailLogId }, "Failed to update email log"));
+    }
   }
 
   return { storagePath };

@@ -93,7 +93,7 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
           { label: "Balance", value: formatCurrency(invoice.balance, invoice.currency ?? "INR"), detail: "Remaining unpaid balance." },
           { label: "Due Date", value: invoice.dueDate, detail: "Customer payment due date." },
           { label: "Status", value: invoice.status, detail: "Current invoice lifecycle stage." },
-          { label: "Terms", value: invoice.paymentTerms ?? "Standard", detail: "Commercial payment terms on this invoice." },
+          { label: "Terms", value: invoice.paymentTerms ? `${invoice.paymentTerms} Days` : "Due on receipt", detail: "Commercial payment terms on this invoice." },
         ]}
       />
 
@@ -105,20 +105,20 @@ export function InvoiceDetailsView({ invoiceId }: { invoiceId: string }) {
           <Card>
             <CardContent className="space-y-3 p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-semibold text-slate-950">Invoice Controls</p>
+                <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">Invoice Controls</p>
                 <InvoiceStatusBadge status={invoice.status} />
               </div>
-              <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">Sales rep: {invoice.salesRep}</div>
-              <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">Currency: {invoice.currency ?? "INR"}</div>
-              <div className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">Issued: {invoice.issueDate ?? "Pending"}</div>
+              <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 text-sm text-slate-600 dark:text-slate-400">Sales rep: {invoice.salesRep}</div>
+              <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 text-sm text-slate-600 dark:text-slate-400">Currency: {invoice.currency ?? "INR"}</div>
+              <div className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 text-sm text-slate-600 dark:text-slate-400">Issued: {invoice.issueDate ?? "Pending"}</div>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4">
-              <p className="text-sm font-semibold text-slate-950">Activity Timeline</p>
+              <p className="text-sm font-semibold text-slate-950 dark:text-slate-50">Activity Timeline</p>
               <div className="mt-3 space-y-3">
                 {invoice.activity.map((entry) => (
-                  <div key={entry} className="rounded-lg border border-slate-200 p-3 text-sm text-slate-600">
+                  <div key={entry} className="rounded-lg border border-slate-200 dark:border-slate-800 p-3 text-sm text-slate-600 dark:text-slate-400">
                     {entry}
                   </div>
                 ))}

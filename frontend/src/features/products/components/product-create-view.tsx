@@ -41,7 +41,7 @@ export function ProductCreateView() {
             supplierCode: "",
             supplierLeadTimeDays: 0,
             supplierMinimumOrderQuantity: 0,
-            supplierPaymentTerms: "",
+            supplierPaymentTerms: 0,
             costPrice: 0,
             salePrice: 0,
             wholesalePrice: 0,

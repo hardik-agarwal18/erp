@@ -18,7 +18,7 @@ export type InvoiceFormValues = {
   issueDate: string;
   dueDate: string;
   salesRep: string;
-  paymentTerms: string;
+  paymentTerms: number;
   notes: string;
   billingAddress: string;
   lineItems: InvoiceLineItemFormValues[];

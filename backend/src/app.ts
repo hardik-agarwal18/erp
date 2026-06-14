@@ -45,6 +45,7 @@ import attendanceRoutes from "./domains/hrms/attendance/attendance.routes.js";
 import leaveRoutes from "./domains/hrms/leaves/leaves.routes.js";
 import payrollRoutes from "./domains/hrms/payroll/payroll.routes.js";
 import holidayRoutes from "./domains/hrms/holidays/holiday.routes.js";
+import claimsRoutes from "./domains/hrms/claims/claims.routes.js";
 import purchaseOrderRoutes from "./domains/financials/purchasing/purchase-orders/purchase-orders.routes.js";
 import vendorInvoiceRoutes from "./domains/financials/purchasing/vendor-invoices/vendor-invoices.routes.js";
 import invitationRoutes from "./domains/iam/invitations/invitation.routes.js";
@@ -156,6 +157,7 @@ app.use("/api/v1/departments", departmentRoutes);
 app.use("/api/v1/designations", designationRoutes);
 app.use("/api/v1/shifts", shiftRoutes);
 app.use("/api/v1/holidays", holidayRoutes);
+app.use("/api/v1/claims", claimsRoutes);
 
 import path from "path";
 app.use("/api/v1/storage", express.static(path.resolve(process.cwd(), env.STORAGE_LOCAL_PATH || "./uploads")));

@@ -26,9 +26,22 @@ export const updateInvoiceSchema = z.object({
     id: z.string().uuid(),
   }),
   body: z.object({
+    customerId: z.string().uuid().optional(),
+    issueDate: z.string().datetime().optional(),
     status: z.enum(["DRAFT", "ISSUED", "CANCELLED"]).optional(),
     dueDate: z.string().datetime().optional(),
     notes: z.string().max(500).optional(),
+    items: z
+      .array(
+        z.object({
+          productId: z.string().uuid(),
+          quantity: z.number().positive(),
+          unitPrice: z.number().min(0).optional(),
+          discountAmount: z.number().min(0).optional(),
+        }),
+      )
+      .min(1)
+      .optional(),
   }),
 });
 

@@ -51,7 +51,7 @@ export function AuditLogsView() {
           ) : filteredLogs.length === 0 ? (
             <EmptyState title="No logs found" description="No activity matches your search." />
           ) : (
-            <div className="border border-slate-200 rounded-md divide-y divide-slate-100 bg-white">
+            <div className="border rounded-md divide-y divide-slate-100 bg-card text-card-foreground dark:divide-slate-800">
               {filteredLogs.map(log => (
                 <div key={log.id} className="p-4 flex gap-4 items-start hover:bg-slate-50 transition-colors">
                   <div className="p-2 bg-slate-100 rounded-full text-slate-500 shrink-0 mt-0.5">
@@ -75,7 +75,7 @@ export function AuditLogsView() {
                       {new Date(log.createdAt).toLocaleString()}
                     </p>
                     <p className="text-[10px] text-slate-400 mt-1 uppercase">
-                      ID: {log.entityId.slice(0, 8)}
+                      ID: {log.entityId?.slice(0, 8) || 'N/A'}
                     </p>
                   </div>
                 </div>

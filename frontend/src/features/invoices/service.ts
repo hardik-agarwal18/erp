@@ -60,22 +60,26 @@ function mapInvoiceStatus(status: BackendInvoice["status"]) {
 }
 
 function mapInvoice(invoice: BackendInvoice): Invoice {
+  const paidAmount = invoice.payments?.reduce((sum, p) => sum + Number(p.amount), 0) ?? 0;
+
   return {
     id: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
+    customerId: invoice.customerId,
     customer: invoice.customer?.name ?? invoice.customerId,
     issueDate: invoice.issueDate.slice(0, 10),
     dueDate: invoice.dueDate?.slice(0, 10) ?? invoice.issueDate.slice(0, 10),
     status: mapInvoiceStatus(invoice.status),
     amount: Number(invoice.totalAmount),
-    balance: Math.max(Number(invoice.totalAmount) - Number(invoice.paidAmount), 0),
+    balance: Math.max(Number(invoice.totalAmount || 0) - paidAmount, 0),
     salesRep: "ERP",
     currency: "INR",
-    paymentTerms: "Net 30",
+    paymentTerms: 30,
     notes: invoice.notes ?? "",
     billingAddress: invoice.customer?.address ?? "",
     lineItems: invoice.items?.map((item) => ({
       id: item.id,
+      productId: item.product.id,
       description: item.product.name,
       quantity: Number(item.quantity),
       unitPrice: Number(item.unitPrice),
@@ -143,9 +147,17 @@ export async function createLiveInvoice(payload: {
 export async function updateLiveInvoice(
   invoiceId: string,
   payload: {
+    customerId?: string;
+    issueDate?: string;
     dueDate?: string;
     notes?: string;
     status?: "DRAFT" | "ISSUED" | "CANCELLED";
+    items?: Array<{
+      productId: string;
+      quantity: number;
+      unitPrice?: number;
+      discountAmount?: number;
+    }>;
   },
 ) {
   const response = await apiClient.patch<ApiResponse<BackendInvoice>>(apiEndpoints.invoices.details(invoiceId), payload);

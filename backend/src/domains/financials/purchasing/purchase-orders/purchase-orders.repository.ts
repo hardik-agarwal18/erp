@@ -10,6 +10,7 @@ export const purchaseOrdersRepository = {
       const lineTotal = (item.quantity * item.unitPrice) + (item.taxAmount || 0) - (item.discountAmount || 0);
       totalAmount += lineTotal;
       return {
+        organizationId,
         productId: item.productId,
         quantity: item.quantity,
         unitPrice: item.unitPrice,

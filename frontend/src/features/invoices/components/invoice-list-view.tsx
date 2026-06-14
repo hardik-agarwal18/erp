@@ -56,7 +56,7 @@ export function InvoiceListView() {
   }
 
   if (!data?.invoices.length) {
-    return <EmptyState title="No invoices yet" description="Create your first invoice to begin receivables tracking." actionLabel="Create invoice" />;
+    return <EmptyState title="No invoices yet" description="Create your first invoice to begin receivables tracking." actionLabel="Create invoice" actionUrl="/invoices/create" />;
   }
 
   const { summary } = data;

@@ -121,4 +121,8 @@ export const leavesService = {
   listApplications: async (organizationId: string, employeeId?: string) => {
     return leavesRepository.listApplications(organizationId, employeeId);
   },
+
+  getLeaveBalances: async (organizationId: string, employeeId: string) => {
+    return leavesRepository.getBalancesByEmployee(organizationId, employeeId);
+  },
 };

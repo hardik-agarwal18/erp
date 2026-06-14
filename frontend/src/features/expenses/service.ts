@@ -51,12 +51,22 @@ export async function getExpenseById(expenseId: string) {
 }
 
 export async function createExpense(input: ExpenseFormSchema) {
-  const response = await apiClient.post<ApiResponse<BackendExpense>>(apiEndpoints.expenses.list, input);
+  const payload = {
+    ...input,
+    vendorId: input.vendorId || undefined,
+    expenseDate: new Date(input.expenseDate).toISOString(),
+  };
+  const response = await apiClient.post<ApiResponse<BackendExpense>>(apiEndpoints.expenses.list, payload);
   return mapBackendExpense(response.data.data);
 }
 
 export async function updateExpense(expenseId: string, input: ExpenseFormSchema) {
-  const response = await apiClient.put<ApiResponse<BackendExpense>>(apiEndpoints.expenses.details(expenseId), input);
+  const payload = {
+    ...input,
+    vendorId: input.vendorId || undefined,
+    expenseDate: new Date(input.expenseDate).toISOString(),
+  };
+  const response = await apiClient.put<ApiResponse<BackendExpense>>(apiEndpoints.expenses.details(expenseId), payload);
   return mapBackendExpense(response.data.data);
 }
 

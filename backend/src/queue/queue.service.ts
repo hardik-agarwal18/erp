@@ -1,7 +1,7 @@
 
 import { Queue, JobsOptions } from "bullmq";
 import { queueConnection } from "./connection.js";
-import { QueueNames, MailJobPayload, PdfGenerationJobPayload, ReportJobPayload, AuditExportJobPayload } from "./types.js";
+import { QueueNames, MailJobPayload, PdfGenerationJobPayload, ReportJobPayload, AuditExportJobPayload, AccountingJobPayload, OutboxRelayJobPayload } from "./types.js";
 import logger, { loggerContext } from "../config/logger.js";
 import { env } from "../config/env.js";
 
@@ -13,6 +13,7 @@ const defaultJobOptions: JobsOptions = {
   },
   removeOnComplete: { age: 3600 }, // Keep in Redis for 1 hour so status endpoints work
   removeOnFail: false, // Leave failed jobs for dead-letter processing
+  // // timeout: 30000, // 30 seconds
 };
 
 // Queue registry to cleanly shut them down if needed
@@ -51,6 +52,9 @@ export const pdfGenerationQueue = createQueue<PdfGenerationJobPayload>(QueueName
 export const cleanupQueue = createQueue(QueueNames.STORAGE_CLEANUP);
 export const reportsQueue = createQueue<ReportJobPayload>(QueueNames.REPORTS);
 export const auditQueue = createQueue<AuditExportJobPayload>(QueueNames.AUDIT_EXPORTS);
+export const accountingQueue = createQueue<AccountingJobPayload>(QueueNames.ACCOUNTING);
+export const accountingDlqQueue = createQueue<AccountingJobPayload>(QueueNames.ACCOUNTING_DLQ);
+export const outboxRelayQueue = createQueue<OutboxRelayJobPayload>(QueueNames.OUTBOX_RELAY);
 
 export const closeQueues = async () => {
   for (const [name, queue] of queues.entries()) {

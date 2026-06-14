@@ -1,6 +1,7 @@
 
 import { reportRepository } from "./report.repository.js";
 import { ReportRange } from "./report.types.js";
+import { accountingService } from "../../financials/accounting/accounting.service.js";
 
 const resolveRange = (range: ReportRange) => ({
   startDate: range.startDate,
@@ -183,7 +184,9 @@ const dashboardMetrics = async (organizationId: string) => {
       prevExpenseSnapshot,
       historicalSalesSnapshot,
       historicalExpenseSnapshot,
-      taxSnapshot
+      taxSnapshot,
+      currentPnL,
+      prevPnL
     ] = await Promise.all([
       salesReport(organizationId, {
         startDate: startOfMonth.toISOString(),
@@ -214,6 +217,8 @@ const dashboardMetrics = async (organizationId: string) => {
         startDate: startOfMonth.toISOString(),
         endDate: endOfMonth.toISOString(),
       }),
+      accountingService.getProfitAndLoss(organizationId, startOfMonth, endOfMonth),
+      accountingService.getProfitAndLoss(organizationId, startOfPrevMonth, endOfPrevMonth),
     ]);
 
     const unpaidInvoices =
@@ -224,8 +229,14 @@ const dashboardMetrics = async (organizationId: string) => {
       return Math.round(((current - prev) / prev) * 100);
     };
 
-    const currentProfit = salesSnapshot.totalSales - expenseSnapshot.totalExpenses;
-    const prevProfit = prevSalesSnapshot.totalSales - prevExpenseSnapshot.totalExpenses;
+    // Use pure ledger numbers for the key KPIs
+    const ledgerRevenue = currentPnL.totals.revenue;
+    const ledgerExpenses = currentPnL.totals.expense;
+    const ledgerProfit = currentPnL.netProfit;
+
+    const prevLedgerRevenue = prevPnL.totals.revenue;
+    const prevLedgerExpenses = prevPnL.totals.expense;
+    const prevLedgerProfit = prevPnL.netProfit;
 
     // Fill missing months for the last 6 months to ensure arrays are exactly 6 elements
     const historicalRevenue = [];
@@ -242,18 +253,18 @@ const dashboardMetrics = async (organizationId: string) => {
     }
 
     return {
-      monthlyRevenue: salesSnapshot.totalSales,
-      monthlyExpenses: expenseSnapshot.totalExpenses,
-      profitEstimate: currentProfit,
+      monthlyRevenue: ledgerRevenue,
+      monthlyExpenses: ledgerExpenses,
+      profitEstimate: ledgerProfit,
       unpaidInvoices,
       inventoryValue: inventorySnapshot.stockValue,
       topCustomers: salesSnapshot.topCustomers,
-      revenueTrend: calcTrend(salesSnapshot.totalSales, prevSalesSnapshot.totalSales),
-      expensesTrend: calcTrend(expenseSnapshot.totalExpenses, prevExpenseSnapshot.totalExpenses),
-      profitTrend: calcTrend(currentProfit, prevProfit),
+      revenueTrend: calcTrend(ledgerRevenue, prevLedgerRevenue),
+      expensesTrend: calcTrend(ledgerExpenses, prevLedgerExpenses),
+      profitTrend: calcTrend(ledgerProfit, prevLedgerProfit),
       historicalRevenue,
       historicalExpenses,
-      expensesByCategory: expenseSnapshot.expensesByCategory,
+      expensesByCategory: currentPnL.expenses.map((e: any) => ({ category: e.accountName, total: Number(e.netBalance) })),
       taxCollected: taxSnapshot.taxCollected,
       taxTrend: calcTrend(taxSnapshot.taxCollected, 0) // No previous month tax calculated here, so trend is basic
     };

@@ -20,6 +20,7 @@ import {
   TableBody,
   TableCell,
   TableHead,
+  TableHeader,
   TableHeaderCell,
   TableRow,
 } from "@/components/ui/table";
@@ -40,6 +41,10 @@ export interface DataTableProps<TData, TValue> {
   className?: string;
   pageSize?: number;
   enableToolbar?: boolean;
+  manualPagination?: boolean;
+  pageCount?: number;
+  pagination?: { pageIndex: number; pageSize: number };
+  onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -53,6 +58,10 @@ export function DataTable<TData, TValue>({
   className,
   pageSize = 10,
   enableToolbar = true,
+  manualPagination = false,
+  pageCount,
+  pagination: externalPagination,
+  onPaginationChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
@@ -62,10 +71,21 @@ export function DataTable<TData, TValue>({
   const [showColumnsMenu, setShowColumnsMenu] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   
-  const [pagination, setPagination] = React.useState({
+  const [internalPagination, setInternalPagination] = React.useState({
     pageIndex: 0,
     pageSize,
   });
+
+  const pagination = externalPagination ?? internalPagination;
+  
+  const handlePaginationChange = (updater: any) => {
+    if (onPaginationChange) {
+      const newPagination = typeof updater === 'function' ? updater(pagination) : updater;
+      onPaginationChange(newPagination);
+    } else {
+      setInternalPagination(updater);
+    }
+  };
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -87,9 +107,11 @@ export function DataTable<TData, TValue>({
     onSortingChange: setSorting,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
+    manualPagination,
+    pageCount,
     state: {
       sorting,
       rowSelection,
@@ -153,7 +175,7 @@ export function DataTable<TData, TValue>({
       )}
 
       <Table>
-        <TableHead>
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -201,7 +223,7 @@ export function DataTable<TData, TValue>({
               })}
             </tr>
           ))}
-        </TableHead>
+        </TableHeader>
         <TableBody>
           {isLoading ? (
             Array.from({ length: 5 }).map((_, rowIndex) => (

@@ -16,6 +16,7 @@ export const vendorInvoicesRepository = {
       discountAmount += (item.discountAmount || 0);
 
       return {
+        organizationId,
         productId: item.productId,
         poItemId: item.poItemId,
         quantity: item.quantity,

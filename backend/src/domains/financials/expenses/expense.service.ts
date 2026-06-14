@@ -9,6 +9,7 @@ import {
 } from "../../../services/audit/index.js";
 import { expenseRepository } from "./expense.repository.js";
 import { CreateExpenseInput } from "./expense.types.js";
+import { accountingService } from "../accounting/accounting.service.js";
 
 export const expenseService = {
   createExpense: async (
@@ -63,6 +64,18 @@ export const expenseService = {
 
       return created;
     });
+
+    try {
+      await accountingService.postExpenseJournal(
+        organizationId,
+        expense.id,
+        payload.description || `Expense: ${payload.category}`,
+        payload.amount,
+        payload.category
+      );
+    } catch (error) {
+      logger.error({ error, expenseId: expense.id }, "Failed to post expense journal");
+    }
 
     return expense;
   },

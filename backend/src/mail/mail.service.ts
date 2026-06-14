@@ -297,14 +297,19 @@ export class DirectMailDispatcher implements MailDispatcher {
 }
 
 import { mailQueue } from "../queue/queue.service.js";
-import { randomUUID } from "crypto";
+import { createHash } from "crypto";
+
+const generateIdempotencyKey = (prefix: string, payload: any) => {
+  const hash = createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+  return `${prefix}:${hash}`;
+};
 
 export class QueueMailDispatcher implements MailDispatcher {
   async sendVerificationEmail(request: VerificationEmailRequest): Promise<void> {
     await mailQueue.add(
       "send-verification",
       { type: "verification", payload: request },
-      { jobId: `verification:${request.to}:${randomUUID()}` } // Idempotency key
+      { jobId: generateIdempotencyKey("verification", request) } // Idempotency key
     );
   }
 
@@ -312,7 +317,7 @@ export class QueueMailDispatcher implements MailDispatcher {
     await mailQueue.add(
       "send-password-reset",
       { type: "password-reset", payload: request },
-      { jobId: `password-reset:${request.to}:${randomUUID()}` }
+      { jobId: generateIdempotencyKey("password-reset", request) }
     );
   }
 
@@ -320,7 +325,7 @@ export class QueueMailDispatcher implements MailDispatcher {
     await mailQueue.add(
       "send-invitation",
       { type: "invitation", payload: request },
-      { jobId: `invitation:${request.to}:${randomUUID()}` }
+      { jobId: generateIdempotencyKey("invitation", request) }
     );
   }
 
@@ -328,7 +333,7 @@ export class QueueMailDispatcher implements MailDispatcher {
     await mailQueue.add(
       "send-invoice",
       { type: "invoice", payload: request },
-      { jobId: `invoice:${request.invoiceNumber}:${randomUUID()}` }
+      { jobId: generateIdempotencyKey("invoice", request) }
     );
   }
 
@@ -336,7 +341,7 @@ export class QueueMailDispatcher implements MailDispatcher {
     await mailQueue.add(
       "send-export",
       { type: "export", payload: request },
-      { jobId: `export:${request.exportType}:${randomUUID()}` }
+      { jobId: generateIdempotencyKey("export", request) }
     );
   }
 
@@ -344,7 +349,7 @@ export class QueueMailDispatcher implements MailDispatcher {
     await mailQueue.add(
       "send-email-change-current",
       { type: "email-change-current", payload: request },
-      { jobId: `email-change-current:${request.to}:${randomUUID()}` }
+      { jobId: generateIdempotencyKey("email-change-current", request) }
     );
   }
 
@@ -352,7 +357,7 @@ export class QueueMailDispatcher implements MailDispatcher {
     await mailQueue.add(
       "send-email-change-new",
       { type: "email-change-new", payload: request },
-      { jobId: `email-change-new:${request.to}:${randomUUID()}` }
+      { jobId: generateIdempotencyKey("email-change-new", request) }
     );
   }
 }

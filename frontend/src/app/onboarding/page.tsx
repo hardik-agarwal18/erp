@@ -78,40 +78,40 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(30,41,59,0.08),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-4 py-8">
+    <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(30,41,59,0.08),transparent_24%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.05),transparent_24%),linear-gradient(180deg,#020617_0%,#0f172a_100%)] px-4 py-8">
       <div className="w-full max-w-2xl">
         
         {mode === "choice" && (
           <div className="space-y-6 text-center">
-            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">Welcome to your ERP!</h1>
-            <p className="text-lg text-slate-600">How would you like to get started?</p>
+            <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">Welcome to your ERP!</h1>
+            <p className="text-lg text-slate-600 dark:text-slate-400">How would you like to get started?</p>
             
             <div className="mt-10 grid gap-6 sm:grid-cols-2">
               <Card 
-                className="group cursor-pointer border-slate-200 transition-all hover:border-indigo-500 hover:shadow-md"
+                className="group cursor-pointer border-slate-200 dark:border-slate-800 transition-all hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-md"
                 onClick={() => setMode("create")}
               >
                 <CardContent className="p-8 flex flex-col items-center text-center">
-                  <div className="mb-4 rounded-full bg-indigo-50 p-4 text-indigo-600 group-hover:bg-indigo-100 transition-colors">
+                  <div className="mb-4 rounded-full bg-indigo-50 dark:bg-indigo-500/10 p-4 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
                     <Building2 className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">Create Workspace</h3>
-                  <p className="text-sm text-slate-500">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">Create Workspace</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Start a new organization and invite your team members.
                   </p>
                 </CardContent>
               </Card>
 
               <Card 
-                className="group cursor-pointer border-slate-200 transition-all hover:emerald-500 hover:shadow-md"
+                className="group cursor-pointer border-slate-200 dark:border-slate-800 transition-all hover:emerald-500 dark:hover:emerald-400 hover:shadow-md"
                 onClick={() => setMode("join")}
               >
                 <CardContent className="p-8 flex flex-col items-center text-center">
-                  <div className="mb-4 rounded-full bg-emerald-50 p-4 text-emerald-600 group-hover:bg-emerald-100 transition-colors">
+                  <div className="mb-4 rounded-full bg-emerald-50 dark:bg-emerald-500/10 p-4 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-500/20 transition-colors">
                     <UserPlus className="h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 mb-2">Join Workspace</h3>
-                  <p className="text-sm text-slate-500">
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-50 mb-2">Join Workspace</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Enter a Join Code or Organization ID to request access to an existing organization.
                   </p>
                 </CardContent>
@@ -121,9 +121,9 @@ export default function OnboardingPage() {
         )}
 
         {mode === "create" && (
-          <Card className="border-slate-200 shadow-xl mx-auto max-w-lg">
+          <Card className="border-slate-200 dark:border-slate-800 shadow-xl mx-auto max-w-lg">
             <CardHeader>
-              <Button variant="ghost" className="w-fit -ml-4 mb-2 text-slate-500" onClick={() => { setError(null); setMode("choice"); }}>
+              <Button variant="ghost" className="w-fit -ml-4 mb-2 text-slate-500 dark:text-slate-400" onClick={() => { setError(null); setMode("choice"); }}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
               <CardTitle>Create Workspace</CardTitle>
@@ -160,7 +160,7 @@ export default function OnboardingPage() {
                     </div>
                   ))}
                   {fields.length === 0 && (
-                    <p className="text-sm text-slate-500 italic">No members added yet. You can invite them later.</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 italic">No members added yet. You can invite them later.</p>
                   )}
                 </div>
 
@@ -176,9 +176,9 @@ export default function OnboardingPage() {
         )}
 
         {mode === "join" && (
-          <Card className="border-slate-200 shadow-xl mx-auto max-w-lg">
+          <Card className="border-slate-200 dark:border-slate-800 shadow-xl mx-auto max-w-lg">
             <CardHeader>
-              <Button variant="ghost" className="w-fit -ml-4 mb-2 text-slate-500" onClick={() => { setError(null); setMode("choice"); }}>
+              <Button variant="ghost" className="w-fit -ml-4 mb-2 text-slate-500 dark:text-slate-400" onClick={() => { setError(null); setMode("choice"); }}>
                 <ArrowLeft className="mr-2 h-4 w-4" /> Back
               </Button>
               <CardTitle>Join Workspace</CardTitle>
@@ -194,7 +194,7 @@ export default function OnboardingPage() {
                     placeholder="ACME-XXXXXX or UUID"
                     {...joinForm.register("joinCode", { required: true })}
                   />
-                  <p className="text-xs text-slate-500">Ask your workspace administrator for this code or ID.</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Ask your workspace administrator for this code or ID.</p>
                 </div>
 
                 <div className="space-y-2">
@@ -220,15 +220,15 @@ export default function OnboardingPage() {
         )}
 
         {mode === "pending" && (
-          <Card className="border-emerald-200 shadow-xl mx-auto max-w-lg text-center overflow-hidden">
-            <div className="bg-emerald-50 py-10 flex justify-center">
-              <CheckCircle2 className="h-16 w-16 text-emerald-500" />
+          <Card className="border-emerald-200 dark:border-emerald-800 shadow-xl mx-auto max-w-lg text-center overflow-hidden">
+            <div className="bg-emerald-50 dark:bg-emerald-500/10 py-10 flex justify-center">
+              <CheckCircle2 className="h-16 w-16 text-emerald-500 dark:text-emerald-400" />
             </div>
             <CardHeader>
               <CardTitle className="text-2xl">Request Sent Successfully</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <p className="text-slate-600">
+              <p className="text-slate-600 dark:text-slate-400">
                 Your request to join the workspace has been sent to the administrators. You will be notified by email once your request is approved.
               </p>
               <Button className="w-full" variant="outline" onClick={() => router.push("/login")}>

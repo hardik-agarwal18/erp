@@ -49,7 +49,7 @@ export function CustomerEditView({ customerId }: { customerId: string }) {
             segment: customer.segment,
             gstin: customer.gstin || "",
             currency: customer.currency || "INR",
-            paymentTerms: customer.paymentTerms || "",
+            paymentTerms: customer.paymentTerms || 0,
             creditLimit: customer.creditLimit || 0,
             owner: customer.owner || "",
             billingAddress: customer.billingAddress || "",

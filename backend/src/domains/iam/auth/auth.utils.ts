@@ -16,9 +16,7 @@ export const getRequestMetadata = (req: Request) => {
 };
 
 export const buildVerificationUrl = (token: string) => {
-  return `${env.APP_URL}/api/v1/auth/verify-email?token=${encodeURIComponent(
-    token,
-  )}`;
+  return `${env.APP_URL}/verify-email?token=${encodeURIComponent(token)}`;
 };
 
 export const buildPasswordResetUrl = (token: string) => {

@@ -205,6 +205,17 @@ export const organizationService = {
       );
     }
 
+    try {
+      await import("../../financials/accounting/accounting.service.js").then(({ accountingService }) => {
+        return Promise.all([
+          accountingService.seedDefaultAccounts(organization.id),
+          accountingService.seedFiscalYear(organization.id)
+        ]);
+      });
+    } catch (err) {
+      console.error(`Failed to seed accounting for org ${organization.id}`, err);
+    }
+
     return {
       ...organization,
       membershipId: membership?.id ?? null,

@@ -1,4 +1,3 @@
-
 import { Request, Response } from "express";
 import { leavesService } from "./leaves.service.js";
 import { sendSuccess } from "../../../utils/apiResponse.js";
@@ -34,5 +33,16 @@ export const leavesController = {
       req.params.id as string
     );
     sendSuccess(res, { statusCode: 200, data: application });
+  }),
+
+  getMyBalances: asyncHandler(async (req: Request, res: Response) => {
+    const employeeId = (req.query.employeeId as string) || req.user!.id; 
+    const balances = await leavesService.getLeaveBalances(req.member!.organizationId, employeeId);
+    sendSuccess(res, { statusCode: 200, data: balances });
+  }),
+
+  getEmployeeBalances: asyncHandler(async (req: Request, res: Response) => {
+    const balances = await leavesService.getLeaveBalances(req.member!.organizationId, req.params.employeeId as string);
+    res.json({ success: true, data: balances });
   }),
 };

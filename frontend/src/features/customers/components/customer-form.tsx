@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -30,6 +31,20 @@ export function CustomerForm({
     defaultValues: defaultValues as any,
   });
 
+  const legalName = form.watch("legalName");
+
+  useEffect(() => {
+    if (legalName && !form.getValues("code")) {
+      const prefix = legalName
+        .substring(0, 3)
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "C")
+        .padEnd(3, "C");
+      const randomNum = Math.floor(1000 + Math.random() * 9000);
+      form.setValue("code", `${prefix}-${randomNum}`, { shouldValidate: true });
+    }
+  }, [legalName, form]);
+
   return (
     <Card>
       <CardHeader>
@@ -53,7 +68,12 @@ export function CustomerForm({
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
               <Label htmlFor="customer-code">Customer Code</Label>
-              <Input id="customer-code" {...form.register("code")} />
+              <Input 
+                id="customer-code" 
+                readOnly 
+                className="bg-muted cursor-not-allowed text-muted-foreground" 
+                {...form.register("code")} 
+              />
             </div>
             <div>
               <Label htmlFor="customer-name">Display Name</Label>
@@ -97,7 +117,7 @@ export function CustomerForm({
             </div>
             <div>
               <Label htmlFor="customer-payment-terms">Payment Terms</Label>
-              <Input id="customer-payment-terms" {...form.register("paymentTerms")} />
+              <Input type="number" id="customer-payment-terms" {...form.register("paymentTerms")} />
             </div>
             <div>
               <Label htmlFor="customer-credit-limit">Credit Limit</Label>

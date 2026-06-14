@@ -7,6 +7,7 @@ import ApiError from "../../../utils/ApiError.js";
 import { attendanceService } from "../attendance/attendance.service.js";
 import { approvalsService } from "../../core/approvals/approvals.service.js";
 import { eventBus } from "../../../shared/events/event-bus.js";
+import PDFDocument from "pdfkit";
 
 // Event Listeners for Payroll Approvals
 eventBus.on("approval.completed", async (event: any) => {
@@ -231,5 +232,82 @@ export const payrollService = {
 
     await approvalsService.submitForApproval(organizationId, "PAYROLL_RUN", runId, userId);
     await payrollRepository.updatePayrollRunStatus(runId, PayrollRunStatus.PENDING_APPROVAL);
+  },
+
+  getMyPayslips: async (organizationId: string, employeeId: string) => {
+    return payrollRepository.getPayslipsByEmployee(organizationId, employeeId);
+  },
+
+  getPayslipById: async (organizationId: string, id: string, employeeId?: string) => {
+    const payslip = await payrollRepository.getPayslipById(organizationId, id);
+    if (!payslip) throw new ApiError(404, "Payslip not found");
+    if (employeeId && payslip.employeeId !== employeeId) {
+      throw new ApiError(403, "Access denied");
+    }
+    return payslip;
+  },
+
+  generatePayslipPdf: async (organizationId: string, id: string, employeeId?: string): Promise<Buffer> => {
+    const payslip = await payrollRepository.getPayslipById(organizationId, id);
+    if (!payslip) throw new ApiError(404, "Payslip not found");
+    if (employeeId && payslip.employeeId !== employeeId) {
+      throw new ApiError(403, "Access denied");
+    }
+
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50 });
+        const buffers: Buffer[] = [];
+
+        doc.on("data", buffers.push.bind(buffers));
+        doc.on("end", () => resolve(Buffer.concat(buffers)));
+        doc.on("error", reject);
+
+        // Header
+        doc.fontSize(20).text("PAYSLIP", { align: "center" });
+        doc.moveDown();
+        doc.fontSize(12).text(`Organization ID: ${organizationId}`, { align: "center" });
+        doc.text(`Month/Year: ${payslip.payrollRun.month}/${payslip.payrollRun.year}`, { align: "center" });
+        doc.moveDown(2);
+
+        // Employee Info
+        doc.fontSize(14).text("Employee Details");
+        doc.fontSize(10).moveDown(0.5);
+        doc.text(`Name: ${payslip.employee.firstName} ${payslip.employee.lastName}`);
+        doc.text(`Employee Code: ${payslip.employee.employeeCode || "N/A"}`);
+        doc.text(`Designation: ${(payslip.employee as any).designation?.name || "N/A"}`);
+        doc.text(`Department: ${(payslip.employee as any).department?.name || "N/A"}`);
+        doc.moveDown(2);
+
+        // Earnings and Deductions tables
+        const earnings = payslip.lineItems.filter(item => item.isEarning);
+        const deductions = payslip.lineItems.filter(item => !item.isEarning);
+
+        doc.fontSize(14).text("Earnings");
+        doc.fontSize(10).moveDown(0.5);
+        earnings.forEach(item => {
+          doc.text(`${item.componentName}: ${Number(item.amount).toFixed(2)}`);
+        });
+        doc.moveDown();
+
+        doc.fontSize(14).text("Deductions");
+        doc.fontSize(10).moveDown(0.5);
+        deductions.forEach(item => {
+          doc.text(`${item.componentName}: ${Number(item.amount).toFixed(2)}`);
+        });
+        doc.moveDown(2);
+
+        // Summary
+        doc.fontSize(14).text("Summary");
+        doc.fontSize(10).moveDown(0.5);
+        doc.text(`Total Earnings: ${Number(payslip.grossPay).toFixed(2)}`);
+        doc.text(`Total Deductions: ${Number(payslip.totalDeductions).toFixed(2)}`);
+        doc.fontSize(12).text(`Net Pay: ${Number(payslip.netPay).toFixed(2)}`, { stroke: true });
+
+        doc.end();
+      } catch (err) {
+        reject(err);
+      }
+    });
   },
 };

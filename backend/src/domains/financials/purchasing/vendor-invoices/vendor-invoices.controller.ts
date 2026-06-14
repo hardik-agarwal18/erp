@@ -20,6 +20,11 @@ export const vendorInvoicesController = {
     sendSuccess(res, { statusCode: 200, data: invoice });
   }),
 
+  getMatchSummary: asyncHandler(async (req: Request, res: Response) => {
+    const summary = await vendorInvoicesService.getMatchSummary(req.member!.organizationId, req.params.id as string);
+    sendSuccess(res, { statusCode: 200, data: summary });
+  }),
+
   postInvoice: asyncHandler(async (req: Request, res: Response) => {
     // Attempt standard posting. If three-way match fails, the service throws a 409 Conflict ApiError.
     const invoice = await vendorInvoicesService.postInvoice(

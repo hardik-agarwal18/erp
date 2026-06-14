@@ -45,6 +45,51 @@ export const vendorInvoicesService = {
     return vendorInvoicesRepository.list(organizationId);
   },
 
+  getMatchSummary: async (organizationId: string, invoiceId: string) => {
+    const invoice = await vendorInvoicesRepository.getById(organizationId, invoiceId);
+    if (!invoice) throw new ApiError(404, "Vendor Invoice not found");
+
+    if (!invoice.purchaseOrderId) {
+      return { matchStatus: "N/A", items: [], message: "No Purchase Order linked" };
+    }
+
+    const po = await purchaseOrdersRepository.getById(organizationId, invoice.purchaseOrderId);
+    if (!po) throw new ApiError(404, "Linked Purchase Order not found");
+
+    const items = [];
+    let overallMatch = true;
+
+    for (const invItem of invoice.items) {
+      const poItemId = (invItem as any).poItemId;
+      if (!poItemId) continue;
+      const poItem = po.items.find(i => i.id === poItemId);
+      if (!poItem) continue;
+
+      const orderedQty = Number(poItem.quantity);
+      const receivedQty = Number(poItem.receivedQuantity);
+      const billedQty = Number(invItem.quantity);
+
+      const maxAllowedQty = Math.min(orderedQty, receivedQty);
+      const isMatch = billedQty <= maxAllowedQty;
+      
+      if (!isMatch) overallMatch = false;
+
+      items.push({
+        productId: invItem.productId,
+        productName: (invItem as any).product?.name || "Unknown",
+        orderedQty,
+        receivedQty,
+        billedQty,
+        matchStatus: isMatch ? "MATCH" : "MISMATCH"
+      });
+    }
+
+    return {
+      matchStatus: overallMatch ? "MATCH" : "MISMATCH",
+      items
+    };
+  },
+
   postInvoice: async (organizationId: string, id: string, forceOverride = false) => {
     const invoice = await vendorInvoicesRepository.getById(organizationId, id);
     if (!invoice) throw new ApiError(404, "Vendor Invoice not found");

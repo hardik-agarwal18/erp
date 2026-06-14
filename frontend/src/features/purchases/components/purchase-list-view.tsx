@@ -58,8 +58,8 @@ export function PurchaseListView() {
 
   if (!data || !summary) return null;
 
-  if (orders.length === 0) {
-    return <EmptyState title="No purchase orders" description="Create a vendor order to start procurement tracking." actionLabel="New PO" />;
+  if (!data?.orders.length) {
+    return <EmptyState title="No purchase orders" description="Create a vendor order to start procurement tracking." actionLabel="New PO" actionUrl="/purchases/create" />;
   }
 
   return (

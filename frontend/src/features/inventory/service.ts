@@ -175,3 +175,31 @@ export async function scheduleInventoryAudit(_input: InventoryAuditSchema) {
 export async function saveWarehouseSettings(_input: WarehouseSchema) {
   throw new Error("Warehouse management is not implemented by the backend API");
 }
+
+export type StockGroup = {
+  id: string;
+  name: string;
+  description: string | null;
+  parentId: string | null;
+  createdAt: string;
+};
+
+export async function getStockGroups() {
+  const response = await apiClient.get<ApiResponse<StockGroup[]>>(apiEndpoints.inventory.stockGroups.list);
+  return response.data.data;
+}
+
+export async function createStockGroup(data: any) {
+  const response = await apiClient.post<ApiResponse<StockGroup>>(apiEndpoints.inventory.stockGroups.create, data);
+  return response.data.data;
+}
+
+export async function updateStockGroup(id: string, data: any) {
+  const response = await apiClient.patch<ApiResponse<StockGroup>>(apiEndpoints.inventory.stockGroups.update(id), data);
+  return response.data.data;
+}
+
+export async function deleteStockGroup(id: string) {
+  const response = await apiClient.delete<ApiResponse<any>>(apiEndpoints.inventory.stockGroups.delete(id));
+  return response.data.data;
+}

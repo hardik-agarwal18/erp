@@ -49,7 +49,7 @@ export function ProductListView() {
   }
 
   if (!data?.products.length) {
-    return <EmptyState title="No products found" description="Create your first product to start catalog, pricing, and stock workflows." actionLabel="Create product" />;
+    return <EmptyState title="No products found" description="Create your first product to start catalog, pricing, and stock workflows." actionLabel="Create product" actionUrl="/products/create" />;
   }
 
   const { summary } = data;
@@ -97,7 +97,7 @@ export function ProductListView() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:w-[360px]">
               <select
-                className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700"
+                className="h-10 rounded-lg border bg-card text-card-foreground dark:border-slate-800 dark:bg-slate-950 px-3 text-sm text-slate-700"
                 onChange={(event) => setFilters((current) => ({ ...current, status: event.target.value as ProductFiltersState["status"] }))}
                 value={filters.status}
               >
@@ -107,7 +107,7 @@ export function ProductListView() {
                 <option value="discontinued">Discontinued</option>
               </select>
               <select
-                className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700"
+                className="h-10 rounded-lg border bg-card text-card-foreground dark:border-slate-800 dark:bg-slate-950 px-3 text-sm text-slate-700"
                 onChange={(event) => setFilters((current) => ({ ...current, type: event.target.value as ProductFiltersState["type"] }))}
                 value={filters.type}
               >

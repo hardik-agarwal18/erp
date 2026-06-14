@@ -12,6 +12,9 @@ export type HrmsDashboardResponse = {
   }>;
   recentHires: Employee[];
   upcomingBirthdays: Employee[];
+  headcountByDepartment: Array<{ department: string; count: number }>;
+  headcountByEmploymentType: Array<{ type: string; count: number }>;
+  genderDiversity: Array<{ gender: string; count: number }>;
 };
 
 export type EmployeeListParams = {
@@ -20,6 +23,9 @@ export type EmployeeListParams = {
   search?: string;
   status?: EmployeeStatus;
   departmentId?: string;
+  designationId?: string;
+  joinedBefore?: string;
+  joinedAfter?: string;
 };
 
 export type CreateEmployeePayload = {
@@ -59,5 +65,20 @@ export async function createEmployee(payload: CreateEmployeePayload) {
 
 export async function updateEmployee(id: string, payload: UpdateEmployeePayload) {
   const response = await apiClient.patch<ApiResponse<Employee>>(apiEndpoints.hrms.employeeDetails(id), payload);
+  return response.data.data;
+}
+
+export async function getEmployeeHierarchy(id: string) {
+  const response = await apiClient.get<ApiResponse<any>>(apiEndpoints.hrms.hierarchy(id));
+  return response.data.data;
+}
+
+export async function getDepartments() {
+  const response = await apiClient.get<ApiResponse<PaginatedResponse<Department>>>(apiEndpoints.hrms.departments.list);
+  return response.data.data;
+}
+
+export async function getDesignations() {
+  const response = await apiClient.get<ApiResponse<PaginatedResponse<Designation>>>(apiEndpoints.hrms.designations);
   return response.data.data;
 }

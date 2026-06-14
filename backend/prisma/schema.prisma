@@ -24,58 +24,64 @@ model User {
   refreshSessions         RefreshSession[]
   joinRequests            JoinRequest[]
   approvalInstances       ApprovalInstance[]
+  approvedClaims          ExpenseClaim[]           @relation("ExpenseClaimApprovedBy")
 }
 
 model Organization {
-  id                  String               @id @default(uuid())
-  name                String
-  slug                String               @unique
-  joinCode            String               @unique
-  logo                String?
-  ownerId             String
-  settings            Json?
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  auditLogs           AuditLog[]
-  customers           Customer[]
-  expenses            Expense[]
-  inventoryItems      InventoryItem[]
-  inventoryMovements  InventoryMovement[]
-  invitations         Invitation[]
-  invoices            Invoice[]
-  invoiceSequences    InvoiceSequence?
-  joinRequests        JoinRequest[]
-  owner               User                 @relation("OrganizationOwner", fields: [ownerId], references: [id])
-  members             OrganizationMember[]
-  payments            Payment[]
-  products            Product[]
-  productCategories   ProductCategory[]
-  refreshSessions     RefreshSession[]
-  roles               Role[]
-  taxes               Tax[]
-  transactions        Transaction[]
-  vendors             Vendor[]
-  invoiceEmailLogs    InvoiceEmailLog[]
-  approvalTemplates   ApprovalTemplate[]
-  approvalInstances   ApprovalInstance[]
-  accounts            Account[]
-  journalEntries      JournalEntry[]
-  fiscalYears         FiscalYear[]
-  purchaseOrders      PurchaseOrder[]
-  vendorInvoices      VendorInvoice[]
-  batches             Batch[]
-  godowns             Godown[]
-  goodsReceiptNotes   GoodsReceiptNote[]
-  serialNumbers       SerialNumber[]
-  deliveryChallans    DeliveryChallan[]
-  stockGroups         StockGroup[]
-  stockJournals       StockJournal[]
-  stockVerifications  StockVerification[]
-  batchInventoryItems BatchInventoryItem[]
-  employeeSequence    EmployeeSequence?
-  departments         Department[]
-  designations        Designation[]
-  employees           Employee[]
+  id                          String                       @id @default(uuid())
+  name                        String
+  slug                        String                       @unique
+  joinCode                    String                       @unique
+  logo                        String?
+  ownerId                     String
+  settings                    Json?
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  auditLogs                   AuditLog[]
+  customers                   Customer[]
+  expenses                    Expense[]
+  inventoryItems              InventoryItem[]
+  inventoryMovements          InventoryMovement[]
+  invitations                 Invitation[]
+  invoices                    Invoice[]
+  invoiceSequences            InvoiceSequence?
+  joinRequests                JoinRequest[]
+  owner                       User                         @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  members                     OrganizationMember[]
+  payments                    Payment[]
+  products                    Product[]
+  productCategories           ProductCategory[]
+  refreshSessions             RefreshSession[]
+  roles                       Role[]
+  systemAccountMappings       SystemAccountMapping[]
+  taxes                       Tax[]
+  transactions                Transaction[]
+  vendors                     Vendor[]
+  invoiceEmailLogs            InvoiceEmailLog[]
+  approvalTemplates           ApprovalTemplate[]
+  approvalInstances           ApprovalInstance[]
+  accounts                    Account[]
+  journalEntries              JournalEntry[]
+  fiscalYears                 FiscalYear[]
+  purchaseOrders              PurchaseOrder[]
+  vendorInvoices              VendorInvoice[]
+  batches                     Batch[]
+  godowns                     Godown[]
+  goodsReceiptNotes           GoodsReceiptNote[]
+  serialNumbers               SerialNumber[]
+  deliveryChallans            DeliveryChallan[]
+  stockGroups                 StockGroup[]
+  stockJournals               StockJournal[]
+  stockVerifications          StockVerification[]
+  batchInventoryItems         BatchInventoryItem[]
+  employeeSequence            EmployeeSequence?
+  departments                 Department[]
+  designations                Designation[]
+  employees                   Employee[]
+  financialStatementSnapshots FinancialStatementSnapshot[]
+  inventoryValuationSnapshots InventoryValuationSnapshot[]
+  outboxEvents                OutboxEvent[]
+  expenseClaims               ExpenseClaim[]
 
   @@index([ownerId])
 }
@@ -742,6 +748,8 @@ model Employee {
   salaryStructures  EmployeeSalaryStructure[]
   salaryHistory     SalaryStructureHistory[]
   payrollRuns       PayrollRunEmployee[]
+  payslips          Payslip[]
+  expenseClaims     ExpenseClaim[]
 }
 
 model EmployeeDocument {
@@ -847,6 +855,37 @@ model EmployeeShiftAssignment {
   updatedAt      DateTime  @updatedAt
   employee       Employee  @relation(fields: [employeeId], references: [id])
   shift          Shift     @relation(fields: [shiftId], references: [id])
+}
+
+enum ExpenseClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+  REIMBURSED
+}
+
+model ExpenseClaim {
+  id             String             @id @default(uuid())
+  organizationId String
+  employeeId     String
+  date           DateTime
+  category       String
+  amount         Decimal
+  currency       String             @default("USD")
+  description    String?
+  receiptUrl     String?
+  status         ExpenseClaimStatus @default(PENDING)
+  approvedById   String?
+  reimbursedAt   DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  employee       Employee           @relation(fields: [employeeId], references: [id])
+  approvedBy     User?              @relation("ExpenseClaimApprovedBy", fields: [approvedById], references: [id])
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, employeeId])
 }
 
 // --- LEAVES & HOLIDAYS ---
@@ -989,6 +1028,7 @@ model Payslip {
   totalDeductions Decimal?
   netPay          Decimal?
   payrollRun      PayrollRun        @relation(fields: [payrollRunId], references: [id])
+  employee        Employee          @relation(fields: [employeeId], references: [id])
   lineItems       PayslipLineItem[]
 }
 
@@ -1067,15 +1107,29 @@ model Account {
   code           String
   name           String
   type           AccountType
+  normalBalance  BalanceType   @default(DEBIT)
   parentId       String?
   isSystem       Boolean       @default(false)
   isActive       Boolean       @default(true)
   parent         Account?      @relation("AccountHierarchy", fields: [parentId], references: [id])
   children       Account[]     @relation("AccountHierarchy")
   journalLines   JournalLine[]
+  systemMappings SystemAccountMapping[]
   organization   Organization  @relation(fields: [organizationId], references: [id])
 
   @@unique([organizationId, code])
+}
+
+model SystemAccountMapping {
+  id             String       @id @default(uuid())
+  organizationId String
+  mappingKey     String
+  accountId      String
+  
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  account        Account      @relation(fields: [accountId], references: [id])
+
+  @@unique([organizationId, mappingKey])
 }
 
 model JournalEntry {
@@ -1371,6 +1425,11 @@ enum AccountType {
   EXPENSE
 }
 
+enum BalanceType {
+  DEBIT
+  CREDIT
+}
+
 enum PurchaseOrderStatus {
   DRAFT
   ISSUED
@@ -1412,3 +1471,52 @@ model BatchInventoryItem {
 
   @@unique([batchId, godownId])
 }
+
+model FinancialStatementSnapshot {
+  id             String   @id @default(uuid())
+  organizationId String
+  statementType  String
+  fiscalYearId   String?
+  generatedAt    DateTime @default(now())
+  generatedBy    String
+  statementHash  String
+  payload        Json
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model InventoryValuationSnapshot {
+  id                  String   @id @default(uuid())
+  organizationId      String
+  valuationDate       DateTime
+  totalInventoryValue Decimal
+  payload             Json
+  createdAt           DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model OutboxEvent {
+  id             String    @id @default(uuid())
+  organizationId String
+  aggregateType  String
+  aggregateId    String
+  eventType      String
+  eventVersion   Int       @default(1)
+  payload        Json
+  status         String    @default("PENDING")
+  correlationId  String?
+  causationId    String?
+  retryCount     Int       @default(0)
+  lastError      String?
+  nextRetryAt    DateTime?
+  processedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextRetryAt])
+  @@index([organizationId])
+}
+

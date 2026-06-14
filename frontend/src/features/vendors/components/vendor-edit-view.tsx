@@ -49,7 +49,7 @@ export function VendorEditView({ vendorId }: { vendorId: string }) {
             category: vendor.category,
             gstin: vendor.gstin || "",
             currency: vendor.currency || "INR",
-            paymentTerms: vendor.paymentTerms || "",
+            paymentTerms: vendor.paymentTerms || 0,
             leadTimeDays: vendor.leadTimeDays || 0,
             accountManager: vendor.accountManager || "",
             billingAddress: vendor.billingAddress || "",

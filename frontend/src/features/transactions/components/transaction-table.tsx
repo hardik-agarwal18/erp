@@ -9,7 +9,19 @@ import type { Transaction } from "@/types/app";
 import { formatCurrency } from "@/utils/formatters";
 import { TransactionStatusBadge } from "./transaction-status-badge";
 
-export function TransactionTable({ transactions }: { transactions: Transaction[] }) {
+export function TransactionTable({ 
+  transactions,
+  manualPagination,
+  pageCount,
+  pagination,
+  onPaginationChange,
+}: { 
+  transactions: Transaction[];
+  manualPagination?: boolean;
+  pageCount?: number;
+  pagination?: { pageIndex: number; pageSize: number };
+  onPaginationChange?: (pagination: { pageIndex: number; pageSize: number }) => void;
+}) {
   const columns = useMemo<ColumnDef<Transaction>[]>(
     () => [
       {
@@ -72,6 +84,10 @@ export function TransactionTable({ transactions }: { transactions: Transaction[]
       data={transactions}
       density="comfortable"
       emptyMessage="No transactions found."
+      manualPagination={manualPagination}
+      pageCount={pageCount}
+      pagination={pagination}
+      onPaginationChange={onPaginationChange}
     />
   );
 }

@@ -4,6 +4,7 @@ import { purchaseOrdersController } from "./purchase-orders.controller.js";
 import { validate } from "../../../../middleware/validate.middleware.js";
 import { authMiddleware } from "../../../../middleware/auth.middleware.js";
 import { requirePermission, tenantContextMiddleware } from "../../../../middleware/tenant.middleware.js";
+import { PERMISSIONS } from "../../../../shared/constants/permissions.js";
 import { createPurchaseOrderSchema } from "./purchase-orders.validators.js";
 
 const router = Router();
@@ -13,26 +14,26 @@ router.use(tenantContextMiddleware());
 
 router.post(
   "/",
-  requirePermission("PURCHASES_CREATE"),
+  requirePermission(PERMISSIONS.PURCHASING_CREATE),
   validate(createPurchaseOrderSchema),
   purchaseOrdersController.create
 );
 
 router.get(
   "/",
-  requirePermission("PURCHASES_READ"),
+  requirePermission(PERMISSIONS.PURCHASING_VIEW),
   purchaseOrdersController.list
 );
 
 router.get(
   "/:id",
-  requirePermission("PURCHASES_READ"),
+  requirePermission(PERMISSIONS.PURCHASING_VIEW),
   purchaseOrdersController.getById
 );
 
 router.post(
   "/:id/submit-approval",
-  requirePermission("PURCHASES_CREATE"),
+  requirePermission(PERMISSIONS.PURCHASING_CREATE),
   purchaseOrdersController.submitForApproval
 );
 

@@ -103,6 +103,8 @@ export const grnService = {
         throw new ApiError(400, "Only DRAFT GRN can be received");
       }
 
+      let totalValue = 0;
+
       for (const item of grn.items) {
         const product = await tx.product.findUnique({ where: { id: item.productId } });
         if (!product) throw new ApiError(404, "Product not found");
@@ -257,6 +259,30 @@ export const grnService = {
         data: { status: "COMPLETED" },
       });
 
+      // Calculate total value
+      grn.items.forEach((item) => {
+        totalValue += Number(item.receivedQty) * Number(item.unitPrice);
+      });
+
+      // Fire Accounting Event via Outbox
+      await (tx as any).outboxEvent.create({
+        data: {
+          organizationId,
+          aggregateType: "GoodsReceiptNote",
+          aggregateId: grn.id,
+          eventType: "GoodsReceiptNoteReceived",
+          payload: {
+            grnId: grn.id,
+            grnNumber: grn.grnNumber,
+            vendorId: grn.vendorId || undefined,
+            purchaseOrderId: grn.purchaseOrderId || undefined,
+            totalValue: totalValue,
+            currency: "INR",
+            receivedAt: new Date().toISOString(),
+          },
+        },
+      });
+
       await auditService.record({
         organizationId,
         userId: actorUserId,
@@ -292,3 +318,4 @@ export const grnService = {
     return grnRepository.list(organizationId, filters, query);
   },
 };
+

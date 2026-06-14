@@ -12,7 +12,7 @@ export const vendorFormSchema = z.object({
   category: z.enum(["raw_materials", "services", "logistics", "electronics"]),
   gstin: z.string().trim().optional().or(z.literal("")),
   currency: z.string().trim().min(3).max(3),
-  paymentTerms: z.string().trim().optional().or(z.literal("")),
+  paymentTerms: z.coerce.number().int().nonnegative().optional(),
   leadTimeDays: z.coerce.number().nonnegative().optional(),
   accountManager: z.string().trim().optional().or(z.literal("")),
   billingAddress: z.string().trim().optional().or(z.literal("")),

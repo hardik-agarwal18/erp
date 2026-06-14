@@ -146,6 +146,117 @@ export const employeeService = {
     return employeeRepository.listEmployees(organizationId, filters);
   },
 
+  getDashboardMetrics: async (organizationId: string) => {
+    // 1. Total Employees
+    const totalEmployees = await prisma.employee.count({
+      where: { organizationId, deletedAt: null, isActive: true }
+    });
+
+    // 2. Recent Hires (joined in last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentHires = await prisma.employee.findMany({
+      where: {
+        organizationId,
+        deletedAt: null,
+        joiningDate: { gte: thirtyDaysAgo }
+      },
+      orderBy: { joiningDate: "desc" },
+      take: 5
+    });
+
+    // 3. Upcoming Birthdays (next 30 days)
+    // Prisma doesn't have native day/month extraction in findMany, so we fetch active employees with DOB
+    const employeesWithDob = await prisma.employee.findMany({
+      where: { organizationId, deletedAt: null, isActive: true, dateOfBirth: { not: null } },
+      select: { id: true, firstName: true, lastName: true, dateOfBirth: true, profileImageUrl: true, designation: { select: { name: true } } }
+    });
+
+    const today = new Date();
+    const upcomingBirthdays = employeesWithDob.filter(emp => {
+      const dob = new Date(emp.dateOfBirth!);
+      dob.setFullYear(today.getFullYear());
+      if (dob < today) dob.setFullYear(today.getFullYear() + 1);
+      const diffDays = (dob.getTime() - today.getTime()) / (1000 * 3600 * 24);
+      return diffDays >= 0 && diffDays <= 30;
+    }).sort((a, b) => {
+      const dobA = new Date(a.dateOfBirth!);
+      dobA.setFullYear(today.getFullYear());
+      if (dobA < today) dobA.setFullYear(today.getFullYear() + 1);
+      const dobB = new Date(b.dateOfBirth!);
+      dobB.setFullYear(today.getFullYear());
+      if (dobB < today) dobB.setFullYear(today.getFullYear() + 1);
+      return dobA.getTime() - dobB.getTime();
+    }).slice(0, 5);
+
+    // 4. Department Count
+    const totalDepartments = await prisma.department.count({
+      where: { organizationId, deletedAt: null, isActive: true }
+    });
+
+    // 5. Headcount by Department
+    const employeesByDept = await prisma.employee.groupBy({
+      by: ['departmentId'],
+      where: { organizationId, deletedAt: null, isActive: true },
+      _count: { id: true }
+    });
+    const deptIds = employeesByDept.map(e => e.departmentId).filter(Boolean) as string[];
+    const depts = await prisma.department.findMany({ where: { id: { in: deptIds } }, select: { id: true, name: true } });
+    const headcountByDepartment = employeesByDept.map(e => ({
+      department: e.departmentId ? depts.find(d => d.id === e.departmentId)?.name || 'Unknown' : 'Unassigned',
+      count: e._count.id
+    })).sort((a, b) => b.count - a.count);
+
+    // 6. Employment Type
+    const employeesByEmpType = await prisma.employee.groupBy({
+      by: ['employmentType'],
+      where: { organizationId, deletedAt: null, isActive: true },
+      _count: { id: true }
+    });
+    const headcountByEmploymentType = employeesByEmpType.map(e => ({
+      type: e.employmentType.replace(/_/g, ' '),
+      count: e._count.id
+    })).sort((a, b) => b.count - a.count);
+
+    // 7. Gender Diversity
+    const employeesByGender = await prisma.employee.groupBy({
+      by: ['gender'],
+      where: { organizationId, deletedAt: null, isActive: true },
+      _count: { id: true }
+    });
+    const genderDiversity = employeesByGender.map(e => ({
+      gender: e.gender || 'Not Specified',
+      count: e._count.id
+    })).sort((a, b) => b.count - a.count);
+
+    const kpis = [
+      {
+        label: "Total Employees",
+        value: totalEmployees,
+        detail: "Active employees",
+      },
+      {
+        label: "Recent Hires",
+        value: recentHires.length,
+        detail: "Joined in last 30 days",
+      },
+      {
+        label: "Departments",
+        value: totalDepartments,
+        detail: "Active departments",
+      }
+    ];
+
+    return { 
+      kpis, 
+      recentHires, 
+      upcomingBirthdays,
+      headcountByDepartment,
+      headcountByEmploymentType,
+      genderDiversity
+    };
+  },
+
   deleteEmployee: async (id: string, organizationId: string, userId: string) => {
     const employee = await employeeRepository.getEmployeeById(id, organizationId);
     if (!employee) throw new ApiError(404, "Employee not found");

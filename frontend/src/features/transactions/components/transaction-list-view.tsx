@@ -20,7 +20,9 @@ import { formatCurrency } from "@/utils/formatters";
 import { MetricCard } from "@/features/dashboard/components/metric-card";
 
 export function TransactionListView() {
-  const query = useTransactionsQuery();
+  const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+  const query = useTransactionsQuery(pagination.pageIndex + 1, pagination.pageSize);
+  
   const [filters, setFilters] = useState<TransactionFiltersState>({
     search: "",
     status: "all",
@@ -30,6 +32,7 @@ export function TransactionListView() {
   const transactions = useMemo(() => data?.transactions ?? [], [data?.transactions]);
   const reconciliations = useMemo(() => data?.reconciliations ?? [], [data?.reconciliations]);
   const summary = data?.summary;
+  const meta = data?.meta;
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((transaction) => {
@@ -54,7 +57,7 @@ export function TransactionListView() {
 
   if (!data || !summary) return null;
 
-  if (transactions.length === 0) {
+  if (transactions.length === 0 && filters.search.length === 0 && filters.status === "all") {
     return <EmptyState title="No transactions found" description="Transactions will populate here after posting and bank feed import." />;
   }
 
@@ -133,7 +136,13 @@ export function TransactionListView() {
             </div>
           </div>
 
-          <TransactionTable transactions={filteredTransactions} />
+          <TransactionTable 
+            transactions={filteredTransactions} 
+            manualPagination={true}
+            pageCount={meta ? Math.ceil(meta.total / meta.limit) : 1}
+            pagination={pagination}
+            onPaginationChange={setPagination}
+          />
         </CardContent>
       </Card>
     </div>

@@ -33,7 +33,7 @@ export function PurchaseCreateView() {
             expectedDate: "",
             warehouse: "",
             approvalStage: "Pending",
-            paymentTerms: "",
+            paymentTerms: 0,
             buyer: "",
             notes: "",
             lineItems: [],

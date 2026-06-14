@@ -22,7 +22,7 @@ export function VendorProfile({ vendor }: { vendor: Vendor }) {
           <ProfileField label="Email" value={vendor.email} />
           <ProfileField label="Phone" value={vendor.phone} />
           <ProfileField label="Category" value={vendor.category.replace("_", " ")} />
-          <ProfileField label="Payment Terms" value={vendor.paymentTerms} />
+          <ProfileField label="Payment Terms" value={vendor.paymentTerms ? `${vendor.paymentTerms} Days` : "Due on receipt"} />
           <ProfileField label="Lead Time" value={`${vendor.leadTimeDays} days`} />
           <ProfileField label="Outstanding Balance" value={formatCurrency(vendor.outstandingBalance)} />
         </div>

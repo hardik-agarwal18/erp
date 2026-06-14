@@ -68,7 +68,7 @@ export function CommandPalette() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/40 px-4 pt-24 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+      <div className="w-full max-w-2xl rounded-2xl border bg-card text-card-foreground dark:border-slate-800 dark:bg-slate-950 shadow-2xl overflow-hidden">
         <div className="flex items-center border-b border-slate-200 px-4 py-3 gap-3">
           <Search className="h-5 w-5 text-slate-400 shrink-0" />
           <input

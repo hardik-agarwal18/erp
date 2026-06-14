@@ -40,4 +40,26 @@ export const payrollController = {
     const run = await payrollRepository.getPayrollRun(req.member!.organizationId, req.params.id as string);
     sendSuccess(res, { statusCode: 200, data: run });
   }),
+
+  getMyPayslips: asyncHandler(async (req: Request, res: Response) => {
+    // Similarly, we need the employee ID.
+    const employeeId = (req.query.employeeId as string) || req.user!.id;
+    const payslips = await payrollService.getMyPayslips(req.member!.organizationId, employeeId);
+    sendSuccess(res, { statusCode: 200, data: payslips });
+  }),
+
+  getMyPayslip: asyncHandler(async (req: Request, res: Response) => {
+    const employeeId = (req.query.employeeId as string) || req.user!.id;
+    const payslip = await payrollService.getPayslipById(req.member!.organizationId, req.params.id as string, employeeId);
+    sendSuccess(res, { statusCode: 200, data: payslip });
+  }),
+
+  getPayslipPdf: asyncHandler(async (req: Request, res: Response) => {
+    const employeeId = (req.query.employeeId as string) || req.user!.id;
+    const pdfBuffer = await payrollService.generatePayslipPdf(req.member!.organizationId, req.params.id as string, employeeId);
+    
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename=payslip-${req.params.id}.pdf`);
+    res.send(pdfBuffer);
+  }),
 };

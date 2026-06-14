@@ -14,6 +14,9 @@ export enum QueueNames {
   NOTIFICATIONS = "notifications-queue",
   PDF_GENERATION = "pdf-generation-queue",
   STORAGE_CLEANUP = "storage-cleanup-queue",
+  ACCOUNTING = "accounting-queue",
+  ACCOUNTING_DLQ = "accounting-dlq",
+  OUTBOX_RELAY = "outbox-relay-queue",
 }
 
 // Mail Job payloads
@@ -37,6 +40,8 @@ export type PdfGenerationJobPayload = {
   documentId: string;
   documentType: "INVOICE" | "PURCHASE_ORDER";
   organizationId: string;
+  targetEmail?: string;
+  emailLogId?: string;
 };
 
 export type ReportJobPayload = {
@@ -55,3 +60,9 @@ export type AuditExportJobPayload = {
   startDate?: string;
   endDate?: string;
 };
+
+export type AccountingJobPayload = {
+  outboxEventId: string;
+};
+
+export type OutboxRelayJobPayload = {};

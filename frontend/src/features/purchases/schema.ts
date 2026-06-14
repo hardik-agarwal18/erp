@@ -15,7 +15,7 @@ export const purchaseOrderSchema = z.object({
   expectedDate: z.string().trim().min(8),
   warehouse: requiredTextSchema,
   approvalStage: requiredTextSchema,
-  paymentTerms: requiredTextSchema,
+  paymentTerms: z.number().int().nonnegative(),
   buyer: requiredTextSchema,
   notes: z.string().trim().min(4),
   lineItems: z.array(purchaseLineItemSchema).min(1),

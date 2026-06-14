@@ -59,4 +59,20 @@ router.get(
   payrollController.getPayrollRun
 );
 
+// Employee Self Service
+router.get(
+  "/my-payslips",
+  payrollController.getMyPayslips
+);
+
+router.get(
+  "/my-payslips/:id",
+  payrollController.getMyPayslip
+);
+
+router.get(
+  "/my-payslips/:id/pdf",
+  payrollController.getPayslipPdf
+);
+
 export default router;
