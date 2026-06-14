@@ -62,7 +62,7 @@ export function InvoiceEditor({
             </div>
             <div>
               <Label htmlFor="invoice-payment-terms">Payment Terms</Label>
-              <Input type="number" id="invoice-payment-terms" {...form.register("paymentTerms")} />
+              <Input type="number" id="invoice-payment-terms" {...form.register("paymentTerms", { valueAsNumber: true })} />
             </div>
             <div className="lg:col-span-2">
               <Label htmlFor="invoice-billing-address">Billing Address</Label>

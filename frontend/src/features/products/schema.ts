@@ -17,7 +17,7 @@ export const productFormSchema = z.object({
   supplierCode: z.string().trim().min(3),
   supplierLeadTimeDays: z.number().nonnegative(),
   supplierMinimumOrderQuantity: z.number().nonnegative(),
-  supplierPaymentTerms: z.coerce.number().int().nonnegative(),
+  supplierPaymentTerms: z.number().int().nonnegative(),
   costPrice: z.number().nonnegative(),
   salePrice: z.number().nonnegative(),
   wholesalePrice: z.number().nonnegative(),

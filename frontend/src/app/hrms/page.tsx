@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import { AppShell } from "@/components/layout/app-shell";
 import { getHrmsDashboard } from "@/services/hrms.service";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -216,7 +217,7 @@ export default function HrmsDashboardPage() {
                     <div key={employee.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
                       <div className="flex items-center gap-3">
                         {employee.profileImageUrl ? (
-                          <img src={employee.profileImageUrl} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                          <Image src={employee.profileImageUrl} alt="Profile" width={32} height={32} className="w-8 h-8 rounded-full object-cover" unoptimized />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-semibold text-xs">
                             {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
@@ -260,7 +261,7 @@ export default function HrmsDashboardPage() {
                     <div key={employee.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800">
                       <div className="flex items-center gap-3">
                         {employee.profileImageUrl ? (
-                          <img src={employee.profileImageUrl} alt="Profile" className="w-8 h-8 rounded-full object-cover" />
+                          <Image src={employee.profileImageUrl} alt="Profile" width={32} height={32} className="w-8 h-8 rounded-full object-cover" unoptimized />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900/50 flex items-center justify-center text-pink-600 dark:text-pink-400 font-semibold text-xs">
                             {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
