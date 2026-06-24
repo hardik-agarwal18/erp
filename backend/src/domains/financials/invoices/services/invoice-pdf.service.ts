@@ -43,9 +43,7 @@ export const invoicePdfService = {
           .fontSize(10)
           .text(invoice.customer.name, 50, 135);
 
-        if (invoice.customer.address) {
-          doc.text(invoice.customer.address, 50, 150);
-        }
+        // Address logic goes here when relation is loaded
 
         // Line Items Header
         let y = 200;

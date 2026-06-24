@@ -1,22 +1,41 @@
-
 export type CreateCustomerInput = {
   name: string;
-  email?: string;
-  phone?: string;
+  type: string; // INDIVIDUAL, CORPORATE
+  group?: string; // WHOLESALE, RETAIL
   gstNumber?: string;
-  address?: string;
-  creditLimit?: number;
+  parentCustomerId?: string;
+  addresses?: Array<{
+    type: string;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    postalCode: string;
+    isDefault?: boolean;
+  }>;
+  contacts?: Array<{
+    name: string;
+    email?: string;
+    phone?: string;
+    role?: string;
+    isPrimary?: boolean;
+  }>;
+  taxProfile?: {
+    panNumber?: string;
+    taxExempt?: boolean;
+    exemptionReason?: string;
+  };
+  creditProfile?: {
+    creditLimit: number;
+    creditDays: number;
+    riskRating?: string;
+  };
 };
 
-export type UpdateCustomerInput = {
-  name?: string;
-  email?: string;
-  phone?: string;
-  gstNumber?: string;
-  address?: string;
-  creditLimit?: number;
-};
+export type UpdateCustomerInput = Partial<Omit<CreateCustomerInput, 'code'>>;
 
 export type CustomerFilters = {
   search?: string;
+  status?: string;
+  type?: string;
 };

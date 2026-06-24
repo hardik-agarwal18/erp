@@ -1,0 +1,17 @@
+{
+  "name": "erp-monorepo",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build:all": "npm run build --workspaces",
+    "generate:openapi": "npm run generate:openapi --workspace=backend",
+    "generate:sdk": "npm run generate:sdk --workspace=frontend"
+  }
+}

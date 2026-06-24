@@ -17,6 +17,7 @@ export enum QueueNames {
   ACCOUNTING = "accounting-queue",
   ACCOUNTING_DLQ = "accounting-dlq",
   OUTBOX_RELAY = "outbox-relay-queue",
+  QUOTATION_EXPIRY = "quotation-expiry-queue",
 }
 
 // Mail Job payloads

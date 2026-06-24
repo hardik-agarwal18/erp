@@ -20,6 +20,19 @@ export const startScheduler = async () => {
     }
   );
 
+  // Schedule nightly quotation expiry sweep
+  const { quotationExpiryQueue } = await import("./queue.service.js");
+  await quotationExpiryQueue.add(
+    "daily-quotation-expiry",
+    {},
+    {
+      repeat: {
+        pattern: "0 1 * * *", // Runs at 1:00 AM daily
+      },
+      jobId: "quotation-expiry-job",
+    }
+  );
+
   // Schedule repeatable outbox relay job (runs every 5 seconds)
   await outboxRelayQueue.add(
     "outbox-relay",

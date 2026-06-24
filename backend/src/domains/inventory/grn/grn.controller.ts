@@ -1,49 +1,62 @@
-
 import { Request, Response } from "express";
-import { sendSuccess } from "../../../utils/apiResponse.js";
 import { grnService } from "./grn.service.js";
 
 export const grnController = {
-  create: async (req: Request, res: Response) => {
-    const payload = {
-      ...req.body,
-      receivedDate: new Date(req.body.receivedDate),
-    };
-    const grn = await grnService.create(
-      req.organization!.id,
-      req.user!.id,
-      payload
-    );
-    sendSuccess(res, { statusCode: 201, data: grn });
-  },
-
-  receive: async (req: Request, res: Response) => {
-    const result = await grnService.receive(
-      req.params.id as string,
-      req.organization!.id,
-      req.user!.id,
+  createDraft: async (req: Request, res: Response) => {
+    const grn = await grnService.createDraft(
+      (req as any).tenant.organizationId,
+      (req as any).user.id,
       req.body
     );
-    sendSuccess(res, { statusCode: 200, data: result });
+    res.status(201).json(grn);
+  },
+
+  startInspection: async (req: Request, res: Response) => {
+    const grn = await grnService.startInspection(
+      req.params.id as string,
+      (req as any).tenant.organizationId,
+      (req as any).user.id
+    );
+    res.json(grn);
+  },
+
+  recordInspection: async (req: Request, res: Response) => {
+    const grn = await grnService.recordInspection(
+      req.params.id as string,
+      (req as any).tenant.organizationId,
+      (req as any).user.id,
+      req.body.items
+    );
+    res.json(grn);
+  },
+
+  postGrn: async (req: Request, res: Response) => {
+    const grn = await grnService.postGrn(
+      req.params.id as string,
+      (req as any).tenant.organizationId,
+      (req as any).user.id
+    );
+    res.json(grn);
   },
 
   getById: async (req: Request, res: Response) => {
-    const grn = await grnService.getById(req.params.id as string, req.organization!.id);
-    sendSuccess(res, { statusCode: 200, data: grn });
+    const grn = await grnService.getById(
+      req.params.id as string,
+      (req as any).tenant.organizationId
+    );
+    res.json(grn);
   },
 
   list: async (req: Request, res: Response) => {
     const filters = {
-      search: req.query.search as string | undefined,
+      vendorId: req.query.vendorId as string,
       status: req.query.status as any,
-      godownId: req.query.godownId as string | undefined,
-      vendorId: req.query.vendorId as string | undefined,
     };
     const result = await grnService.list(
-      req.organization!.id,
+      (req as any).tenant.organizationId,
       filters,
-      req.query
+      req.query as Record<string, unknown>
     );
-    sendSuccess(res, { statusCode: 200, data: result });
+    res.json(result);
   },
 };

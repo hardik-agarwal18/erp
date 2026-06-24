@@ -9,6 +9,8 @@ import { processReportJob } from "./jobs/report-export.job.js";
 import { processAuditExportJob } from "./jobs/audit-export.job.js";
 import { processOutboxRelayJob } from "./jobs/outbox-relay.job.js";
 import { processAccountingJob } from "./jobs/accounting.job.js";
+import { processAccountingDlqJob } from "./jobs/accounting-dlq.job.js";
+import { processQuotationExpiryJob } from "./jobs/quotation-expiry.job.js";
 import { queueJobsCompletedTotal, queueJobsFailedTotal, queueJobLatencySeconds } from "../monitoring/metrics.js";
 import logger from "../config/logger.js";
 import { env } from "../config/env.js";
@@ -101,6 +103,14 @@ export const startWorkers = () => {
   // Accounting Worker
   const accountingWorker = new Worker(QueueNames.ACCOUNTING, withLoggerContext(processAccountingJob), { connection: queueConnection.duplicate() as any, concurrency: 5, prefix });
   attachWorkerObservability(accountingWorker, QueueNames.ACCOUNTING);
+
+  // Accounting DLQ Worker
+  const accountingDlqWorker = new Worker(QueueNames.ACCOUNTING_DLQ, withLoggerContext(processAccountingDlqJob), { connection: queueConnection.duplicate() as any, concurrency: 1, prefix });
+  attachWorkerObservability(accountingDlqWorker, QueueNames.ACCOUNTING_DLQ);
+
+  // Quotation Expiry Worker
+  const quotationExpiryWorker = new Worker(QueueNames.QUOTATION_EXPIRY, withLoggerContext(processQuotationExpiryJob), { connection: queueConnection.duplicate() as any, concurrency: 1, prefix });
+  attachWorkerObservability(quotationExpiryWorker, QueueNames.QUOTATION_EXPIRY);
 };
 
 export const shutdownWorkers = async () => {

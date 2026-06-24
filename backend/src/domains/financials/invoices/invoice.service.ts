@@ -109,6 +109,9 @@ export const invoiceService = {
         organizationId,
         {
           customerId: payload.customerId,
+          sourceType: payload.sourceType,
+          salesOrderId: payload.salesOrderId,
+          deliveryChallanId: payload.deliveryChallanId,
           invoiceNumber,
           status,
           issueDate: new Date(payload.issueDate),
@@ -131,7 +134,7 @@ export const invoiceService = {
 
       let totalCogs = 0;
 
-      if (status === "ISSUED") {
+      if (status === "POSTED") {
         for (const item of lineItems) {
           if (item.productType !== "PHYSICAL") {
             continue;
@@ -183,7 +186,7 @@ export const invoiceService = {
         tx,
       );
 
-      if (status === "ISSUED") {
+      if (status === "POSTED") {
         await pdfGenerationQueue.add("generate-invoice-pdf", {
           documentId: created.id,
           documentType: "INVOICE",
@@ -196,7 +199,7 @@ export const invoiceService = {
             organizationId,
             aggregateType: "SalesInvoice",
             aggregateId: created.id,
-            eventType: "SalesInvoiceIssued",
+            eventType: "SalesInvoicePOSTED",
             payload: {
               invoiceId: created.id,
               invoiceNumber: invoiceNumber,
@@ -239,7 +242,7 @@ export const invoiceService = {
     let finalDiscountAmount = Number(existing.discountAmount);
     let finalTotalAmount = Number(existing.totalAmount);
     let finalCustomerId = payload.customerId ?? existing.customerId;
-    let finalIssueDate = payload.issueDate ? new Date(payload.issueDate) : existing.issueDate;
+    let finalissueDate = payload.issueDate ? new Date(payload.issueDate) : existing.issueDate;
     let newItemsData: any[] | null = null;
 
     if (payload.items && payload.items.length > 0) {
@@ -290,11 +293,11 @@ export const invoiceService = {
       const updatedInvoiceCount = await tx.invoice.updateMany({
         where: { id: invoiceId, organizationId },
         data: {
-          status: nextStatus,
+          status: nextStatus as any,
           dueDate: payload.dueDate ? new Date(payload.dueDate) : undefined,
           notes: payload.notes,
           customerId: finalCustomerId,
-          issueDate: finalIssueDate,
+          issueDate: finalissueDate,
           subtotal: finalSubtotal,
           taxAmount: finalTaxAmount,
           discountAmount: finalDiscountAmount,
@@ -324,7 +327,7 @@ export const invoiceService = {
         });
       }
 
-      if (existing.status === "DRAFT" && nextStatus === "ISSUED") {
+      if (existing.status === "DRAFT" && nextStatus === "POSTED") {
         let totalCogs = 0;
         const items = await invoiceRepository.listInvoiceItems(tx, invoiceId);
         for (const item of items) {
@@ -372,7 +375,7 @@ export const invoiceService = {
             organizationId,
             aggregateType: "SalesInvoice",
             aggregateId: invoiceId,
-            eventType: "SalesInvoiceIssued",
+            eventType: "SalesInvoicePOSTED",
             payload: {
               invoiceId: invoiceId,
               invoiceNumber: existing.invoiceNumber,

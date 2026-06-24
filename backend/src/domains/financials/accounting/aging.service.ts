@@ -16,7 +16,7 @@ export const agingService = {
     const invoices = await prisma.invoice.findMany({
       where: {
         organizationId,
-        status: { notIn: ["DRAFT", "PAID", "CANCELLED"] },
+        status: { in: ["RECEIVED", "POSTED", "PARTIALLY_PAID", "OVERDUE"] as any } as any,
         issueDate: { lte: asOfDate }
       },
       // Removed allocations because it's not in the schema anymore
@@ -59,7 +59,7 @@ export const agingService = {
     const vendorInvoices = await prisma.vendorInvoice.findMany({
       where: {
         organizationId,
-        status: { notIn: ["DRAFT", "RECEIVED"] }, // Adjust statuses as needed
+        status: { notIn: ["DRAFT" as any, "RECEIVED" as any] } as any, // Adjust statuses as needed
         invoiceDate: { lte: asOfDate }
       }
     });

@@ -1,0 +1,389 @@
+model ProductCategory {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  products       Product[]
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Product {
+  id                       String                    @id @default(uuid())
+  organizationId           String
+  categoryId               String?
+  taxId                    String?
+  name                     String
+  sku                      String?
+  description              String?
+  unit                     String?
+  sellingPrice             Decimal
+  purchasePrice            Decimal?
+  isBatchTracked           Boolean                   @default(false)
+  isSerialTracked          Boolean                   @default(false)
+  type                     ProductType
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  deletedAt                DateTime?
+  inventoryItem            InventoryItem?
+  inventoryMovements       InventoryMovement[]
+  invoiceItems             InvoiceItem[]
+  category                 ProductCategory?          @relation(fields: [categoryId], references: [id])
+  organization             Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tax                      Tax?                      @relation(fields: [taxId], references: [id])
+  batches                  Batch[]
+  serialNumbers            SerialNumber[]
+  vendorInvoiceItems       VendorInvoiceItem[]
+  goodsReceiptNoteItems    GoodsReceiptNoteItem[]
+  deliveryChallanItems     DeliveryChallanItem[]
+  stockJournalItems        StockJournalItem[]
+  stockVerificationItems   StockVerificationItem[]
+  stockGroupId             String?
+  stockGroup               StockGroup?               @relation(fields: [stockGroupId], references: [id])
+  inventoryLots            InventoryLot[]
+  requestForQuotationItems RequestForQuotationItem[]
+  quotationRevisionItems   QuotationRevisionItem[]
+  quotationItems           QuotationItem[]
+  inventoryReservations    InventoryReservation[]
+  salesOrderLines          SalesOrderLine[]
+
+  @@unique([organizationId, sku])
+  @@index([organizationId])
+  @@index([organizationId, name])
+}
+
+model InventoryItem {
+  id             String       @id @default(uuid())
+  organizationId String
+  productId      String       @unique
+  godownId       String?
+  quantity       Decimal      @default(0)
+  averageCost    Decimal      @default(0)
+  reorderLevel   Decimal?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batch          Batch?       @relation(fields: [batchId], references: [id])
+  batchId        String?
+  godown         Godown?      @relation(fields: [godownId], references: [id])
+
+  @@index([organizationId])
+}
+
+model InventoryMovement {
+  id             String                @id @default(uuid())
+  organizationId String
+  productId      String
+  godownId       String?
+  batchId        String?
+  serialNumberId String?
+  type           InventoryMovementType
+  quantity       Decimal
+  referenceType  String?
+  referenceId    String?
+  createdAt      DateTime              @default(now())
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  product        Product               @relation(fields: [productId], references: [id], onDelete: Cascade)
+  batch          Batch?                @relation(fields: [batchId], references: [id])
+  godown         Godown?               @relation(fields: [godownId], references: [id])
+  serialNumber   SerialNumber?         @relation(fields: [serialNumberId], references: [id])
+
+  @@index([organizationId])
+  @@index([organizationId, productId])
+  @@index([organizationId, createdAt(sort: Desc)])
+}
+
+enum ProductType {
+  PHYSICAL
+  SERVICE
+}
+
+enum InventoryMovementType {
+  PURCHASE
+  SALE
+  ADJUSTMENT
+  RETURN
+  TRANSFER
+  GRN_RECEIPT
+}
+
+model Batch {
+  id                  String               @id @default(uuid())
+  organizationId      String
+  productId           String
+  batchNumber         String
+  manufacturingDate   DateTime?
+  expiryDate          DateTime?
+  quantity            Decimal
+  createdAt           DateTime             @default(now())
+  deletedAt           DateTime?
+  product             Product              @relation(fields: [productId], references: [id])
+  organization        Organization         @relation(fields: [organizationId], references: [id])
+  batchInventoryItems BatchInventoryItem[]
+  inventoryItems      InventoryItem[]
+  inventoryMovements  InventoryMovement[]
+  serialNumbers       SerialNumber[]
+}
+
+model Godown {
+  id                   String                @id @default(uuid())
+  organizationId       String
+  name                 String
+  location             String?
+  isDefault            Boolean               @default(false)
+  deletedAt            DateTime?
+  organization         Organization          @relation(fields: [organizationId], references: [id])
+  inventoryMovements   InventoryMovement[]
+  inventoryItems       InventoryItem[]
+  deliveryChallans     DeliveryChallan[]
+  goodsReceiptNotes    GoodsReceiptNote[]
+  stockJournalsFrom    StockJournal[]        @relation("StockJournalFromGodown")
+  stockJournalsTo      StockJournal[]        @relation("StockJournalToGodown")
+  stockVerifications   StockVerification[]
+  serialNumbers        SerialNumber[]
+  batchInventoryItems  BatchInventoryItem[]
+  inventoryLots        InventoryLot[]
+  inventoryAllocations InventoryAllocation[]
+}
+
+model GoodsReceiptNote {
+  id              String                 @id @default(uuid())
+  organizationId  String
+  purchaseOrderId String?
+  vendorId        String?
+  godownId        String
+  grnNumber       String
+  status          String
+  notes           String?
+  totalValue      Decimal                @default(0)
+  inspectedById   String?
+  postedById      String?
+  receivedDate    DateTime               @default(now())
+  deletedAt       DateTime?
+  organization    Organization           @relation(fields: [organizationId], references: [id])
+  vendor          Vendor?                @relation(fields: [vendorId], references: [id])
+  purchaseOrder   PurchaseOrder?         @relation(fields: [purchaseOrderId], references: [id])
+  godown          Godown                 @relation(fields: [godownId], references: [id])
+  items           GoodsReceiptNoteItem[]
+}
+
+model GoodsReceiptNoteItem {
+  id          String           @id @default(uuid())
+  grnId       String
+  productId   String
+  poItemId    String?
+  orderedQty  Decimal?
+  receivedQty Decimal
+  acceptedQty Decimal          @default(0)
+  rejectedQty Decimal          @default(0)
+  batchId     String?
+  unitPrice   Decimal
+  product     Product          @relation(fields: [productId], references: [id])
+  grn         GoodsReceiptNote @relation(fields: [grnId], references: [id], onDelete: Cascade)
+}
+
+model SerialNumber {
+  id                 String              @id @default(uuid())
+  organizationId     String
+  productId          String
+  godownId           String
+  serialNumber       String
+  status             SerialNumberStatus
+  batchId            String?
+  purchaseDate       DateTime?
+  createdAt          DateTime            @default(now())
+  organization       Organization        @relation(fields: [organizationId], references: [id])
+  product            Product             @relation(fields: [productId], references: [id])
+  godown             Godown              @relation(fields: [godownId], references: [id])
+  batch              Batch?              @relation(fields: [batchId], references: [id])
+  inventoryMovements InventoryMovement[]
+}
+
+model StockGroup {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  parentId       String?
+  deletedAt      DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  parent         StockGroup?  @relation("StockGroupToStockGroup", fields: [parentId], references: [id])
+  children       StockGroup[] @relation("StockGroupToStockGroup")
+  products       Product[]
+}
+
+model StockJournal {
+  id             String             @id @default(uuid())
+  organizationId String
+  fromGodownId   String
+  toGodownId     String
+  journalNumber  String
+  date           DateTime           @default(now())
+  status         String             @default("DRAFT")
+  notes          String?
+  createdAt      DateTime           @default(now())
+  deletedAt      DateTime?
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  fromGodown     Godown             @relation("StockJournalFromGodown", fields: [fromGodownId], references: [id])
+  toGodown       Godown             @relation("StockJournalToGodown", fields: [toGodownId], references: [id])
+  items          StockJournalItem[]
+}
+
+model StockJournalItem {
+  id        String       @id @default(uuid())
+  journalId String
+  productId String
+  quantity  Decimal
+  type      String?
+  product   Product      @relation(fields: [productId], references: [id])
+  journal   StockJournal @relation(fields: [journalId], references: [id], onDelete: Cascade)
+}
+
+model StockVerification {
+  id                 String                  @id @default(uuid())
+  organizationId     String
+  godownId           String
+  verificationNumber String
+  scheduledDate      DateTime
+  status             String
+  notes              String?
+  deletedAt          DateTime?
+  organization       Organization            @relation(fields: [organizationId], references: [id])
+  godown             Godown                  @relation(fields: [godownId], references: [id])
+  items              StockVerificationItem[]
+}
+
+model StockVerificationItem {
+  id               String            @id @default(uuid())
+  verificationId   String
+  productId        String
+  systemQuantity   Decimal           @default(0)
+  physicalQuantity Decimal           @default(0)
+  difference       Decimal           @default(0)
+  product          Product           @relation(fields: [productId], references: [id])
+  verification     StockVerification @relation(fields: [verificationId], references: [id], onDelete: Cascade)
+}
+
+enum SerialNumberStatus {
+  AVAILABLE
+  IN_USE
+  SOLD
+  DEFECTIVE
+  RETURNED
+}
+
+model BatchInventoryItem {
+  id             String       @id @default(uuid())
+  organizationId String
+  batchId        String
+  godownId       String
+  quantity       Decimal      @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  batch          Batch        @relation(fields: [batchId], references: [id])
+  godown         Godown       @relation(fields: [godownId], references: [id])
+
+  @@unique([batchId, godownId])
+}
+
+enum GoodsReceiptNoteStatus {
+  DRAFT
+  INSPECTING
+  RECEIVED
+  POSTED
+  CANCELLED
+}
+
+model InventoryLot {
+  id                String       @id @default(uuid())
+  organizationId    String
+  productId         String
+  godownId          String
+  lotNumber         String
+  expiryDate        DateTime?
+  receivedQuantity  Decimal      @default(0)
+  availableQuantity Decimal      @default(0)
+  reservedQuantity  Decimal      @default(0)
+  createdAt         DateTime     @default(now())
+  organization      Organization @relation(fields: [organizationId], references: [id])
+  product           Product      @relation(fields: [productId], references: [id])
+  godown            Godown       @relation(fields: [godownId], references: [id])
+}
+
+model PickList {
+  id                String         @id @default(uuid())
+  organizationId    String
+  deliveryChallanId String?
+  listNumber        String
+  status            String         @default("PENDING")
+  createdAt         DateTime       @default(now())
+  organization      Organization   @relation(fields: [organizationId], references: [id])
+  items             PickListItem[]
+}
+
+model PickListItem {
+  id             String   @id @default(uuid())
+  pickListId     String
+  productId      String
+  godownId       String
+  quantityToPick Decimal
+  quantityPicked Decimal  @default(0)
+  pickList       PickList @relation(fields: [pickListId], references: [id], onDelete: Cascade)
+}
+
+model Shipment {
+  id                String       @id @default(uuid())
+  organizationId    String
+  deliveryChallanId String?
+  shipmentNumber    String
+  carrierId         String?
+  trackingNumber    String?
+  dispatchedAt      DateTime?
+  status            String       @default("PENDING")
+  createdAt         DateTime     @default(now())
+  organization      Organization @relation(fields: [organizationId], references: [id])
+}
+
+model InventoryReservation {
+  id                      String                @id @default(uuid())
+  organizationId          String
+  productId               String
+  reservationSourceId     String
+  reservationSourceType   String
+  reservationSourceLineId String?
+  status                  ReservationStatus     @default(ACTIVE)
+  quantity                Decimal
+  quantityReserved        Decimal               @default(0)
+  quantityConsumed        Decimal               @default(0)
+  quantityReleased        Decimal               @default(0)
+  createdAt               DateTime              @default(now())
+  organization            Organization          @relation(fields: [organizationId], references: [id])
+  product                 Product               @relation(fields: [productId], references: [id])
+  allocations             InventoryAllocation[]
+}
+
+model InventoryAllocation {
+  id                String               @id @default(uuid())
+  reservationId     String
+  godownId          String
+  quantityAllocated Decimal
+  createdAt         DateTime             @default(now())
+  reservation       InventoryReservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  godown            Godown               @relation(fields: [godownId], references: [id])
+}
+
+enum ReservationStatus {
+  ACTIVE
+  PARTIALLY_RESERVED
+  CONSUMED
+  PARTIALLY_CONSUMED
+  CANCELLED
+}

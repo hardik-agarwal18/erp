@@ -1,13 +1,13 @@
-
 import { Request, Response } from "express";
 import { vendorInvoicesService } from "./vendor-invoices.service.js";
+import { apAnalyticsService } from "./ap-analytics.service.js";
 import { sendSuccess } from "../../../../utils/apiResponse.js";
 import asyncHandler from "../../../../utils/asyncHandler.js";
 
 export const vendorInvoicesController = {
-  create: asyncHandler(async (req: Request, res: Response) => {
-    const invoice = await vendorInvoicesService.create(req.member!.organizationId, req.body);
-    sendSuccess(res, { statusCode: 201, message: "Vendor Invoice created", data: invoice });
+  createDraft: asyncHandler(async (req: Request, res: Response) => {
+    const invoice = await vendorInvoicesService.createDraft(req.member!.organizationId, req.user!.id, req.body);
+    sendSuccess(res, { statusCode: 201, message: "Vendor Invoice draft created", data: invoice });
   }),
 
   list: asyncHandler(async (req: Request, res: Response) => {
@@ -20,27 +20,28 @@ export const vendorInvoicesController = {
     sendSuccess(res, { statusCode: 200, data: invoice });
   }),
 
-  getMatchSummary: asyncHandler(async (req: Request, res: Response) => {
-    const summary = await vendorInvoicesService.getMatchSummary(req.member!.organizationId, req.params.id as string);
+  performThreeWayMatch: asyncHandler(async (req: Request, res: Response) => {
+    const summary = await vendorInvoicesService.performThreeWayMatch(req.member!.organizationId, req.params.id as string);
     sendSuccess(res, { statusCode: 200, data: summary });
   }),
 
   postInvoice: asyncHandler(async (req: Request, res: Response) => {
-    // Attempt standard posting. If three-way match fails, the service throws a 409 Conflict ApiError.
     const invoice = await vendorInvoicesService.postInvoice(
       req.member!.organizationId,
+      req.user!.id,
       req.params.id as string,
-      false
+      req.body.forceOverride
     );
     sendSuccess(res, { statusCode: 200, message: "Vendor Invoice posted successfully", data: invoice });
   }),
 
-  requestOverride: asyncHandler(async (req: Request, res: Response) => {
-    const invoice = await vendorInvoicesService.requestOverrideApproval(
-      req.member!.organizationId,
-      req.params.id as string,
-      req.user!.id
-    );
-    sendSuccess(res, { statusCode: 200, message: "Override requested via Approval Engine", data: invoice });
+  getApAging: asyncHandler(async (req: Request, res: Response) => {
+    const aging = await apAnalyticsService.getApAging(req.member!.organizationId);
+    sendSuccess(res, { statusCode: 200, data: aging });
   }),
+
+  getVendorStatement: asyncHandler(async (req: Request, res: Response) => {
+    const statement = await apAnalyticsService.getVendorStatement(req.member!.organizationId, req.params.vendorId as string);
+    sendSuccess(res, { statusCode: 200, data: statement });
+  })
 };

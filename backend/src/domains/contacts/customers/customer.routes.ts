@@ -59,4 +59,28 @@ router.get(
   asyncHandler(customerController.getLedger),
 );
 
+router.get(
+  "/:id/exposure",
+  requirePermission(PERMISSIONS.CUSTOMERS_VIEW),
+  validate(customerIdParamSchema),
+  asyncHandler(customerController.getExposure),
+);
+
+import { z } from "zod";
+const requestCreditLimitSchema = z.object({
+  params: z.object({ id: z.string().uuid() }),
+  body: z.object({
+    creditLimit: z.number().min(0),
+    creditDays: z.number().min(0),
+    reason: z.string().optional(),
+  })
+});
+
+router.post(
+  "/:id/credit-limit",
+  requirePermission(PERMISSIONS.CUSTOMERS_UPDATE),
+  validate(requestCreditLimitSchema),
+  asyncHandler(customerController.requestCreditLimit),
+);
+
 export default router;

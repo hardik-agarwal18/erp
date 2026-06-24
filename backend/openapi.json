@@ -1,0 +1,68 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "ERP API",
+    "description": "Enterprise ERP API with strongly-typed Zod schemas"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "prod_123"
+          },
+          "name": {
+            "type": "string",
+            "example": "Enterprise Widget"
+          },
+          "price": {
+            "type": "number",
+            "example": 499.99
+          },
+          "organizationId": {
+            "type": "string",
+            "example": "org_1"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "price",
+          "organizationId"
+        ]
+      }
+    },
+    "parameters": {}
+  },
+  "paths": {
+    "/api/v1/products": {
+      "get": {
+        "description": "List products",
+        "summary": "Get a list of products",
+        "responses": {
+          "200": {
+            "description": "Array of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

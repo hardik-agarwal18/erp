@@ -96,7 +96,7 @@ export const paymentRepository = {
     organizationId: string,
     invoiceId: string,
   ) => {
-    return tx.payment.aggregate({
+    return (tx as any).payment.aggregate({
       where: {
         organizationId,
         invoiceId,
@@ -109,9 +109,9 @@ export const paymentRepository = {
     tx: DatabaseTransactionClient,
     organizationId: string,
     invoiceId: string,
-    status: "ISSUED" | "PARTIALLY_PAID" | "PAID",
+    status: any,
   ) => {
-    return tx.invoice.updateMany({
+    return (tx as any).invoice.updateMany({
       where: {
         id: invoiceId,
         organizationId,

@@ -1,0 +1,23 @@
+model FinancialStatementSnapshot {
+  id             String   @id @default(uuid())
+  organizationId String
+  statementType  String
+  fiscalYearId   String?
+  generatedAt    DateTime @default(now())
+  generatedBy    String
+  statementHash  String
+  payload        Json
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+model InventoryValuationSnapshot {
+  id                  String   @id @default(uuid())
+  organizationId      String
+  valuationDate       DateTime
+  totalInventoryValue Decimal
+  payload             Json
+  createdAt           DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}

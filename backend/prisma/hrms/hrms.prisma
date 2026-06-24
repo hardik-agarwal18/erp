@@ -1,0 +1,437 @@
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  TERMINATED
+  SUSPENDED
+  PROBATION
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+  FREELANCE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+  ON_LEAVE
+  WEEK_OFF
+  HOLIDAY
+}
+
+enum LeaveStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum PayrollRunStatus {
+  DRAFT
+  PROCESSING
+  PENDING_APPROVAL
+  APPROVED
+  COMPLETED
+  CANCELLED
+}
+
+enum ComponentCalculationType {
+  FLAT_AMOUNT
+  FLAT
+  PERCENTAGE_OF_BASIC
+  PERCENTAGE_OF_GROSS
+}
+
+enum WorkingDayBasis {
+  FIXED_DAYS
+  ACTUAL_DAYS
+  WORKING_DAYS
+}
+
+model EmployeeSequence {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  nextNumber     Int          @default(1)
+  prefix         String       @default("EMP")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model Department {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  code           String?
+  description    String?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  employees      Employee[]
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, name])
+}
+
+model Designation {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  level          Int?
+  description    String?
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  employees      Employee[]
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, name])
+}
+
+model Employee {
+  id                    String         @id @default(uuid())
+  organizationId        String
+  employeeCode          String?        @unique
+  firstName             String
+  lastName              String
+  officialEmail         String?
+  personalEmail         String?
+  phone                 String?
+  alternatePhone        String?
+  dateOfBirth           DateTime?
+  gender                Gender?
+  joiningDate           DateTime
+  confirmationDate      DateTime?
+  terminationDate       DateTime?
+  designationId         String?
+  departmentId          String?
+  managerId             String?
+  employmentType        EmploymentType
+  status                EmployeeStatus
+  isActive              Boolean        @default(true)
+  isDriver              Boolean        @default(false)
+  drivingLicenseNumber  String?
+  drivingLicenseExpiry  DateTime?
+  profileImageUrl       String?
+  address               String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  notes                 String?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  deletedAt             DateTime?
+
+  organization      Organization              @relation(fields: [organizationId], references: [id])
+  department        Department?               @relation(fields: [departmentId], references: [id])
+  designation       Designation?              @relation(fields: [designationId], references: [id])
+  manager           Employee?                 @relation("ManagerSubordinates", fields: [managerId], references: [id])
+  subordinates      Employee[]                @relation("ManagerSubordinates")
+  documents         EmployeeDocument[]
+  attendanceRecords AttendanceRecord[]
+  shiftAssignments  EmployeeShiftAssignment[]
+  leaveApplications LeaveApplication[]
+  leaveBalances     LeaveBalance[]
+  salaryStructures  EmployeeSalaryStructure[]
+  salaryHistory     SalaryStructureHistory[]
+  payrollRuns       PayrollRunEmployee[]
+  payslips          Payslip[]
+  expenseClaims     ExpenseClaim[]
+}
+
+model EmployeeDocument {
+  id             String   @id @default(uuid())
+  organizationId String?
+  employeeId     String
+  documentName   String
+  documentType   String?
+  fileUrl        String?
+  createdAt      DateTime @default(now())
+  employee       Employee @relation(fields: [employeeId], references: [id])
+
+  @@unique([id, employeeId])
+}
+
+model AttendanceRecord {
+  id             String           @id @default(uuid())
+  organizationId String
+  employeeId     String
+  date           DateTime
+  status         AttendanceStatus
+  shiftId        String?
+  checkIn        DateTime?
+  checkOut       DateTime?
+  workedMinutes  Int              @default(0)
+  notes          String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  employee       Employee         @relation(fields: [employeeId], references: [id])
+  shift          Shift?           @relation(fields: [shiftId], references: [id])
+
+  @@unique([organizationId, employeeId, date])
+}
+
+model AttendancePolicy {
+  id                    String   @id @default(uuid())
+  organizationId        String   @unique
+  lateGraceMinutes      Int?
+  earlyExitGraceMinutes Int?
+  halfDayMinutes        Int?
+  fullDayMinutes        Int?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model AttendanceAdjustment {
+  id             String           @id @default(uuid())
+  organizationId String
+  employeeId     String
+  date           DateTime
+  newStatus      AttendanceStatus
+  newCheckIn     DateTime?
+  newCheckOut    DateTime?
+  reason         String
+  createdAt      DateTime         @default(now())
+  approvedBy     String?
+  approvedAt     DateTime?
+}
+
+model AttendancePeriod {
+  id             String   @id @default(uuid())
+  organizationId String
+  month          Int
+  year           Int
+  status         String?
+  createdAt      DateTime @default(now())
+
+  @@unique([organizationId, month, year])
+}
+
+model Shift {
+  id                    String                    @id @default(uuid())
+  organizationId        String
+  name                  String
+  type                  String?
+  startTime             String
+  endTime               String
+  breakMinutes          Int?
+  lateGraceMinutes      Int?
+  earlyExitGraceMinutes Int?
+  minimumWorkMinutes    Int?
+  weeklyOffDays         String?
+  isActive              Boolean                   @default(true)
+  isNightShift          Boolean                   @default(false)
+  deletedAt             DateTime?
+  createdAt             DateTime                  @default(now())
+  updatedAt             DateTime                  @updatedAt
+  assignments           EmployeeShiftAssignment[]
+  attendanceRecords     AttendanceRecord[]
+
+  @@unique([organizationId, name])
+}
+
+model EmployeeShiftAssignment {
+  id             String    @id @default(uuid())
+  organizationId String
+  employeeId     String
+  shiftId        String
+  effectiveFrom  DateTime
+  effectiveTo    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  employee       Employee  @relation(fields: [employeeId], references: [id])
+  shift          Shift     @relation(fields: [shiftId], references: [id])
+}
+
+enum ExpenseClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+  REIMBURSED
+}
+
+model ExpenseClaim {
+  id             String             @id @default(uuid())
+  organizationId String
+  employeeId     String
+  date           DateTime
+  category       String
+  amount         Decimal
+  currency       String             @default("USD")
+  description    String?
+  receiptUrl     String?
+  status         ExpenseClaimStatus @default(PENDING)
+  approvedById   String?
+  reimbursedAt   DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  employee     Employee     @relation(fields: [employeeId], references: [id])
+  approvedBy   User?        @relation("ExpenseClaimApprovedBy", fields: [approvedById], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, employeeId])
+}
+
+model LeaveType {
+  id             String             @id @default(uuid())
+  organizationId String
+  name           String
+  description    String?
+  createdAt      DateTime           @default(now())
+  applications   LeaveApplication[]
+  balances       LeaveBalance[]
+}
+
+model LeaveApplication {
+  id             String      @id @default(uuid())
+  organizationId String
+  employeeId     String
+  leaveTypeId    String
+  fromDate       DateTime
+  toDate         DateTime
+  totalDays      Decimal
+  reason         String
+  status         LeaveStatus @default(DRAFT)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  employee       Employee    @relation(fields: [employeeId], references: [id])
+  leaveType      LeaveType   @relation(fields: [leaveTypeId], references: [id])
+}
+
+model LeaveBalance {
+  id             String    @id @default(uuid())
+  organizationId String
+  employeeId     String
+  leaveTypeId    String
+  allocated      Decimal   @default(0)
+  used           Decimal   @default(0)
+  remaining      Decimal   @default(0)
+  employee       Employee  @relation(fields: [employeeId], references: [id])
+  leaveType      LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([organizationId, employeeId, leaveTypeId])
+}
+
+model Holiday {
+  id             String   @id @default(uuid())
+  organizationId String
+  date           DateTime
+  name           String
+  isOptional     Boolean  @default(false)
+
+  @@unique([organizationId, date])
+}
+
+model PayrollPolicy {
+  id                  String          @id @default(uuid())
+  organizationId      String          @unique
+  prorateByAttendance Boolean         @default(true)
+  workingDayBasis     WorkingDayBasis @default(FIXED_DAYS)
+}
+
+model PayrollRun {
+  id              String               @id @default(uuid())
+  organizationId  String
+  month           Int
+  year            Int
+  status          PayrollRunStatus     @default(DRAFT)
+  totalGrossPay   Decimal              @default(0)
+  totalDeductions Decimal              @default(0)
+  totalNetPay     Decimal              @default(0)
+  deletedAt       DateTime?
+  createdAt       DateTime             @default(now())
+  approvedBy      String?
+  approvedAt      DateTime?
+  employees       PayrollRunEmployee[]
+  payslips        Payslip[]
+
+  @@unique([organizationId, month, year])
+}
+
+model PayrollRunEmployee {
+  id            String     @id @default(uuid())
+  payrollRunId  String
+  employeeId    String
+  workingDays   Decimal?
+  presentDays   Decimal?
+  leaveDays     Decimal?
+  unpaidDays    Decimal?
+  halfDays      Decimal?
+  overtimeHours Decimal?
+  lateDays      Decimal?
+  payrollRun    PayrollRun @relation(fields: [payrollRunId], references: [id])
+  employee      Employee   @relation(fields: [employeeId], references: [id])
+}
+
+model SalaryComponent {
+  id              String                    @id @default(uuid())
+  organizationId  String
+  name            String
+  calculationType ComponentCalculationType
+  amount          Decimal?
+  percentage      Decimal?
+  isEarning       Boolean                   @default(true)
+  structures      EmployeeSalaryStructure[]
+}
+
+model EmployeeSalaryStructure {
+  id             String          @id @default(uuid())
+  organizationId String
+  employeeId     String
+  componentId    String
+  amount         Decimal?
+  percentage     Decimal?
+  effectiveDate  DateTime?
+  component      SalaryComponent @relation(fields: [componentId], references: [id])
+  employee       Employee        @relation(fields: [employeeId], references: [id])
+
+  @@unique([employeeId, componentId])
+}
+
+model SalaryStructureHistory {
+  id             String   @id @default(uuid())
+  organizationId String
+  employeeId     String
+  componentId    String
+  amount         Decimal?
+  percentage     Decimal?
+  effectiveDate  DateTime
+  createdAt      DateTime @default(now())
+  employee       Employee @relation(fields: [employeeId], references: [id])
+}
+
+model Payslip {
+  id              String            @id @default(uuid())
+  organizationId  String
+  payrollRunId    String
+  employeeId      String
+  status          String?
+  grossPay        Decimal?
+  totalDeductions Decimal?
+  netPay          Decimal?
+  payrollRun      PayrollRun        @relation(fields: [payrollRunId], references: [id])
+  employee        Employee          @relation(fields: [employeeId], references: [id])
+  lineItems       PayslipLineItem[]
+}
+
+model PayslipLineItem {
+  id            String  @id @default(uuid())
+  payslipId     String
+  componentName String
+  amount        Decimal
+  isEarning     Boolean
+  payslip       Payslip @relation(fields: [payslipId], references: [id])
+}

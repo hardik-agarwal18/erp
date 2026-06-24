@@ -1,4 +1,3 @@
-
 import ApiError from "../../../utils/ApiError.js";
 import { grnRepository } from "./grn.repository.js";
 import { GRNFilters } from "./grn.types.js";
@@ -8,77 +7,63 @@ import {
   auditService,
 } from "../../../services/audit/index.js";
 import prisma from "../../../config/database.js";
+import { GoodsReceiptNoteStatus, RejectedItemDisposition } from "@prisma/client";
 
 export const grnService = {
-  create: async (organizationId: string, actorUserId: string, payload: any) => {
+  createDraft: async (organizationId: string, actorUserId: string, payload: any) => {
     return prisma.$transaction(async (tx: any) => {
       const existing = await tx.goodsReceiptNote.findFirst({
         where: { grnNumber: payload.grnNumber, organizationId, deletedAt: null }
       });
-      if (existing) {
-        throw new ApiError(400, "GRN with this number already exists");
-      }
+      if (existing) throw new ApiError(400, "GRN with this number already exists");
 
       const godown = await tx.godown.findFirst({
         where: { id: payload.godownId, organizationId, deletedAt: null },
       });
-      if (!godown) {
-        throw new ApiError(404, "Godown not found");
-      }
+      if (!godown) throw new ApiError(404, "Godown not found");
 
       if (payload.purchaseOrderId) {
         const po = await tx.purchaseOrder.findFirst({
-          where: { id: payload.purchaseOrderId, organizationId }
+          where: { id: payload.purchaseOrderId, organizationId },
+          include: { items: true }
         });
         if (!po) throw new ApiError(404, "Purchase Order not found");
-        if (po.status !== "APPROVED" && po.status !== "PARTIALLY_RECEIVED") {
-          throw new ApiError(400, `Cannot create GRN for PO in ${po.status} status.`);
+        if (po.status !== "APPROVED" && po.status !== "PARTIALLY_RECEIVED" && po.status !== "SENT") {
+          throw new ApiError(400, `Cannot create GRN for PO in \${po.status} status.`);
+        }
+
+        // Validate PO tolerances
+        const overTolerance = po.overReceiptTolerance ? Number(po.overReceiptTolerance) : 0;
+        for (const item of payload.items) {
+           const poItem = po.items.find((i: any) => i.id === item.poItemId);
+           if (poItem) {
+             const ordered = Number(poItem.quantity); // actually orderedQty or quantity depending on schema
+             const alreadyReceived = Number(poItem.receivedQty);
+             const attemptingToReceive = Number(item.receivedQty);
+             const maxAllowed = ordered + (ordered * overTolerance / 100);
+             if (alreadyReceived + attemptingToReceive > maxAllowed) {
+                throw new ApiError(400, `Receiving \${attemptingToReceive} units exceeds PO tolerance for product \${item.productId}`);
+             }
+           }
         }
       }
 
-      const processedItems = [];
-      for (const item of payload.items) {
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
-        let finalBatchId = item.batchId;
+      const processedItems = payload.items.map((item: any) => ({
+        productId: item.productId,
+        poItemId: item.poItemId,
+        orderedQty: item.orderedQty,
+        receivedQty: item.receivedQty,
+        unitPrice: item.unitPrice,
+        batchId: item.batchId || null
+      }));
 
-        if (product?.isBatchTracked) {
-          if (item.batchMode === "CREATE_NEW") {
-            if (!item.batchNumber) throw new ApiError(400, "Batch Number Required");
-            if (!item.expiryDate) throw new ApiError(400, "Expiry Date Required");
-            
-            const newBatch = await tx.batch.create({
-              data: {
-                organizationId,
-                productId: item.productId,
-                batchNumber: item.batchNumber,
-                manufactureDate: item.manufactureDate ? new Date(item.manufactureDate) : null,
-                expiryDate: new Date(item.expiryDate),
-                quantity: 0
-              }
-            });
-            finalBatchId = newBatch.id;
-          } else if (!item.batchId) {
-             throw new ApiError(400, "Batch ID Required");
-          }
-        }
-
-        processedItems.push({
-          productId: item.productId,
-          poItemId: item.poItemId,
-          orderedQty: item.orderedQty,
-          receivedQty: item.receivedQty,
-          unitPrice: item.unitPrice,
-          batchId: finalBatchId
-        });
-      }
-
-      const dataToSave = { ...payload, items: processedItems };
+      const dataToSave = { ...payload, items: processedItems, createdById: actorUserId, status: GoodsReceiptNoteStatus.DRAFT };
       const grn = await grnRepository.create(organizationId, dataToSave, tx);
 
       await auditService.record({
         organizationId,
         userId: actorUserId,
-        action: (AUDIT_ACTIONS as any).GRN_CREATED,
+        action: (AUDIT_ACTIONS as any).GRN_CREATED || "GRN_CREATED",
         entityType: AUDIT_ENTITY_TYPES.GRN,
         entityId: grn.id,
         metadata: { grnNumber: payload.grnNumber },
@@ -88,215 +73,252 @@ export const grnService = {
     });
   },
 
-  receive: async (id: string, organizationId: string, actorUserId: string, payload?: any) => {
+  startInspection: async (id: string, organizationId: string, actorUserId: string) => {
+    return prisma.$transaction(async (tx) => {
+       const grn = await tx.goodsReceiptNote.findFirst({ where: { id, organizationId } });
+       if (!grn) throw new ApiError(404, "GRN not found");
+       if (grn.status !== GoodsReceiptNoteStatus.DRAFT) throw new ApiError(400, "Only DRAFT GRNs can start inspection");
+
+       const updated = await tx.goodsReceiptNote.update({
+         where: { id: grn.id },
+         data: { status: "INSPECTION_RECORDED", inspectedById: actorUserId }
+       });
+
+       await auditService.record({
+         organizationId, userId: actorUserId,
+         action: "GRN_INSPECTION_STARTED" as any,
+         entityType: AUDIT_ENTITY_TYPES.GRN,
+         entityId: grn.id,
+       }, tx);
+       return updated;
+    });
+  },
+
+  recordInspection: async (id: string, organizationId: string, actorUserId: string, itemsInspection: any[]) => {
+     return prisma.$transaction(async (tx) => {
+       const grn = await tx.goodsReceiptNote.findFirst({ where: { id, organizationId }, include: { items: true } });
+       if (!grn) throw new ApiError(404, "GRN not found");
+       if (grn.status !== GoodsReceiptNoteStatus.INSPECTING) throw new ApiError(400, "GRN must be in INSPECTING status");
+
+       for (const inspectedItem of itemsInspection) {
+         const grnItem = grn.items.find(i => i.id === inspectedItem.grnItemId);
+         if (!grnItem) continue;
+
+         if (Number(inspectedItem.acceptedQty) + Number(inspectedItem.rejectedQty) !== Number(grnItem.receivedQty)) {
+            throw new ApiError(400, `Quantities for item ${grnItem.id} do not match received quantity.`);
+         }
+
+         await tx.goodsReceiptNoteItem.update({
+            where: { id: grnItem.id },
+            data: {
+              acceptedQty: inspectedItem.acceptedQty,
+              rejectedQty: inspectedItem.rejectedQty
+            }
+         });
+       }
+
+       const updated = await tx.goodsReceiptNote.update({
+         where: { id },
+         data: { 
+           status: GoodsReceiptNoteStatus.RECEIVED,
+           inspectedById: actorUserId
+         }
+       });
+
+       await auditService.record({
+         organizationId, userId: actorUserId,
+         action: "GRN_INSPECTION_RECORDED" as any,
+         entityType: AUDIT_ENTITY_TYPES.GRN,
+         entityId: grn.id,
+       }, tx);
+
+       return updated;
+     });
+  },
+
+  postGrn: async (id: string, organizationId: string, actorUserId: string) => {
     const result = await prisma.$transaction(async (tx) => {
       const grn = await tx.goodsReceiptNote.findFirst({
         where: { id, organizationId, deletedAt: null },
-        include: { items: true },
+        include: { items: { include: { product: true } } },
       });
 
-      if (!grn) {
-        throw new ApiError(404, "GRN not found");
+      if (!grn) throw new ApiError(404, "GRN not found");
+      if (grn.status !== GoodsReceiptNoteStatus.RECEIVED && grn.status !== GoodsReceiptNoteStatus.DRAFT) {
+        throw new ApiError(400, "GRN must be RECEIVED to be posted");
       }
 
-      if (grn.status !== "DRAFT") {
-        throw new ApiError(400, "Only DRAFT GRN can be received");
+      // If bypassing inspection, auto-accept all
+      if (grn.status === GoodsReceiptNoteStatus.DRAFT) {
+         for (const item of grn.items) {
+           await tx.goodsReceiptNoteItem.update({
+             where: { id: item.id },
+             data: { acceptedQty: item.receivedQty }
+           });
+           item.acceptedQty = item.receivedQty;
+         }
       }
 
-      let totalValue = 0;
+      let totalAccepted = 0;
+      let totalRejected = 0;
+      let totalExpectedDeliveryTime = 0;
+      let totalActualDeliveryTime = 0;
+      let deliveryLines = 0;
 
       for (const item of grn.items) {
-        const product = await tx.product.findUnique({ where: { id: item.productId } });
-        if (!product) throw new ApiError(404, "Product not found");
+         const acceptedQty = Number(item.acceptedQty);
+         const rejectedQty = Number(item.rejectedQty);
+         if (acceptedQty === 0) continue;
 
-        if (product.isBatchTracked && !item.batchId) {
-          throw new ApiError(400, `Product ${product.name} requires a batch number.`);
-        }
+         totalAccepted += acceptedQty;
+         totalRejected += rejectedQty;
 
-        let serialNumbers: string[] = [];
-        if (product.isSerialTracked) {
-          const payloadItem = payload?.items?.find((i: any) => i.grnItemId === item.id);
-          serialNumbers = payloadItem?.serialNumbers || [];
-          if (serialNumbers.length !== Number(item.receivedQty)) {
-            throw new ApiError(400, `Product ${product.name} requires exactly ${item.receivedQty} serial numbers.`);
-          }
-        }
+         const product = item.product;
 
-        let inventoryItem = await tx.inventoryItem.findFirst({
-          where: {
-            organizationId,
-            productId: item.productId,
-            godownId: grn.godownId,
-          },
-        });
+         // Batch Tracking Logic
+         let finalLotId = null;
+         if (product.isBatchTracked) {
+           if (!item.batchId) throw new ApiError(400, `Product ${product.name} requires a batch/lot number.`);
+           // Create or find lot
+           let lot = await tx.inventoryLot.findFirst({
+              where: { lotNumber: item.batchId, productId: product.id, godownId: grn.godownId }
+           });
+           if (!lot) {
+              lot = await tx.inventoryLot.create({
+                 data: {
+                   organizationId,
+                   productId: product.id,
+                   godownId: grn.godownId,
+                   lotNumber: item.batchId,
+                   receivedQuantity: acceptedQty,
+                   availableQuantity: acceptedQty,
+                   reservedQuantity: 0
+                 }
+              });
+           } else {
+               await tx.inventoryLot.update({
+                 where: { id: lot.id },
+                 data: {
+                   receivedQuantity: { increment: acceptedQty },
+                   availableQuantity: { increment: acceptedQty }
+                 }
+               });
+           }
+           finalLotId = lot.id;
+         }
 
-        if (!inventoryItem) {
-          inventoryItem = await tx.inventoryItem.create({
-            data: {
-              organizationId,
-              productId: item.productId,
-              godownId: grn.godownId,
-              quantity: item.receivedQty,
-              averageCost: item.unitPrice,
-            },
-          });
-        } else {
-          // Calculate new average cost
-          const currentQty = Number(inventoryItem.quantity);
-          const currentCost = Number(inventoryItem.averageCost);
-          const receivedQty = Number(item.receivedQty);
-          const receivedCost = Number(item.unitPrice);
-          const newQty = currentQty + receivedQty;
-          
-          let newAvgCost = currentCost;
-          if (newQty > 0) {
-             newAvgCost = ((currentQty * currentCost) + (receivedQty * receivedCost)) / newQty;
-          }
-
-          await tx.inventoryItem.update({
-            where: { id: inventoryItem.id },
-            data: {
-              quantity: { increment: item.receivedQty },
-              averageCost: newAvgCost,
-            },
-          });
-        }
-
-        if (item.batchId) {
-          // Increment Batch quantity globally
-          await tx.batch.update({
-            where: { id: item.batchId },
-            data: { quantity: { increment: item.receivedQty } }
-          });
-
-          // Update BatchInventoryItem
-          let batchInv = await tx.batchInventoryItem.findUnique({
-            where: {
-              batchId_godownId: {
-                batchId: item.batchId,
-                godownId: grn.godownId
-              }
-            }
-          });
-          if (!batchInv) {
-            await tx.batchInventoryItem.create({
-              data: {
-                organizationId,
-                batchId: item.batchId,
-                godownId: grn.godownId,
-                quantity: item.receivedQty
-              }
-            });
-          } else {
-            await tx.batchInventoryItem.update({
-              where: { id: batchInv.id },
-              data: { quantity: { increment: item.receivedQty } }
-            });
-          }
-        }
-
-        // Create inventory movement(s)
-        if (product.isSerialTracked) {
-          for (const sn of serialNumbers) {
-            const serialRecord = await tx.serialNumber.create({
-              data: {
-                organizationId,
-                productId: item.productId,
-                godownId: grn.godownId,
-                serialNumber: sn,
-                status: "AVAILABLE",
-                batchId: item.batchId || null,
-                purchaseDate: grn.receivedDate,
-              }
-            });
-
-            await tx.inventoryMovement.create({
-              data: {
-                organizationId,
-                productId: item.productId,
-                godownId: grn.godownId,
-                type: "GRN_RECEIPT",
-                quantity: 1,
-                referenceType: "GRN",
-                referenceId: grn.id,
-                batchId: item.batchId || null,
-                serialNumberId: serialRecord.id,
-              },
-            });
-          }
-        } else {
-          await tx.inventoryMovement.create({
+         // Create Inventory Movement -> this increments stock ledger
+         await tx.inventoryMovement.create({
             data: {
               organizationId,
               productId: item.productId,
               godownId: grn.godownId,
               type: "GRN_RECEIPT",
-              quantity: item.receivedQty,
+              quantity: acceptedQty,
               referenceType: "GRN",
               referenceId: grn.id,
-              batchId: item.batchId || null,
             },
-          });
-        }
+         });
+
+         // Update PO items received quantity if linked
+         if (item.poItemId) {
+           await tx.purchaseOrderItem.update({
+             where: { id: item.poItemId },
+             data: { receivedQuantity: { increment: acceptedQty } } // Only increment by accepted!
+           });
+         }
       }
 
-      // Update PO items received quantity if linked
+      // Determine PO Status Update
       if (grn.purchaseOrderId) {
-        for (const item of grn.items) {
-          if (item.poItemId) {
-            await tx.purchaseOrderItem.update({
-              where: { id: item.poItemId },
-              data: { receivedQuantity: { increment: item.receivedQty } }
+         const po = await tx.purchaseOrder.findFirst({
+           where: { id: grn.purchaseOrderId },
+           include: { items: true }
+         });
+         if (po) {
+            let allFullyReceived = true;
+             for (const poItem of po.items) {
+               if (Number(poItem.receivedQuantity) < Number(poItem.quantity)) { // actually ordered qty is in quantity
+                  allFullyReceived = false;
+                  break;
+               }
+             }
+            await tx.purchaseOrder.update({
+               where: { id: po.id },
+               data: { status: allFullyReceived ? "RECEIVED" : "PARTIALLY_RECEIVED" }
             });
-          }
-        }
-        
-        // Let event listener update the overall PO status to PARTIALLY_RECEIVED or RECEIVED
+
+            // For vendor performance lead time
+            const expected = po.expectedDeliveryDate ? new Date(po.expectedDeliveryDate).getTime() : 0;
+            const actual = new Date(grn.receivedDate).getTime();
+            if (expected > 0) {
+               const expectedDays = Math.ceil((expected - new Date(po.issueDate).getTime()) / (1000 * 3600 * 24));
+               const actualDays = Math.ceil((actual - new Date(po.issueDate).getTime()) / (1000 * 3600 * 24));
+               totalExpectedDeliveryTime += expectedDays;
+               totalActualDeliveryTime += actualDays;
+               deliveryLines++;
+            }
+         }
       }
 
-      await tx.goodsReceiptNote.update({
+      // Update Vendor Performance
+      if (grn.vendorId) {
+         const isLate = deliveryLines > 0 && totalActualDeliveryTime > totalExpectedDeliveryTime;
+         await tx.vendorPerformance.upsert({
+            where: { vendorId: grn.vendorId },
+            update: {
+               acceptedQuantity: { increment: totalAccepted },
+               rejectedQuantity: { increment: totalRejected },
+               lateDeliveries: isLate ? { increment: 1 } : undefined,
+               onTimeDeliveries: !isLate ? { increment: 1 } : undefined,
+               totalFulfilled: { increment: 1 }
+            },
+            create: {
+               id: crypto.randomUUID(),
+               vendorId: grn.vendorId,
+               acceptedQuantity: totalAccepted,
+               rejectedQuantity: totalRejected,
+               lateDeliveries: isLate ? 1 : 0,
+               onTimeDeliveries: !isLate ? 1 : 0,
+               totalFulfilled: 1
+            }
+         });
+      }
+
+      const updatedGrn = await tx.goodsReceiptNote.update({
         where: { id: grn.id },
-        data: { status: "COMPLETED" },
+        data: { 
+          status: GoodsReceiptNoteStatus.POSTED,
+          postedById: actorUserId
+        },
       });
 
-      // Calculate total value
-      grn.items.forEach((item) => {
-        totalValue += Number(item.receivedQty) * Number(item.unitPrice);
-      });
-
-      // Fire Accounting Event via Outbox
       await (tx as any).outboxEvent.create({
         data: {
           organizationId,
           aggregateType: "GoodsReceiptNote",
-          aggregateId: grn.id,
+          aggregateId: updatedGrn.id,
           eventType: "GoodsReceiptNoteReceived",
           payload: {
-            grnId: grn.id,
-            grnNumber: grn.grnNumber,
-            vendorId: grn.vendorId || undefined,
-            purchaseOrderId: grn.purchaseOrderId || undefined,
-            totalValue: totalValue,
-            currency: "INR",
-            receivedAt: new Date().toISOString(),
-          },
-        },
+            grnId: updatedGrn.id,
+            totalValue: updatedGrn.totalValue || 0,
+            godownId: updatedGrn.godownId
+          }
+        }
       });
 
       await auditService.record({
-        organizationId,
-        userId: actorUserId,
-        action: (AUDIT_ACTIONS as any).GRN_RECEIVED,
+        organizationId, userId: actorUserId,
+        action: "GRN_POSTED" as any,
         entityType: AUDIT_ENTITY_TYPES.GRN,
         entityId: grn.id,
       }, tx);
 
-      return grn;
+      return updatedGrn;
     });
 
-    // Emit Event
     import("../../../shared/events/event-bus.js").then(({ eventBus }) => {
-      eventBus.emit("grn.completed", {
+      eventBus.emit("grn.posted", {
         organizationId,
         grnId: result.id,
         purchaseOrderId: result.purchaseOrderId
@@ -308,9 +330,7 @@ export const grnService = {
 
   getById: async (id: string, organizationId: string) => {
     const grn = await grnRepository.findById(id, organizationId);
-    if (!grn) {
-      throw new ApiError(404, "GRN not found");
-    }
+    if (!grn) throw new ApiError(404, "GRN not found");
     return grn;
   },
 
@@ -318,4 +338,3 @@ export const grnService = {
     return grnRepository.list(organizationId, filters, query);
   },
 };
-

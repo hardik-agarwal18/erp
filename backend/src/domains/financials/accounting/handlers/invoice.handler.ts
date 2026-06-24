@@ -76,7 +76,7 @@ export const invoiceAccountingHandler = {
       description: `Invoice ${payload.invoiceNumber} for Customer ${payload.customerId}`,
       referenceType: "SalesInvoice",
       referenceId: payload.invoiceId,
-
+      sourceEventId: event.id,
       postedAt: new Date(payload.issuedAt || event.createdAt),
       lines,
     });

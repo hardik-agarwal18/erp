@@ -68,10 +68,10 @@ export const vendorInvoiceAccountingHandler = {
 
     // 3. Create Journal Entry
     await accountingRepository.createJournalEntry(organizationId, {
-      description: `Vendor Invoice ${payload.invoiceNumber} approved from Vendor ${payload.vendorId}`,
+      description: `Vendor Invoice ${payload.invoiceNumber}`,
       referenceType: "VendorInvoice",
       referenceId: payload.invoiceId,
-
+      sourceEventId: event.id,
       postedAt: new Date(payload.approvedAt || event.createdAt),
       lines,
     });

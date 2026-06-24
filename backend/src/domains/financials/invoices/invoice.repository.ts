@@ -86,8 +86,11 @@ export const invoiceRepository = {
     organizationId: string,
     payload: {
       customerId: string;
+      sourceType?: "SALES_ORDER" | "DELIVERY_CHALLAN";
+      salesOrderId?: string;
+      deliveryChallanId?: string;
       invoiceNumber: string;
-      status: "DRAFT" | "ISSUED";
+      status: any;
       issueDate: Date;
       dueDate: Date | null;
       subtotal: number;
@@ -109,6 +112,9 @@ export const invoiceRepository = {
       data: {
         organizationId,
         customerId: payload.customerId,
+        sourceType: payload.sourceType ?? "SALES_ORDER",
+        salesOrderId: payload.salesOrderId,
+        deliveryChallanId: payload.deliveryChallanId,
         invoiceNumber: payload.invoiceNumber,
         status: payload.status,
         issueDate: payload.issueDate,
@@ -117,8 +123,9 @@ export const invoiceRepository = {
         taxAmount: payload.taxAmount,
         discountAmount: payload.discountAmount,
         totalAmount: payload.totalAmount,
+        amountDue: payload.totalAmount, // amountDue is totalAmount at creation
         notes: payload.notes,
-      },
+      } as any,
     });
 
     await tx.invoiceItem.createMany({
@@ -210,13 +217,7 @@ export const invoiceRepository = {
     organizationId: string,
     invoiceId: string,
     payload: {
-      status:
-        | "DRAFT"
-        | "ISSUED"
-        | "CANCELLED"
-        | "PAID"
-        | "PARTIALLY_PAID"
-        | "OVERDUE";
+        status: any;
       dueDate?: Date;
       notes?: string;
     },

@@ -35,7 +35,6 @@ export const processPdfGenerationJob = async (job: Job<PdfGenerationJobPayload>)
     doc.moveDown();
     
     doc.text(`Customer: ${invoice.customer?.name || "Unknown"}`);
-    if (invoice.customer?.email) doc.text(`Email: ${invoice.customer.email}`);
     
     doc.moveDown();
     doc.text("Items:");
@@ -54,7 +53,7 @@ export const processPdfGenerationJob = async (job: Job<PdfGenerationJobPayload>)
   
   logger.info({ storagePath }, "PDF stored successfully");
 
-  const targetEmail = job.data.targetEmail || invoice.customer?.email;
+  const targetEmail = job.data.targetEmail;
   if (targetEmail) {
     const signedUrl = await storageService.getSignedUrl(storagePath);
     

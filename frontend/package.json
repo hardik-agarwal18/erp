@@ -12,6 +12,8 @@
     "cypress:run": "cypress run"
   },
   "dependencies": {
+    "@erp/shared-contracts": "*",
+    "@erp/shared-validation": "*",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-avatar": "^1.1.12",
@@ -51,6 +53,7 @@
     "cypress": "^15.16.0",
     "eslint": "^9.39.1",
     "eslint-config-next": "^15.5.18",
+    "openapi-typescript-codegen": "^0.30.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "tailwindcss-animate": "^1.0.7",

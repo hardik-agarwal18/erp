@@ -1,0 +1,472 @@
+model User {
+  id                      String                   @id @default(uuid())
+  name                    String
+  email                   String                   @unique
+  password                String
+  isVerified              Boolean                  @default(false)
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  auditLogs               AuditLog[]
+  emailVerificationTokens EmailVerificationToken[]
+  invitationsSent         Invitation[]             @relation("InvitationInvitedBy")
+  organizationsOwned      Organization[]           @relation("OrganizationOwner")
+  organizationMembers     OrganizationMember[]
+  passwordResetTokens     PasswordResetToken[]
+  refreshSessions         RefreshSession[]
+  joinRequests            JoinRequest[]
+  approvalInstances       ApprovalInstance[]
+  approvedClaims          ExpenseClaim[]           @relation("ExpenseClaimApprovedBy")
+  fiscalYears             FiscalYear[]
+  accountingPeriods       AccountingPeriod[]
+  paymentBatches          PaymentBatch[]
+  vendorInvoiceMismatches VendorInvoiceMismatch[]
+  notifications           Notification[]
+}
+
+model Organization {
+  id                          String                       @id @default(uuid())
+  name                        String
+  slug                        String                       @unique
+  joinCode                    String                       @unique
+  logo                        String?
+  ownerId                     String
+  settings                    Json?
+  createdAt                   DateTime                     @default(now())
+  updatedAt                   DateTime                     @updatedAt
+  auditLogs                   AuditLog[]
+  customers                   Customer[]
+  expenses                    Expense[]
+  inventoryItems              InventoryItem[]
+  inventoryMovements          InventoryMovement[]
+  invitations                 Invitation[]
+  invoices                    Invoice[]
+  invoiceSequences            InvoiceSequence?
+  joinRequests                JoinRequest[]
+  owner                       User                         @relation("OrganizationOwner", fields: [ownerId], references: [id])
+  members                     OrganizationMember[]
+  payments                    Payment[]
+  products                    Product[]
+  productCategories           ProductCategory[]
+  refreshSessions             RefreshSession[]
+  roles                       Role[]
+  systemAccountMappings       SystemAccountMapping[]
+  taxes                       Tax[]
+  transactions                Transaction[]
+  vendors                     Vendor[]
+  invoiceEmailLogs            InvoiceEmailLog[]
+  approvalTemplates           ApprovalTemplate[]
+  approvalInstances           ApprovalInstance[]
+  accounts                    Account[]
+  journalEntries              JournalEntry[]
+  fiscalYears                 FiscalYear[]
+  purchaseOrders              PurchaseOrder[]
+  vendorInvoices              VendorInvoice[]
+  batches                     Batch[]
+  godowns                     Godown[]
+  goodsReceiptNotes           GoodsReceiptNote[]
+  serialNumbers               SerialNumber[]
+  deliveryChallans            DeliveryChallan[]
+  stockGroups                 StockGroup[]
+  stockJournals               StockJournal[]
+  stockVerifications          StockVerification[]
+  batchInventoryItems         BatchInventoryItem[]
+  employeeSequence            EmployeeSequence?
+  departments                 Department[]
+  designations                Designation[]
+  employees                   Employee[]
+  financialStatementSnapshots FinancialStatementSnapshot[]
+  inventoryValuationSnapshots InventoryValuationSnapshot[]
+  outboxEvents                OutboxEvent[]
+  expenseClaims               ExpenseClaim[]
+  vendorPayments              VendorPayment[]
+  bankAccounts                BankAccount[]
+  bankTransactions            BankTransaction[]
+  accountingPeriods           AccountingPeriod[]
+  paymentBatches              PaymentBatch[]
+  numberSeries                NumberSeries[]
+  workflowRules               WorkflowRule[]
+  workflowInstances           WorkflowInstance[]
+  documents                   Document[]
+  inventoryLots               InventoryLot[]
+  notifications               Notification[]
+  purchaseRequisitions        PurchaseRequisition[]
+  requestForQuotations        RequestForQuotation[]
+  quotations                  Quotation[]
+  advances                    Advance[]
+  pickLists                   PickList[]
+  shipments                   Shipment[]
+  inventoryReservations       InventoryReservation[]
+  salesOrders                 SalesOrder[]
+  customerCreditDecisions     CustomerCreditDecision[]
+  treasuryTransfers           TreasuryTransfer[]
+
+  @@index([ownerId])
+}
+
+model OrganizationMember {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  roleId         String
+  joinedAt       DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id])
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+model Role {
+  id              String               @id @default(uuid())
+  organizationId  String
+  name            String
+  description     String?
+  isSystem        Boolean              @default(false)
+  archivedAt      DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  invitations     Invitation[]
+  members         OrganizationMember[]
+  organization    Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rolePermissions RolePermission[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@index([organizationId, archivedAt])
+}
+
+model Permission {
+  id              String           @id @default(uuid())
+  name            String           @unique
+  description     String?
+  createdAt       DateTime         @default(now())
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model Invitation {
+  id             String       @id @default(uuid())
+  organizationId String
+  email          String
+  roleId         String
+  token          String       @unique
+  expiresAt      DateTime
+  invitedBy      String
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  invitedByUser  User         @relation("InvitationInvitedBy", fields: [invitedBy], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role           Role         @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, email])
+  @@index([roleId])
+  @@index([invitedBy])
+}
+
+model RefreshSession {
+  id                   String        @id @default(uuid())
+  userId               String
+  refreshToken         String
+  device               String?
+  ipAddress            String?
+  expiresAt            DateTime
+  revokedAt            DateTime?
+  createdAt            DateTime      @default(now())
+  activeOrganizationId String?
+  updatedAt            DateTime      @updatedAt
+  activeOrganization   Organization? @relation(fields: [activeOrganizationId], references: [id])
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([activeOrganizationId])
+}
+
+model JoinRequest {
+  id             String            @id @default(uuid())
+  organizationId String
+  userId         String
+  status         JoinRequestStatus @default(PENDING)
+  message        String?
+  approvedById   String?
+  approvedAt     DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId, status])
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailLog {
+  id         String   @id @default(uuid())
+  recipient  String
+  subject    String
+  status     String
+  provider   String
+  providerId String?
+  error      String?
+  createdAt  DateTime @default(now())
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String
+  actorUserId    String
+  action         String
+  entityType     String
+  entityId       String?
+  metadata       Json?
+  hash           String?
+  createdAt      DateTime     @default(now())
+  actor          User         @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, action])
+  @@index([organizationId, createdAt(sort: Desc)])
+}
+
+enum JoinRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum ApproverType {
+  USER
+  ROLE
+}
+
+model ApprovalTemplate {
+  id             String             @id @default(uuid())
+  organizationId String
+  entityType     String
+  name           String?
+  isActive       Boolean            @default(true)
+  steps          ApprovalStep[]
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  instances      ApprovalInstance[]
+
+  @@unique([organizationId, entityType])
+}
+
+model ApprovalStep {
+  id                   String           @id @default(uuid())
+  templateId           String
+  order                Int
+  approverType         String
+  roleId               String?
+  userId               String?
+  escalationAfterHours Int?
+  autoApprove          Boolean?
+  template             ApprovalTemplate @relation(fields: [templateId], references: [id])
+  actions              ApprovalAction[]
+}
+
+model ApprovalInstance {
+  id               String           @id @default(uuid())
+  organizationId   String
+  templateId       String
+  entityType       String
+  entityId         String
+  submittedById    String
+  submittedAt      DateTime         @default(now())
+  completedAt      DateTime?
+  currentStepOrder Int              @default(0)
+  status           ApprovalStatus   @default(PENDING)
+  actions          ApprovalAction[]
+  organization     Organization     @relation(fields: [organizationId], references: [id])
+  submittedBy      User             @relation(fields: [submittedById], references: [id])
+  template         ApprovalTemplate @relation(fields: [templateId], references: [id])
+}
+
+model ApprovalAction {
+  id         String           @id @default(uuid())
+  instanceId String
+  stepId     String
+  actorId    String
+  action     String
+  comments   String?
+  createdAt  DateTime         @default(now())
+  instance   ApprovalInstance @relation(fields: [instanceId], references: [id])
+  step       ApprovalStep     @relation(fields: [stepId], references: [id])
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model OutboxEvent {
+  id             String    @id @default(uuid())
+  organizationId String
+  aggregateType  String
+  aggregateId    String
+  eventType      String
+  eventVersion   Int       @default(1)
+  payload        Json
+  status         String    @default("PENDING")
+  correlationId  String?
+  causationId    String?
+  retryCount     Int       @default(0)
+  lastError      String?
+  nextRetryAt    DateTime?
+  processedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([status, nextRetryAt])
+  @@index([organizationId])
+}
+
+enum NumberSeriesResetPolicy {
+  NEVER
+  YEARLY
+  MONTHLY
+}
+
+model NumberSeries {
+  id             String                  @id @default(uuid())
+  organizationId String
+  documentType   String
+  year           String?
+  prefix         String
+  currentNumber  Int                     @default(1)
+  lastUsedNumber Int                     @default(0)
+  padding        Int                     @default(4)
+  resetPolicy    NumberSeriesResetPolicy @default(NEVER)
+  lastResetAt    DateTime                @default(now())
+  organization   Organization            @relation(fields: [organizationId], references: [id])
+}
+
+enum WorkflowEntityType {
+  PURCHASE_REQUISITION
+  PURCHASE_ORDER
+  JOURNAL_ENTRY
+  CREDIT_NOTE
+  PAYMENT
+  ADVANCE
+  SALES_ORDER
+}
+
+enum WorkflowStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  CHANGES_REQUESTED
+  ESCALATED
+}
+
+enum WorkflowAction {
+  APPROVE
+  REJECT
+  DELEGATE
+  RETURN
+  REQUEST_CHANGES
+  ESCALATE
+}
+
+model WorkflowRule {
+  id             String             @id @default(uuid())
+  organizationId String
+  entityType     WorkflowEntityType
+  name           String
+  conditionLogic Json?
+  priority       Int                @default(0)
+  effectiveFrom  DateTime?
+  effectiveTo    DateTime?
+  isActive       Boolean            @default(true)
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  steps          WorkflowStep[]
+  instances      WorkflowInstance[]
+}
+
+model WorkflowStep {
+  id                    String       @id @default(uuid())
+  ruleId                String
+  stepOrder             Int
+  approvalMode          String       @default("ANY") // ANY, ALL, MIN_COUNT
+  minApprovalsCount     Int?
+  expectedDurationHours Int?
+  escalationRoleId      String?
+  rule                  WorkflowRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowInstance {
+  id             String               @id @default(uuid())
+  organizationId String
+  ruleId         String
+  entityType     WorkflowEntityType
+  entityId       String
+  status         WorkflowStatus       @default(PENDING)
+  currentStep    Int                  @default(1)
+  snapshot       Json?
+  dueAt          DateTime?
+  escalateAt     DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  organization   Organization         @relation(fields: [organizationId], references: [id])
+  rule           WorkflowRule         @relation(fields: [ruleId], references: [id])
+  history        WorkflowHistory[]
+  delegations    WorkflowDelegation[]
+}
+
+model WorkflowHistory {
+  id              String           @id @default(uuid())
+  instanceId      String
+  approverUserId  String
+  actingForUserId String?
+  action          WorkflowAction
+  comments        String?
+  stepOrder       Int
+  createdAt       DateTime         @default(now())
+  instance        WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowDelegation {
+  id             String            @id @default(uuid())
+  organizationId String
+  fromUserId     String
+  toUserId       String
+  startDate      DateTime?
+  endDate        DateTime?
+  reason         String?
+  createdAt      DateTime          @default(now())
+  instanceId     String?
+  instance       WorkflowInstance? @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}

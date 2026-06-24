@@ -1,0 +1,14 @@
+model Notification {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  title          String
+  message        String
+  type           String
+  isRead         Boolean      @default(false)
+  entityType     String?
+  entityId       String?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+}

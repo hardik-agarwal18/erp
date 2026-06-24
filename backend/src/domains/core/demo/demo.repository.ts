@@ -88,51 +88,52 @@ export const demoRepository = {
     }
 
     // 0.1 Chart of Accounts
-    const accountTemplates = [
-      // Assets
-      { code: "1000", name: "Cash", type: "ASSET" as const, normalBalance: "DEBIT" as const },
-      { code: "1010", name: "Bank Account", type: "ASSET" as const, normalBalance: "DEBIT" as const },
-      { code: "1200", name: "Accounts Receivable", type: "ASSET" as const, normalBalance: "DEBIT" as const },
-      { code: "1300", name: "Inventory", type: "ASSET" as const, normalBalance: "DEBIT" as const },
-      { code: "1400", name: "Prepaid Expenses", type: "ASSET" as const, normalBalance: "DEBIT" as const },
-      { code: "1410", name: "Input GST", type: "ASSET" as const, normalBalance: "DEBIT" as const },
-      { code: "1500", name: "Fixed Assets", type: "ASSET" as const, normalBalance: "DEBIT" as const },
-      { code: "1510", name: "Accumulated Depreciation", type: "ASSET" as const, normalBalance: "CREDIT" as const },
-      
-      // Liabilities
-      { code: "2000", name: "Accounts Payable", type: "LIABILITY" as const, normalBalance: "CREDIT" as const },
-      { code: "2100", name: "Credit Card Payable", type: "LIABILITY" as const, normalBalance: "CREDIT" as const },
-      { code: "2210", name: "Output GST", type: "LIABILITY" as const, normalBalance: "CREDIT" as const },
-      { code: "2220", name: "TDS Payable", type: "LIABILITY" as const, normalBalance: "CREDIT" as const },
-      { code: "2230", name: "PF Payable", type: "LIABILITY" as const, normalBalance: "CREDIT" as const },
-      { code: "2300", name: "Payroll Liabilities", type: "LIABILITY" as const, normalBalance: "CREDIT" as const },
-      { code: "2500", name: "Long-Term Loan", type: "LIABILITY" as const, normalBalance: "CREDIT" as const },
+    // Demo originally used hardcoded codes, but the system now seeds actual accounts via accountingService.
+    // We map the legacy demo codes to the actual system codes.
+    const accountCodeMap: Record<string, string> = {
+      "1000": "1010", // Cash
+      "1010": "1030", // Bank
+      "1200": "1100", // AR
+      "1300": "1200", // Inventory
+      "1400": "1600", // Prepaid
+      "1410": "1300", // Input GST
+      "1500": "1700", // Fixed Assets
+      "1510": "1800", // Acc Dep
+      "2000": "2010", // AP
+      "2100": "2010", // CC Payable -> map to AP
+      "2210": "2100", // Output GST
+      "2220": "2110", // TDS
+      "2230": "2120", // PF
+      "2300": "2200", // Payroll Liab (Salary Payable)
+      "2500": "2420", // LT Loan
+      "3000": "3000", // Owner Eq
+      "3100": "3100", // Retained Earn
+      "3200": "3300", // Drawings
+      "4000": "4010", // Sales Rev
+      "4100": "4100", // Service Rev
+      "4200": "4200", // Other Inc
+      "5000": "5010", // COGS
+      "5100": "6010", // Salary Exp
+      "5110": "6010", // Payroll Tax Exp
+      "5200": "6700", // Office Exp
+      "5300": "6100", // Rent Exp
+      "5400": "6200", // Utils Exp
+      "5500": "6500", // Marketing Exp
+      "5600": "6600", // Travel Exp
+      "5700": "6400", // Software Sub
+      "5800": "7010", // Dep Exp
+      "5900": "6900", // Bank Fees
+    };
 
-      // Equity
-      { code: "3000", name: "Owner Equity", type: "EQUITY" as const, normalBalance: "CREDIT" as const },
-      { code: "3100", name: "Retained Earnings", type: "EQUITY" as const, normalBalance: "CREDIT" as const },
-      { code: "3200", name: "Drawings", type: "EQUITY" as const, normalBalance: "DEBIT" as const },
+    const existingAccounts = await prisma.account.findMany({ where: { organizationId } });
+    accounts.push(...existingAccounts);
 
-      // Revenue
-      { code: "4000", name: "Sales Revenue", type: "REVENUE" as const, normalBalance: "CREDIT" as const },
-      { code: "4100", name: "Service Revenue", type: "REVENUE" as const, normalBalance: "CREDIT" as const },
-      { code: "4200", name: "Other Income", type: "REVENUE" as const, normalBalance: "CREDIT" as const },
-
-      // Expenses
-      { code: "5000", name: "Cost of Goods Sold", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5100", name: "Salary Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5110", name: "Payroll Tax Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5200", name: "Office Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5300", name: "Rent Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5400", name: "Utilities Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5500", name: "Marketing Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5600", name: "Travel Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5700", name: "Software Subscriptions", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5800", name: "Depreciation Expense", type: "EXPENSE" as const, normalBalance: "DEBIT" as const },
-      { code: "5900", name: "Bank Fees", type: "EXPENSE" as const, normalBalance: "DEBIT" as const }
-    ];
-    accountTemplates.forEach(acc => accounts.push({ id: randomUUID(), organizationId, code: acc.code, name: acc.name, type: acc.type, normalBalance: acc.normalBalance, isSystem: true, isActive: true }));
-    const getAccount = (code: string) => accounts.find(a => a.code === code)?.id;
+    const getAccount = (demoCode: string) => {
+      const realCode = accountCodeMap[demoCode] || demoCode;
+      const acc = accounts.find(a => a.code === realCode);
+      if (!acc) throw new Error(`Demo Seeder: Account mapped to ${realCode} (from ${demoCode}) not found!`);
+      return acc.id;
+    };
 
     // 0.2 Godowns
     godowns.push({ id: randomUUID(), organizationId, name: "Main Warehouse", isDefault: true });
@@ -148,12 +149,15 @@ export const demoRepository = {
     );
 
     // 0.4 Fiscal Years
-    const currentYear = now.getFullYear();
-    const currentFyId = randomUUID();
-    fiscalYears.push(
-      { id: randomUUID(), organizationId, name: `FY ${currentYear - 1}`, startDate: new Date(`${currentYear - 1}-01-01T00:00:00.000Z`), endDate: new Date(`${currentYear - 1}-12-31T23:59:59.999Z`), isActive: false, isClosed: true },
-      { id: currentFyId, organizationId, name: `FY ${currentYear}`, startDate: new Date(`${currentYear}-01-01T00:00:00.000Z`), endDate: new Date(`${currentYear}-12-31T23:59:59.999Z`), isActive: true, isClosed: false }
-    );
+    const existingFy = await prisma.fiscalYear.findFirst({ where: { organizationId, isActive: true } });
+    const currentFyId = existingFy?.id || randomUUID();
+    if (!existingFy) {
+      const currentYear = now.getFullYear();
+      fiscalYears.push(
+        { id: randomUUID(), organizationId, name: `FY ${currentYear - 1}`, startDate: new Date(`${currentYear - 1}-01-01T00:00:00.000Z`), endDate: new Date(`${currentYear - 1}-12-31T23:59:59.999Z`), isActive: false, isClosed: true },
+        { id: currentFyId, organizationId, name: `FY ${currentYear}`, startDate: new Date(`${currentYear}-01-01T00:00:00.000Z`), endDate: new Date(`${currentYear}-12-31T23:59:59.999Z`), isActive: true, isClosed: false }
+      );
+    }
 
     // 0.5 Opening Capital (Issue 2 & 3)
     const openingJeId = randomUUID();
@@ -999,7 +1003,7 @@ export const demoRepository = {
 
     // Execute bulk inserts transactionally
     await prisma.$transaction([
-      prisma.account.createMany({ data: accounts }),
+      // Note: We no longer create accounts here, they are seeded during org creation.
       prisma.godown.createMany({ data: godowns }),
       prisma.tax.createMany({ data: taxes }),
       prisma.productCategory.createMany({ data: categories }),

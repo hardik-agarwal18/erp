@@ -1,7 +1,5 @@
-
 import { Router } from "express";
 import { vendorInvoicesController } from "./vendor-invoices.controller.js";
-import { vendorPaymentsController } from "./vendor-payments.controller.js";
 import { validate } from "../../../../middleware/validate.middleware.js";
 import { authMiddleware } from "../../../../middleware/auth.middleware.js";
 import { requirePermission, tenantContextMiddleware } from "../../../../middleware/tenant.middleware.js";
@@ -17,7 +15,7 @@ router.post(
   "/",
   requirePermission(PERMISSIONS.PURCHASING_CREATE),
   validate(createVendorInvoiceSchema),
-  vendorInvoicesController.create
+  vendorInvoicesController.createDraft
 );
 
 router.get(
@@ -27,15 +25,27 @@ router.get(
 );
 
 router.get(
+  "/aging",
+  requirePermission(PERMISSIONS.PURCHASING_VIEW),
+  vendorInvoicesController.getApAging
+);
+
+router.get(
+  "/statement/:vendorId",
+  requirePermission(PERMISSIONS.PURCHASING_VIEW),
+  vendorInvoicesController.getVendorStatement
+);
+
+router.get(
   "/:id",
   requirePermission(PERMISSIONS.PURCHASING_VIEW),
   vendorInvoicesController.getById
 );
 
-router.get(
-  "/:id/match-summary",
-  requirePermission(PERMISSIONS.PURCHASING_VIEW),
-  vendorInvoicesController.getMatchSummary
+router.post(
+  "/:id/match",
+  requirePermission(PERMISSIONS.PURCHASING_CREATE),
+  vendorInvoicesController.performThreeWayMatch
 );
 
 router.post(
@@ -44,23 +54,4 @@ router.post(
   vendorInvoicesController.postInvoice
 );
 
-router.post(
-  "/:id/request-override",
-  requirePermission(PERMISSIONS.PURCHASING_CREATE),
-  vendorInvoicesController.requestOverride
-);
-
-router.post(
-  "/:id/payments",
-  requirePermission(PERMISSIONS.PURCHASING_CREATE),
-  vendorPaymentsController.createPayment
-);
-
-router.get(
-  "/:id/payments",
-  requirePermission(PERMISSIONS.PURCHASING_VIEW),
-  vendorPaymentsController.listPayments
-);
-
 export default router;
-

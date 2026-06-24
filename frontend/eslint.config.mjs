@@ -11,6 +11,12 @@ const config = [
     ignores: [".next/**", "node_modules/**", "legacy-app/**", "legacy-components/**", "legacy-lib/**"],
   },
   ...compat.extends("next/core-web-vitals"),
+  {
+    files: ["src/api/**/*.ts", "src/services/**/*.ts", "src/hooks/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error"
+    }
+  }
 ];
 
 export default config;

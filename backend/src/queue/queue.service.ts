@@ -55,6 +55,7 @@ export const auditQueue = createQueue<AuditExportJobPayload>(QueueNames.AUDIT_EX
 export const accountingQueue = createQueue<AccountingJobPayload>(QueueNames.ACCOUNTING);
 export const accountingDlqQueue = createQueue<AccountingJobPayload>(QueueNames.ACCOUNTING_DLQ);
 export const outboxRelayQueue = createQueue<OutboxRelayJobPayload>(QueueNames.OUTBOX_RELAY);
+export const quotationExpiryQueue = createQueue(QueueNames.QUOTATION_EXPIRY);
 
 export const closeQueues = async () => {
   for (const [name, queue] of queues.entries()) {

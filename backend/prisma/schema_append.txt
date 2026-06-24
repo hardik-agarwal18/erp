@@ -1,0 +1,46 @@
+
+enum GoodsReceiptNoteStatus {
+  DRAFT
+  INSPECTING
+  RECEIVED
+  POSTED
+  CANCELLED
+}
+
+enum RejectedItemDisposition {
+  PENDING
+  RETURN_TO_VENDOR
+  REPLACEMENT_REQUESTED
+  SCRAPPED
+  ACCEPTED_AS_IS
+}
+
+model InventoryLot {
+  id               String       @id @default(uuid())
+  organizationId   String
+  productId        String
+  godownId         String
+  lotNumber        String
+  expiryDate       DateTime?
+  receivedQuantity Decimal      @default(0)
+  availableQuantity Decimal     @default(0)
+  reservedQuantity Decimal      @default(0)
+  createdAt        DateTime     @default(now())
+  organization     Organization @relation(fields: [organizationId], references: [id])
+  product          Product      @relation(fields: [productId], references: [id])
+  godown           Godown       @relation(fields: [godownId], references: [id])
+}
+
+model VendorPerformance {
+  id                    String   @id @default(uuid())
+  vendorId              String   @unique
+  lateDeliveries        Int      @default(0)
+  onTimeDeliveries      Int      @default(0)
+  rejectedQuantity      Decimal  @default(0)
+  acceptedQuantity      Decimal  @default(0)
+  qualityScore          Decimal  @default(5.0)
+  rfqWinRate            Decimal  @default(0)
+  totalOrders           Int      @default(0)
+  totalFulfilled        Int      @default(0)
+  vendor                Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}

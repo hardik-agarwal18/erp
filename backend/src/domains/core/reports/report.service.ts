@@ -10,14 +10,14 @@ const resolveRange = (range: ReportRange) => ({
 
 const salesReport = async (organizationId: string, range: ReportRange) => {
     const { startDate, endDate } = resolveRange(range);
-    const agg = await reportRepository.aggregateInvoiceSales(
+    const agg: any = await reportRepository.aggregateInvoiceSales(
       organizationId,
       startDate,
       endDate,
     );
 
-    const totalSales = Number(agg._sum.totalAmount ?? 0);
-    const invoiceCount = agg._count._all;
+    const totalSales = Number((agg as any)._sum.totalAmount ?? 0);
+    const invoiceCount = (agg as any)._count._all;
     const averageInvoiceValue = invoiceCount ? totalSales / invoiceCount : 0;
 
     const grouped = await reportRepository.groupInvoiceSalesByCustomer(
@@ -29,10 +29,10 @@ const salesReport = async (organizationId: string, range: ReportRange) => {
     const topCustomerIds = grouped
       .sort(
         (a, b) =>
-          Number(b._sum.totalAmount ?? 0) - Number(a._sum.totalAmount ?? 0),
+          Number((b as any)._sum.totalAmount ?? 0) - Number((a as any)._sum.totalAmount ?? 0),
       )
       .slice(0, 5)
-      .map((entry) => entry.customerId);
+      .map((entry) => (entry as any).customerId);
 
     const customers = await reportRepository.findCustomersByIds(
       organizationId,
@@ -43,11 +43,11 @@ const salesReport = async (organizationId: string, range: ReportRange) => {
     );
 
     const topCustomers = topCustomerIds.map((customerId) => {
-      const record = grouped.find((entry) => entry.customerId === customerId)!;
+      const record = grouped.find((entry) => (entry as any).customerId === customerId)!;
       return {
         customer: customerMap.get(customerId),
-        totalSales: Number(record._sum.totalAmount ?? 0),
-        invoiceCount: record._count._all,
+        totalSales: Number((record as any)._sum.totalAmount ?? 0),
+        invoiceCount: (record as any)._count._all,
       };
     });
 
@@ -78,13 +78,13 @@ const salesReport = async (organizationId: string, range: ReportRange) => {
 
 const expenseReport = async (organizationId: string, range: ReportRange) => {
     const { startDate, endDate } = resolveRange(range);
-    const agg = await reportRepository.aggregateExpenses(
+    const agg: any = await reportRepository.aggregateExpenses(
       organizationId,
       startDate,
       endDate,
     );
 
-    const totalExpenses = Number(agg._sum.amount ?? 0);
+    const totalExpenses = Number((agg as any)._sum.amount ?? 0);
 
     const byCategory = await reportRepository.groupExpensesByCategory(
       organizationId,
@@ -140,13 +140,13 @@ const inventoryReport = async (organizationId: string) => {
 
 const taxReport = async (organizationId: string, range: ReportRange) => {
     const { startDate, endDate } = resolveRange(range);
-    const totals = await reportRepository.aggregateInvoiceTaxAmount(
+    const totals: any = await reportRepository.aggregateInvoiceTaxAmount(
       organizationId,
       startDate,
       endDate,
     );
 
-    const taxCollected = Number(totals._sum.taxAmount ?? 0);
+    const taxCollected = Number((totals as any)._sum.taxAmount ?? 0);
     const taxPaid = 0;
 
     return {

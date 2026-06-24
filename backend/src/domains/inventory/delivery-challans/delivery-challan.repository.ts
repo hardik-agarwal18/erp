@@ -48,7 +48,7 @@ export const challanRepository = {
     });
   },
 
-  updateStatus: (id: string, organizationId: string, status: "COMPLETED" | "CANCELLED", client?: DatabaseClient) => {
+  updateStatus: (id: string, organizationId: string, status: string, client?: DatabaseClient) => {
     return getClient(client).deliveryChallan.updateMany({
       where: { id, organizationId, deletedAt: null },
       data: { status },

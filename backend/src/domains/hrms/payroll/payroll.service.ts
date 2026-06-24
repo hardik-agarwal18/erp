@@ -15,8 +15,18 @@ eventBus.on("approval.completed", async (event: any) => {
     console.log(`[EventBus] payroll-run ${event.entityId} approved`);
     await payrollRepository.updatePayrollRunStatus(event.entityId, PayrollRunStatus.APPROVED, event.approvedBy);
     
-    // Here we emit so Accounting can pick it up
-    eventBus.emit("payroll.processed", { organizationId: event.organizationId, payrollRunId: event.entityId });
+    // Publish to Outbox for reliable accounting integration
+    await (prisma as any).outboxEvent.create({
+      data: {
+        organizationId: event.organizationId,
+        aggregateType: "PayrollRun",
+        aggregateId: event.entityId,
+        eventType: "PayrollApproved",
+        payload: {
+          payrollRunId: event.entityId,
+        }
+      }
+    });
   }
 });
 

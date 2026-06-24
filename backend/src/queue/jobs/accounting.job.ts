@@ -8,6 +8,9 @@ import { paymentAccountingHandler } from "../../domains/financials/accounting/ha
 import { vendorInvoiceAccountingHandler } from "../../domains/financials/accounting/handlers/vendor-invoice.handler.js";
 import { vendorPaymentAccountingHandler } from "../../domains/financials/accounting/handlers/vendor-payment.handler.js";
 import { grnAccountingHandler } from "../../domains/financials/accounting/handlers/grn.handler.js";
+import { payrollAccountingHandler } from "../../domains/financials/accounting/handlers/payroll.handler.js";
+import { stockAdjustmentAccountingHandler } from "../../domains/financials/accounting/handlers/stock-adjustment.handler.js";
+import { DomainEvents } from "../../shared/domain-events.js";
 import { accountingDlqQueue } from "../queue.service.js";
 import logger from "../../config/logger.js";
 
@@ -41,20 +44,26 @@ export const processAccountingJob = async (job: Job<AccountingJobPayload>) => {
 
     // Delegate to handlers based on eventType
     switch (event.eventType) {
-      case "SalesInvoiceIssued":
+      case DomainEvents.SALES_INVOICE_POSTED:
         await invoiceAccountingHandler.handle(event.organizationId, event);
         break;
-      case "CustomerPaymentReceived":
+      case DomainEvents.CUSTOMER_PAYMENT_RECEIVED:
         await paymentAccountingHandler.handle(event.organizationId, event);
         break;
-      case "VendorInvoiceApproved":
+      case DomainEvents.VENDOR_INVOICE_POSTED:
         await vendorInvoiceAccountingHandler.handle(event.organizationId, event);
         break;
-      case "VendorPaymentCompleted":
+      case DomainEvents.VENDOR_PAYMENT_CREATED:
         await vendorPaymentAccountingHandler.handle(event.organizationId, event);
         break;
-      case "GoodsReceiptNoteReceived":
+      case DomainEvents.GRN_RECEIVED:
         await grnAccountingHandler.handle(event.organizationId, event);
+        break;
+      case DomainEvents.PAYROLL_APPROVED:
+        await payrollAccountingHandler.handle(event.organizationId, event);
+        break;
+      case DomainEvents.STOCK_ADJUSTMENT_POSTED:
+        await stockAdjustmentAccountingHandler.handle(event.organizationId, event);
         break;
       // Add other handlers here
       default:
@@ -66,6 +75,13 @@ export const processAccountingJob = async (job: Job<AccountingJobPayload>) => {
   } catch (error: any) {
     logger.error({ error, eventId: event.id }, "Failed to process accounting event");
     
+    if (error.code === "P2002") {
+      // Unique constraint failed - means another worker processed this or it's a duplicate retry.
+      logger.info({ eventId: event.id }, "Event was already processed (Unique Constraint). Marking completed.");
+      await markCompleted(event.id);
+      return;
+    }
+
     const newRetryCount = event.retryCount + 1;
     
     if (newRetryCount >= MAX_RETRIES) {

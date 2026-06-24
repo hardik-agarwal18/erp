@@ -1,0 +1,51 @@
+{
+  "title": "ERP Accounting Health Dashboard",
+  "uid": "erp-accounting-health",
+  "panels": [
+    {
+      "title": "Revenue Entries Created (Sales)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(queue_jobs_completed_total{queueName=\"accountingQueue\", eventType=\"SalesInvoicePOSTED\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "title": "AP Entries Created (Procurement)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(queue_jobs_completed_total{queueName=\"accountingQueue\", eventType=\"VendorInvoicePosted\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "title": "Payroll Expenses Created",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(queue_jobs_completed_total{queueName=\"accountingQueue\", eventType=\"PayrollApproved\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "title": "Accounting DLQ Events (Failed)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "sum(rate(queue_jobs_failed_total{queueName=\"accountingQueue\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "title": "Replayed Events (Recovered)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "sum(rate(queue_jobs_completed_total{queueName=\"accountingDlqQueue\"}[5m]))"
+        }
+      ]
+    }
+  ]
+}

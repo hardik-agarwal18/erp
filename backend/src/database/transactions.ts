@@ -137,7 +137,7 @@ export async function createInvoiceAndPayment(
         ? InvoiceStatus.PAID
         : paymentAmount.greaterThan(0)
           ? InvoiceStatus.PARTIALLY_PAID
-          : input.invoice.status ?? InvoiceStatus.ISSUED;
+          : input.invoice.status ?? ("POSTED" as any);
 
     const invoice = await tx.invoice.create({
       data: {

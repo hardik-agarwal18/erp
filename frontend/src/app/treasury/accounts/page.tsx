@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/layout/app-shell";
 import { getBankAccounts, createBankAccount, BankAccount } from "@/services/treasury.service";
+import { getEmployees } from "@/services/hrms.service";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, Plus, Landmark } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select } from "@/components/ui/select";
 
 export default function BankAccountsPage() {
   const queryClient = useQueryClient();
@@ -21,14 +23,35 @@ export default function BankAccountsPage() {
     queryFn: getBankAccounts,
   });
 
-  const [formData, setFormData] = useState({
+  const { data: employees } = useQuery({
+    queryKey: ["hrms", "employees"],
+    queryFn: () => getEmployees(),
+  });
+
+  const [formData, setFormData] = useState<{
+    name: string;
+    type: "BANK" | "CASH" | "PETTY_CASH" | "WALLET" | "CREDIT_CARD" | "LOAN" | "DEPOSIT";
+    accountNumber: string;
+    bankName: string;
+    branchName: string;
+    ifscCode: string;
+    currency: string;
+    openingBalance: string;
+    openingBalanceDate: string;
+    requiresCustodian: boolean;
+    custodianId?: string;
+  }>({
     name: "",
+    type: "BANK",
     accountNumber: "",
     bankName: "",
     branchName: "",
     ifscCode: "",
     currency: "INR",
-    currentBalance: "",
+    openingBalance: "",
+    openingBalanceDate: new Date().toISOString().split('T')[0],
+    requiresCustodian: false,
+    custodianId: "",
   });
 
   const createMutation = useMutation({
@@ -36,7 +59,7 @@ export default function BankAccountsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["treasury", "accounts"] });
       setIsDialogOpen(false);
-      setFormData({ name: "", accountNumber: "", bankName: "", branchName: "", ifscCode: "", currency: "INR", currentBalance: "" });
+      setFormData({ name: "", type: "BANK", accountNumber: "", bankName: "", branchName: "", ifscCode: "", currency: "INR", openingBalance: "", openingBalanceDate: new Date().toISOString().split('T')[0], requiresCustodian: false, custodianId: "" });
     },
   });
 
@@ -70,10 +93,38 @@ export default function BankAccountsPage() {
                 </DialogHeader>
                 
                 <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="name">Account Name (e.g., HDFC Current) <span className="text-red-500">*</span></Label>
-                    <Input id="name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Account Name <span className="text-red-500">*</span></Label>
+                      <Input id="name" required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Account Type <span className="text-red-500">*</span></Label>
+                      <Select value={formData.type} onChange={(e: any) => setFormData({...formData, type: e.target.value})}>
+                        <option value="" disabled>Select type</option>
+                        <option value="BANK">Bank</option>
+                        <option value="CASH">Cash</option>
+                        <option value="PETTY_CASH">Petty Cash</option>
+                        <option value="WALLET">Wallet</option>
+                        <option value="CREDIT_CARD">Credit Card</option>
+                        <option value="LOAN">Loan</option>
+                        <option value="DEPOSIT">Deposit</option>
+                      </Select>
+                    </div>
                   </div>
+
+                  {(formData.type === "CASH" || formData.type === "PETTY_CASH") && (
+                    <div className="grid gap-2">
+                      <Label htmlFor="custodian">Cash Custodian <span className="text-red-500">*</span></Label>
+                      <Select required value={formData.custodianId} onChange={(e: any) => setFormData({...formData, custodianId: e.target.value})}>
+                        <option value="" disabled>Select custodian</option>
+                        {employees?.items?.map((emp: any) => (
+                          <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
+                        ))}
+                      </Select>
+                    </div>
+                  )}
+                  
                   <div className="grid grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <Label htmlFor="bankName">Bank Name</Label>
@@ -94,9 +145,15 @@ export default function BankAccountsPage() {
                       <Input id="branchName" value={formData.branchName} onChange={e => setFormData({...formData, branchName: e.target.value})} />
                     </div>
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="currentBalance">Current Balance <span className="text-red-500">*</span></Label>
-                    <Input id="currentBalance" type="number" step="0.01" required value={formData.currentBalance} onChange={e => setFormData({...formData, currentBalance: e.target.value})} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="openingBalance">Opening Balance</Label>
+                      <Input id="openingBalance" type="number" step="0.01" value={formData.openingBalance} onChange={e => setFormData({...formData, openingBalance: e.target.value})} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="openingBalanceDate">Opening Balance Date</Label>
+                      <Input id="openingBalanceDate" type="date" value={formData.openingBalanceDate} onChange={e => setFormData({...formData, openingBalanceDate: e.target.value})} />
+                    </div>
                   </div>
                 </div>
                 
@@ -136,9 +193,10 @@ export default function BankAccountsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Account Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Custodian</TableHead>
                     <TableHead>Bank</TableHead>
                     <TableHead>Account No.</TableHead>
-                    <TableHead>IFSC</TableHead>
                     <TableHead>GL Account Code</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
@@ -150,9 +208,16 @@ export default function BankAccountsPage() {
                         <Landmark className="h-4 w-4 text-slate-500" />
                         {acc.name}
                       </TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600">
+                          {acc.type.replace("_", " ")}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {acc.custodian ? `${acc.custodian.firstName} ${acc.custodian.lastName}` : "-"}
+                      </TableCell>
                       <TableCell>{acc.bankName || "-"}</TableCell>
                       <TableCell>{acc.accountNumber || "-"}</TableCell>
-                      <TableCell>{acc.ifscCode || "-"}</TableCell>
                       <TableCell>{acc.linkedAccount?.code}</TableCell>
                       <TableCell>
                         <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20">

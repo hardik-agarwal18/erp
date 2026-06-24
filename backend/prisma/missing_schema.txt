@@ -1,0 +1,204 @@
+
+model Document {
+  id             String       @id @default(uuid())
+  organizationId String
+  documentType   String
+  entityType     String
+  entityId       String
+  fileName       String
+  mimeType       String
+  s3Key          String
+  fileSize       Int
+  uploadedById   String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model Notification {
+  id             String       @id @default(uuid())
+  organizationId String
+  userId         String
+  title          String
+  message        String
+  type           String
+  isRead         Boolean      @default(false)
+  entityType     String
+  entityId       String
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+}
+
+enum NumberSeriesResetPolicy {
+  NEVER
+  YEARLY
+  MONTHLY
+}
+model NumberSeries {
+  id             String       @id @default(uuid())
+  organizationId String
+  prefix         String
+  currentNumber  Int          @default(0)
+  padding        Int          @default(5)
+  resetPolicy    NumberSeriesResetPolicy @default(NEVER)
+  lastResetAt    DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+enum WorkflowEntityType {
+  PURCHASE_REQUISITION
+  PURCHASE_ORDER
+  JOURNAL_ENTRY
+  CREDIT_NOTE
+  PAYMENT
+}
+enum WorkflowStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+enum WorkflowAction {
+  APPROVE
+  REJECT
+  DELEGATE
+  RETURN
+}
+model WorkflowRule {
+  id             String       @id @default(uuid())
+  organizationId String
+  entityType     WorkflowEntityType
+  name           String
+  conditions     Json?
+  steps          Json
+  isActive       Boolean      @default(true)
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+model WorkflowInstance {
+  id             String       @id @default(uuid())
+  organizationId String
+  ruleId         String
+  entityType     WorkflowEntityType
+  entityId       String
+  status         WorkflowStatus @default(PENDING)
+  currentStepIndex Int        @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  history        WorkflowHistory[]
+  delegations    WorkflowDelegation[]
+}
+model WorkflowHistory {
+  id                 String       @id @default(uuid())
+  workflowInstanceId String
+  actorUserId        String
+  action             WorkflowAction
+  comments           String?
+  stepIndex          Int
+  createdAt          DateTime     @default(now())
+  instance           WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+}
+model WorkflowDelegation {
+  id                 String       @id @default(uuid())
+  workflowInstanceId String
+  fromUserId         String
+  toUserId           String
+  stepIndex          Int
+  reason             String?
+  createdAt          DateTime     @default(now())
+  instance           WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+}
+
+enum PurchaseRequisitionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  CLOSED
+}
+enum PurchaseRequisitionItemStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+model PurchaseRequisition {
+  id             String       @id @default(uuid())
+  organizationId String
+  prNumber       String
+  requestedById  String
+  departmentId   String?
+  status         PurchaseRequisitionStatus @default(DRAFT)
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  items          PurchaseRequisitionItem[]
+}
+model PurchaseRequisitionItem {
+  id             String       @id @default(uuid())
+  requisitionId  String
+  productId      String
+  quantity       Decimal
+  status         PurchaseRequisitionItemStatus @default(PENDING)
+  requisition    PurchaseRequisition @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+}
+
+enum RequestForQuotationStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  CANCELLED
+}
+model RequestForQuotation {
+  id             String       @id @default(uuid())
+  organizationId String
+  rfqNumber      String
+  status         RequestForQuotationStatus @default(DRAFT)
+  deadline       DateTime
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  items          RequestForQuotationItem[]
+  vendors        RequestForQuotationVendor[]
+}
+model RequestForQuotationItem {
+  id             String       @id @default(uuid())
+  rfqId          String
+  productId      String
+  quantity       Decimal
+  rfq            RequestForQuotation @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id])
+}
+model RequestForQuotationVendor {
+  id             String       @id @default(uuid())
+  rfqId          String
+  vendorId       String
+  status         String       @default("PENDING")
+  rfq            RequestForQuotation @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  vendor         Vendor       @relation(fields: [vendorId], references: [id])
+}
+
+model QuotationRevision {
+  id             String       @id @default(uuid())
+  quotationId    String
+  revisionNumber Int
+  status         String
+  totalAmount    Decimal
+  notes          String?
+  createdAt      DateTime     @default(now())
+  quotation      Quotation    @relation(fields: [quotationId], references: [id])
+  items          QuotationRevisionItem[]
+}
+model QuotationRevisionItem {
+  id             String       @id @default(uuid())
+  revisionId     String
+  productId      String
+  quantity       Decimal
+  unitPrice      Decimal
+  discount       Decimal?
+  taxAmount      Decimal?
+  total          Decimal
+  revision       QuotationRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  product        Product      @relation(fields: [productId], references: [id])
+}

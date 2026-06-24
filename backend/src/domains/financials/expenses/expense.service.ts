@@ -10,6 +10,7 @@ import {
 import { expenseRepository } from "./expense.repository.js";
 import { CreateExpenseInput } from "./expense.types.js";
 import { accountingService } from "../accounting/accounting.service.js";
+import { vendorQueryService } from "../../contacts/vendors/vendor.query-service.js";
 
 export const expenseService = {
   createExpense: async (
@@ -18,9 +19,7 @@ export const expenseService = {
     payload: CreateExpenseInput,
   ) => {
     if (payload.vendorId) {
-      const vendor = await prisma.vendor.findFirst({
-        where: { id: payload.vendorId, organizationId, deletedAt: null },
-      });
+      const vendor = await vendorQueryService.findById(organizationId, payload.vendorId);
       if (!vendor) {
         throw new ApiError(404, "Vendor not found");
       }

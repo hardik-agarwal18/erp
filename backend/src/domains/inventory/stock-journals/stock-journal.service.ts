@@ -250,6 +250,19 @@ export const journalService = {
         data: { status: "COMPLETED" },
       });
 
+      await (tx as any).outboxEvent.create({
+        data: {
+          organizationId,
+          aggregateType: "StockAdjustment",
+          aggregateId: journal.id,
+          eventType: "StockAdjustmentPosted",
+          payload: {
+            journalId: journal.id,
+            totalItems: journal.items.length
+          }
+        }
+      });
+
       await auditService.record({
         organizationId,
         userId: actorUserId,

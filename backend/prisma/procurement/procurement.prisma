@@ -1,0 +1,231 @@
+model Vendor {
+  id                         String                      @id @default(uuid())
+  organizationId             String
+  name                       String
+  email                      String?
+  phone                      String?
+  gstNumber                  String?
+  address                    String?
+  createdAt                  DateTime                    @default(now())
+  updatedAt                  DateTime                    @updatedAt
+  deletedAt                  DateTime?
+  expenses                   Expense[]
+  organization               Organization                @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  purchaseOrders             PurchaseOrder[]
+  vendorInvoices             VendorInvoice[]
+  goodsReceiptNotes          GoodsReceiptNote[]
+  paymentBatchItems          PaymentBatchItem[]
+  requestForQuotationVendors RequestForQuotationVendor[]
+  vendorPerformance          VendorPerformance?
+
+  @@index([organizationId])
+  @@index([organizationId, name])
+}
+
+model PurchaseOrder {
+  id                   String              @id @default(uuid())
+  organizationId       String
+  vendorId             String
+  poNumber             String
+  status               PurchaseOrderStatus
+  issueDate            DateTime
+  expectedDeliveryDate DateTime?
+  notes                String?
+  currencyCode         String?             @default("INR")
+  exchangeRate         Decimal?            @default(1.0)
+  totalAmount          Decimal
+  items                PurchaseOrderItem[]
+  organization         Organization        @relation(fields: [organizationId], references: [id])
+  vendor               Vendor              @relation(fields: [vendorId], references: [id])
+  vendorInvoices       VendorInvoice[]
+  goodsReceiptNotes    GoodsReceiptNote[]
+}
+
+model PurchaseOrderItem {
+  id               String        @id @default(uuid())
+  purchaseOrderId  String
+  productId        String
+  quantity         Decimal
+  billedQuantity   Decimal       @default(0)
+  receivedQuantity Decimal       @default(0)
+  unitPrice        Decimal
+  taxAmount        Decimal?
+  discountAmount   Decimal?
+  lineTotal        Decimal
+  purchaseOrder    PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+}
+
+model VendorInvoice {
+  id                String                    @id @default(uuid())
+  organizationId    String
+  vendorId          String
+  purchaseOrderId   String?
+  invoiceNumber     String
+  status            VendorInvoiceStatus
+  matchStatus       MatchStatus               @default(MATCHED)
+  invoiceDate       DateTime
+  dueDate           DateTime?
+  notes             String?
+  subtotal          Decimal
+  taxAmount         Decimal
+  discountAmount    Decimal
+  totalAmount       Decimal
+  items             VendorInvoiceItem[]
+  allocations       VendorPaymentAllocation[]
+  mismatch          VendorInvoiceMismatch?
+  organization      Organization              @relation(fields: [organizationId], references: [id])
+  vendor            Vendor                    @relation(fields: [vendorId], references: [id])
+  purchaseOrder     PurchaseOrder?            @relation(fields: [purchaseOrderId], references: [id])
+  vendorPayments    VendorPayment[]
+  paymentBatchItems PaymentBatchItem[]
+}
+
+model VendorInvoiceItem {
+  id          String        @id @default(uuid())
+  invoiceId   String
+  productId   String
+  quantity    Decimal
+  matchStatus MatchStatus   @default(MATCHED)
+  unitPrice   Decimal
+  taxAmount   Decimal?
+  lineTotal   Decimal
+  invoice     VendorInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product     Product       @relation(fields: [productId], references: [id])
+}
+
+enum PurchaseOrderStatus {
+  DRAFT
+  ISSUED
+  APPROVED
+  PARTIALLY_RECEIVED
+  RECEIVED
+  COMPLETED
+  CANCELLED
+}
+
+enum MatchStatus {
+  MATCHED
+  PARTIAL_MATCH
+  MISMATCH
+}
+
+enum VendorInvoiceStatus {
+  DRAFT
+  PENDING_MATCH
+  MATCHED
+  POSTED
+  PARTIALLY_PAID
+  PAID
+  VOID
+}
+
+model VendorInvoiceMismatch {
+  id               String        @id @default(uuid())
+  invoiceId        String        @unique
+  quantityVariance Decimal
+  amountVariance   Decimal
+  taxVariance      Decimal
+  mismatchReason   String?
+  resolvedAt       DateTime?
+  resolvedById     String?
+  invoice          VendorInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  resolvedBy       User?         @relation(fields: [resolvedById], references: [id])
+}
+
+enum PurchaseRequisitionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  CLOSED
+}
+
+enum PurchaseRequisitionItemStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PurchaseRequisition {
+  id             String                    @id @default(uuid())
+  organizationId String
+  prNumber       String
+  requestedById  String
+  departmentId   String?
+  status         PurchaseRequisitionStatus @default(DRAFT)
+  notes          String?
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+  organization   Organization              @relation(fields: [organizationId], references: [id])
+  items          PurchaseRequisitionItem[]
+}
+
+model PurchaseRequisitionItem {
+  id            String                        @id @default(uuid())
+  requisitionId String
+  productId     String
+  quantity      Decimal
+  status        PurchaseRequisitionItemStatus @default(PENDING)
+  requisition   PurchaseRequisition           @relation(fields: [requisitionId], references: [id], onDelete: Cascade)
+}
+
+enum RequestForQuotationStatus {
+  DRAFT
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+model RequestForQuotation {
+  id             String                      @id @default(uuid())
+  organizationId String
+  rfqNumber      String
+  status         RequestForQuotationStatus   @default(DRAFT)
+  deadline       DateTime
+  notes          String?
+  createdAt      DateTime                    @default(now())
+  updatedAt      DateTime                    @updatedAt
+  organization   Organization                @relation(fields: [organizationId], references: [id])
+  items          RequestForQuotationItem[]
+  vendors        RequestForQuotationVendor[]
+}
+
+model RequestForQuotationItem {
+  id        String              @id @default(uuid())
+  rfqId     String
+  productId String
+  quantity  Decimal
+  rfq       RequestForQuotation @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  product   Product             @relation(fields: [productId], references: [id])
+}
+
+model RequestForQuotationVendor {
+  id       String              @id @default(uuid())
+  rfqId    String
+  vendorId String
+  status   String              @default("PENDING")
+  rfq      RequestForQuotation @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  vendor   Vendor              @relation(fields: [vendorId], references: [id])
+}
+
+enum RejectedItemDisposition {
+  PENDING
+  RETURN_TO_VENDOR
+  REPLACEMENT_REQUESTED
+  SCRAPPED
+  ACCEPTED_AS_IS
+}
+
+model VendorPerformance {
+  id               String  @id @default(uuid())
+  vendorId         String  @unique
+  lateDeliveries   Int     @default(0)
+  onTimeDeliveries Int     @default(0)
+  rejectedQuantity Decimal @default(0)
+  acceptedQuantity Decimal @default(0)
+  qualityScore     Decimal @default(5.0)
+  rfqWinRate       Decimal @default(0)
+  totalOrders      Int     @default(0)
+  totalFulfilled   Int     @default(0)
+  vendor           Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+}

@@ -1,0 +1,293 @@
+model Customer {
+  id                      String                   @id @default(uuid())
+  organizationId          String
+  name                    String
+  email                   String?
+  phone                   String?
+  gstNumber               String?
+  address                 String?
+  creditLimit             Decimal?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+  creditProfile           CustomerCreditProfile?
+  organization            Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices                Invoice[]
+  deliveryChallans        DeliveryChallan[]
+  quotations              Quotation[]
+  salesOrders             SalesOrder[]
+  customerCreditDecisions CustomerCreditDecision[]
+
+  @@index([organizationId])
+  @@index([organizationId, name])
+  @@index([organizationId, email])
+}
+
+model CustomerCreditProfile {
+  id          String   @id @default(uuid())
+  customerId  String   @unique
+  creditLimit Decimal
+  usedCredit  Decimal  @default(0)
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+model Invoice {
+  id             String            @id @default(uuid())
+  organizationId String
+  customerId     String
+  taxId          String?
+  invoiceNumber  String
+  status         InvoiceStatus
+  issueDate      DateTime
+  dueDate        DateTime?
+  subtotal       Decimal
+  taxAmount      Decimal
+  discountAmount Decimal
+  totalAmount    Decimal
+  notes          String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deletedAt      DateTime?
+  customer       Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tax            Tax?              @relation(fields: [taxId], references: [id])
+  items          InvoiceItem[]
+  payments       Payment[]
+  emailLogs      InvoiceEmailLog[]
+
+  @@unique([organizationId, invoiceNumber])
+  @@index([organizationId])
+  @@index([organizationId, customerId])
+  @@index([organizationId, issueDate])
+  @@index([organizationId, status, issueDate])
+}
+
+model InvoiceItem {
+  id             String  @id @default(uuid())
+  invoiceId      String
+  productId      String
+  quantity       Decimal
+  unitPrice      Decimal
+  taxAmount      Decimal
+  discountAmount Decimal
+  lineTotal      Decimal
+  invoice        Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product        Product @relation(fields: [productId], references: [id])
+
+  @@index([invoiceId])
+  @@index([productId])
+}
+
+model InvoiceSequence {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  prefix         String       @default("INV")
+  nextNumber     Int          @default(1)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  PARTIALLY_PAID
+  OVERDUE
+  CANCELLED
+}
+
+model InvoiceEmailLog {
+  id             String             @id @default(uuid())
+  invoiceId      String
+  organizationId String
+  recipient      String
+  status         InvoiceEmailStatus
+  error          String?
+  sentAt         DateTime?
+  openedAt       DateTime?
+  createdAt      DateTime           @default(now())
+
+  invoice      Invoice      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([organizationId])
+  @@index([status])
+}
+
+enum InvoiceEmailStatus {
+  PENDING
+  SENT
+  FAILED
+  OPENED
+}
+
+model DeliveryChallan {
+  id             String                @id @default(uuid())
+  organizationId String
+  customerId     String?
+  godownId       String?
+  challanNumber  String
+  status         String                @default("DRAFT")
+  notes          String?
+  deliveryDate   DateTime
+  dispatchDate   DateTime?
+  salesOrderId   String?
+  deletedAt      DateTime?
+  organization   Organization          @relation(fields: [organizationId], references: [id])
+  customer       Customer?             @relation(fields: [customerId], references: [id])
+  godown         Godown?               @relation(fields: [godownId], references: [id])
+  salesOrder     SalesOrder?           @relation(fields: [salesOrderId], references: [id])
+  items          DeliveryChallanItem[]
+}
+
+model DeliveryChallanItem {
+  id        String          @id @default(uuid())
+  challanId String
+  productId String
+  quantity  Decimal
+  product   Product         @relation(fields: [productId], references: [id])
+  challan   DeliveryChallan @relation(fields: [challanId], references: [id], onDelete: Cascade)
+}
+
+model QuotationRevision {
+  id                    String                  @id @default(uuid())
+  quotationId           String
+  revisionNumber        Int
+  status                QuotationRevisionStatus @default(DRAFT)
+  subtotal              Decimal?
+  taxTotal              Decimal?
+  totalAmount           Decimal?
+  total                 Decimal
+  notes                 String?
+  issueDate             DateTime
+  validUntil            DateTime
+  expiresAutomatically  Boolean                 @default(false)
+  convertedSalesOrderId String?
+  createdAt             DateTime                @default(now())
+  quotation             Quotation               @relation(fields: [quotationId], references: [id])
+  lines                 QuotationRevisionItem[]
+  salesOrders           SalesOrder[]
+}
+
+model QuotationRevisionItem {
+  id          String            @id @default(uuid())
+  revisionId  String
+  productId   String
+  description String?
+  quantity    Decimal
+  unitPrice   Decimal
+  discount    Decimal?
+  taxRate     Decimal?
+  taxAmount   Decimal?
+  total       Decimal
+  revision    QuotationRevision @relation(fields: [revisionId], references: [id], onDelete: Cascade)
+  product     Product           @relation(fields: [productId], references: [id])
+}
+
+enum QuotationStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+model Quotation {
+  id               String              @id @default(uuid())
+  organizationId   String
+  customerId       String
+  quotationNumber  String
+  status           QuotationStatus     @default(DRAFT)
+  issueDate        DateTime
+  expiryDate       DateTime?
+  totalAmount      Decimal             @default(0)
+  notes            String?
+  activeRevisionId String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  organization     Organization        @relation(fields: [organizationId], references: [id])
+  customer         Customer            @relation(fields: [customerId], references: [id])
+  items            QuotationItem[]
+  revisions        QuotationRevision[]
+}
+
+model QuotationItem {
+  id          String    @id @default(uuid())
+  quotationId String
+  productId   String
+  quantity    Decimal
+  unitPrice   Decimal
+  discount    Decimal?
+  taxAmount   Decimal?
+  total       Decimal
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  product     Product   @relation(fields: [productId], references: [id])
+}
+
+model SalesOrder {
+  id                  String             @id @default(uuid())
+  organizationId      String
+  customerId          String
+  quotationRevisionId String?
+  orderNumber         String
+  orderDate           DateTime           @default(now())
+  sourceType          String             @default("MANUAL")
+  status              String             @default("PENDING")
+  subtotal            Decimal
+  taxTotal            Decimal
+  total               Decimal
+  notes               String?
+  isLocked            Boolean            @default(false)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  customer            Customer           @relation(fields: [customerId], references: [id])
+  organization        Organization       @relation(fields: [organizationId], references: [id])
+  quotationRevision   QuotationRevision? @relation(fields: [quotationRevisionId], references: [id])
+  lines               SalesOrderLine[]
+  challans            DeliveryChallan[]
+}
+
+model SalesOrderLine {
+  id                String     @id @default(uuid())
+  salesOrderId      String
+  productId         String
+  description       String?
+  quantity          Decimal
+  fulfilledQuantity Decimal    @default(0)
+  unitPrice         Decimal
+  taxRate           Decimal?
+  taxAmount         Decimal?
+  total             Decimal
+  salesOrder        SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  product           Product    @relation(fields: [productId], references: [id])
+}
+
+model CustomerCreditDecision {
+  id                    String       @id @default(uuid())
+  organizationId        String
+  customerId            String
+  salesOrderId          String?
+  decision              String
+  exposureAtDecision    Decimal      @default(0)
+  creditLimitAtDecision Decimal      @default(0)
+  status                String       @default("PENDING")
+  decisionReason        String?
+  workflowInstanceId    String?
+  createdAt             DateTime     @default(now())
+  organization          Organization @relation(fields: [organizationId], references: [id])
+  customer              Customer     @relation(fields: [customerId], references: [id])
+}
+
+enum QuotationRevisionStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  SUPERSEDED
+}

@@ -17,7 +17,7 @@ const resolveInvoiceStatus = (totalPaid: number, totalAmount: number) => {
   if (totalPaid > 0) {
     return "PARTIALLY_PAID";
   }
-  return "ISSUED";
+  return "POSTED";
 };
 
 export const paymentService = {

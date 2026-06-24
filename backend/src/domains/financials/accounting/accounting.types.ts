@@ -21,8 +21,11 @@ export interface CreateJournalEntryInput {
   description: string;
   referenceType?: string;
   referenceId?: string;
+  sourceEventId?: string;
   postedAt?: Date;
   lines: JournalLineInput[];
+  isAccrual?: boolean;
+  autoReversalDate?: Date;
 }
 
 export interface TrialBalanceFilters {

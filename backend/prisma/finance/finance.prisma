@@ -1,0 +1,410 @@
+model Tax {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  rate           Decimal
+  type           TaxType
+  isDefault      Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+  invoices       Invoice[]
+  products       Product[]
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model Expense {
+  id             String          @id @default(uuid())
+  organizationId String
+  vendorId       String?
+  category       ExpenseCategory
+  amount         Decimal
+  expenseDate    DateTime
+  description    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  vendor         Vendor?         @relation(fields: [vendorId], references: [id])
+  bankAccount    BankAccount?    @relation(fields: [bankAccountId], references: [id])
+  bankAccountId  String?
+
+  @@index([organizationId])
+  @@index([organizationId, category])
+  @@index([organizationId, expenseDate])
+  @@index([organizationId, vendorId])
+}
+
+model Transaction {
+  id             String          @id @default(uuid())
+  organizationId String
+  type           TransactionType
+  referenceType  String
+  referenceId    String
+  amount         Decimal
+  description    String?
+  createdAt      DateTime        @default(now())
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([organizationId, type])
+  @@index([organizationId, createdAt(sort: Desc)])
+  @@index([organizationId, referenceType, referenceId])
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  UPI
+  CARD
+  CHEQUE
+  WIRE_TRANSFER
+  OTHER
+}
+
+enum TaxType {
+  GST
+  VAT
+  SALES_TAX
+  OTHER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  PAYMENT
+  REFUND
+  PURCHASE
+  SALE
+}
+
+enum ExpenseCategory {
+  SALARY
+  RENT
+  UTILITIES
+  MARKETING
+  TRAVEL
+  SOFTWARE
+  OTHER
+}
+
+model Account {
+  id             String                 @id @default(uuid())
+  organizationId String
+  code           String
+  name           String
+  type           AccountType
+  normalBalance  BalanceType            @default(DEBIT)
+  parentId       String?
+  isSystem       Boolean                @default(false)
+  isActive       Boolean                @default(true)
+  parent         Account?               @relation("AccountHierarchy", fields: [parentId], references: [id])
+  children       Account[]              @relation("AccountHierarchy")
+  journalLines   JournalLine[]
+  systemMappings SystemAccountMapping[]
+  organization   Organization           @relation(fields: [organizationId], references: [id])
+  bankAccount    BankAccount?
+
+  @@unique([organizationId, code])
+}
+
+model SystemAccountMapping {
+  id             String @id @default(uuid())
+  organizationId String
+  mappingKey     String
+  accountId      String
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  account      Account      @relation(fields: [accountId], references: [id])
+
+  @@unique([organizationId, mappingKey])
+}
+
+model JournalEntry {
+  id                       String            @id @default(uuid())
+  organizationId           String
+  entryNumber              String
+  description              String
+  referenceType            String?
+  referenceId              String?
+  isPosted                 Boolean           @default(false)
+  postedAt                 DateTime?
+  createdAt                DateTime          @default(now())
+  isReversal               Boolean           @default(false)
+  reversesEntryId          String?           @unique
+  reversedByEntryId        String?           @unique
+  isAccrual                Boolean           @default(false)
+  autoReversalDate         DateTime?
+  lines                    JournalLine[]
+  organization             Organization      @relation(fields: [organizationId], references: [id])
+  bankTransaction          BankTransaction?
+  reversesEntry            JournalEntry?     @relation("ReversalRelation", fields: [reversesEntryId], references: [id])
+  reversedByEntry          JournalEntry?     @relation("ReversalRelation")
+  treasuryTransfer         TreasuryTransfer? @relation("TreasuryTransferJournal")
+  treasuryTransferReversal TreasuryTransfer? @relation("TreasuryTransferReversalJournal")
+
+  @@unique([organizationId, entryNumber])
+}
+
+model JournalLine {
+  id          String       @id @default(uuid())
+  entryId     String
+  accountId   String
+  debit       Decimal      @default(0)
+  credit      Decimal      @default(0)
+  description String?
+  entry       JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  account     Account      @relation(fields: [accountId], references: [id])
+}
+
+model FiscalYear {
+  id             String             @id @default(uuid())
+  organizationId String
+  name           String
+  startDate      DateTime
+  endDate        DateTime
+  isActive       Boolean            @default(true)
+  isClosed       Boolean            @default(false)
+  closedAt       DateTime?
+  closedById     String?
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  closedBy       User?              @relation(fields: [closedById], references: [id])
+  periods        AccountingPeriod[]
+}
+
+model AccountingPeriod {
+  id             String    @id @default(uuid())
+  organizationId String
+  fiscalYearId   String
+  periodName     String
+  startDate      DateTime
+  endDate        DateTime
+  isClosed       Boolean   @default(false)
+  closedAt       DateTime?
+  closedById     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  fiscalYear   FiscalYear   @relation(fields: [fiscalYearId], references: [id])
+  closedBy     User?        @relation(fields: [closedById], references: [id])
+}
+
+model VendorPayment {
+  id             String              @id @default(uuid())
+  organizationId String
+  vendorId       String
+  amount         Decimal
+  paymentMethod  PaymentMethod
+  paymentDate    DateTime
+  reference      String?
+  bankAccountId  String?
+  status         VendorPaymentStatus @default(PLANNED)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  deletedAt      DateTime?
+
+  organization    Organization              @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bankAccount     BankAccount?              @relation(fields: [bankAccountId], references: [id])
+  allocations     VendorPaymentAllocation[]
+  vendorInvoice   VendorInvoice?            @relation(fields: [vendorInvoiceId], references: [id])
+  vendorInvoiceId String?
+
+  @@index([organizationId])
+  @@index([organizationId, paymentDate])
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum BalanceType {
+  DEBIT
+  CREDIT
+}
+
+enum VendorPaymentStatus {
+  PLANNED
+  POSTED
+  CANCELLED
+}
+
+enum PaymentBatchStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  EXECUTING
+  EXECUTED
+  CANCELLED
+}
+
+model BankAccount {
+  id                String    @id @default(uuid())
+  organizationId    String
+  name              String
+  accountNumber     String?
+  bankName          String?
+  branchName        String?
+  ifscCode          String?
+  currency          String    @default("INR")
+  type              String    @default("BANK")
+  requiresCustodian Boolean   @default(false)
+  custodianId       String?
+  isFrozen          Boolean   @default(false)
+  closedAt          DateTime?
+  linkedAccountId   String    @unique // Link to GL Account in Chart of Accounts
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  organization   Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  linkedAccount  Account            @relation(fields: [linkedAccountId], references: [id], onDelete: Restrict)
+  transactions   BankTransaction[]
+  expenses       Expense[]
+  payments       Payment[]
+  vendorPayments VendorPayment[]
+  paymentBatches PaymentBatch[]
+  transfersFrom  TreasuryTransfer[] @relation("TreasuryTransferFromAccount")
+  transfersTo    TreasuryTransfer[] @relation("TreasuryTransferToAccount")
+
+  @@index([organizationId])
+}
+
+model BankTransaction {
+  id              String   @id @default(uuid())
+  organizationId  String
+  bankAccountId   String
+  type            String // "DEPOSIT", "WITHDRAWAL", "BANK_FEE", "INTEREST"
+  amount          Decimal
+  reference       String? // Cheque number, UTR, etc.
+  description     String?
+  transactionDate DateTime
+  status          String   @default("CLEARED") // "PENDING", "CLEARED", "RECONCILED"
+  journalEntryId  String?  @unique // Link to GL Journal Entry
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  bankAccount  BankAccount   @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+  journalEntry JournalEntry? @relation(fields: [journalEntryId], references: [id])
+
+  @@index([organizationId])
+  @@index([bankAccountId])
+  @@index([transactionDate])
+}
+
+model PaymentBatch {
+  id             String                  @id @default(uuid())
+  organizationId String
+  batchNumber    String
+  status         PaymentBatchStatus      @default(DRAFT)
+  totalAmount    Decimal                 @default(0)
+  totalInvoices  Int                     @default(0)
+  totalVendors   Int                     @default(0)
+  currency       String                  @default("INR")
+  bankAccountId  String
+  scheduledDate  DateTime
+  executedAt     DateTime?
+  executedById   String?
+  bankFileS3Key  String?
+  items          PaymentBatchItem[]
+  executions     PaymentBatchExecution[]
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
+  organization   Organization            @relation(fields: [organizationId], references: [id])
+  bankAccount    BankAccount             @relation(fields: [bankAccountId], references: [id])
+  executedBy     User?                   @relation(fields: [executedById], references: [id])
+}
+
+model PaymentBatchItem {
+  id             String        @id @default(uuid())
+  paymentBatchId String
+  vendorId       String
+  invoiceId      String
+  amount         Decimal
+  paymentBatch   PaymentBatch  @relation(fields: [paymentBatchId], references: [id], onDelete: Cascade)
+  vendor         Vendor        @relation(fields: [vendorId], references: [id])
+  invoice        VendorInvoice @relation(fields: [invoiceId], references: [id])
+}
+
+model PaymentBatchExecution {
+  id           String       @id @default(uuid())
+  batchId      String
+  startedAt    DateTime     @default(now())
+  completedAt  DateTime?
+  successCount Int          @default(0)
+  failureCount Int          @default(0)
+  status       String       @default("IN_PROGRESS")
+  batch        PaymentBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+}
+
+model VendorPaymentAllocation {
+  id        String   @id @default(uuid())
+  paymentId String
+  invoiceId String
+  amount    Decimal
+  createdAt DateTime @default(now())
+
+  payment VendorPayment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoice VendorInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@index([invoiceId])
+}
+
+model Advance {
+  id             String       @id @default(uuid())
+  organizationId String
+  employeeId     String?
+  amount         Decimal
+  status         String       @default("PENDING")
+  isLocked       Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+model TreasuryTransfer {
+  id                     String    @id @default(uuid())
+  organizationId         String
+  transferSequence       String
+  fromAccountId          String
+  toAccountId            String
+  amount                 Decimal
+  transferDate           DateTime
+  reference              String?
+  externalReference      String?
+  description            String?
+  notes                  String?
+  status                 String    @default("DRAFT")
+  reversalReason         String?
+  journalEntryId         String?   @unique
+  reversalJournalEntryId String?   @unique
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  deletedAt              DateTime?
+
+  organization         Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  journalEntry         JournalEntry? @relation("TreasuryTransferJournal", fields: [journalEntryId], references: [id])
+  reversalJournalEntry JournalEntry? @relation("TreasuryTransferReversalJournal", fields: [reversalJournalEntryId], references: [id])
+  fromAccount          BankAccount   @relation("TreasuryTransferFromAccount", fields: [fromAccountId], references: [id])
+  toAccount            BankAccount   @relation("TreasuryTransferToAccount", fields: [toAccountId], references: [id])
+
+  @@index([organizationId])
+}
+
+model TransferSequence {
+  id             String       @id @default(uuid())
+  organizationId String       @unique
+  prefix         String       @default("TRF")
+  nextNumber     Int          @default(1)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}

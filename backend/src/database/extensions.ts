@@ -25,40 +25,15 @@ type RootDelegate = {
 
 const requestContextStorage = new AsyncLocalStorage<DatabaseRequestContext>();
 
-export const TENANT_OWNED_MODELS = [
+export const TENANT_EXCLUDED_MODELS = new Set([
+  "Organization",
   "AuditLog",
-  "Customer",
-  "Expense",
-  "InventoryItem",
-  "InventoryMovement",
-  "Invitation",
-  "Invoice",
-  "InvoiceSequence",
-  "OrganizationMember",
-  "Payment",
-  "Product",
-  "ProductCategory",
-  "Role",
-  "Tax",
-  "Transaction",
-  "Vendor",
-] as const satisfies readonly Prisma.ModelName[];
-
-export const SOFT_DELETE_MODELS = [
-  "Customer",
-  "Expense",
-  "InventoryItem",
-  "Invoice",
-  "Payment",
-  "Product",
-  "ProductCategory",
-  "Tax",
-  "Vendor",
-] as const satisfies readonly Prisma.ModelName[];
-
-const UPDATED_AT_MODELS = Prisma.dmmf.datamodel.models
-  .filter((model) => model.fields.some((field) => field.name === "updatedAt"))
-  .map((model) => model.name);
+  "OutboxEvent",
+  "SystemConfig",
+  "Session",
+  "User",
+  "Role" // Depending on whether roles are global or tenant-scoped, but usually global
+]);
 
 const prismaModelMetadata = new Map(
   Prisma.dmmf.datamodel.models.map((model) => [
@@ -67,8 +42,23 @@ const prismaModelMetadata = new Map(
   ]),
 );
 
-const tenantOwnedModelSet = new Set<string>(TENANT_OWNED_MODELS);
-const softDeleteModelSet = new Set<string>(SOFT_DELETE_MODELS);
+const tenantOwnedModelSet = new Set<string>(
+  Prisma.dmmf.datamodel.models
+    .filter(m => m.fields.some(f => f.name === "organizationId"))
+    .map(m => m.name)
+    .filter(name => !TENANT_EXCLUDED_MODELS.has(name))
+);
+
+const softDeleteModelSet = new Set<string>(
+  Prisma.dmmf.datamodel.models
+    .filter(m => m.fields.some(f => f.name === "deletedAt"))
+    .map(m => m.name)
+);
+
+const UPDATED_AT_MODELS = Prisma.dmmf.datamodel.models
+  .filter((model) => model.fields.some((field) => field.name === "updatedAt"))
+  .map((model) => model.name);
+
 const updatedAtModelSet = new Set<string>(UPDATED_AT_MODELS);
 
 function getRequestContext(): DatabaseRequestContext {
@@ -522,7 +512,58 @@ const prismaExtensions = Prisma.defineExtension({
           });
         }
 
-        return query(scopedArgs);
+        const result = await query(scopedArgs);
+
+        const AUDIT_EXCLUDED_MODELS = new Set([
+          "Session",
+          "RefreshToken",
+          "CacheEntry",
+          "NotificationDelivery",
+          "OutboxRetry",
+          "QueueHeartbeat",
+          "OutboxEvent",
+          "AuditLog"
+        ]);
+
+        if (
+          ["create", "update", "delete", "upsert"].includes(operation) &&
+          !AUDIT_EXCLUDED_MODELS.has(model) &&
+          context.actorUserId &&
+          context.organizationId
+        ) {
+          let entityId: string | undefined;
+
+          // Try to extract ID from the result or arguments
+          if (result && typeof result === "object" && "id" in result) {
+            entityId = String((result as any).id);
+          } else if (scopedArgs.where && typeof scopedArgs.where === "object" && "id" in scopedArgs.where) {
+            entityId = String(scopedArgs.where.id);
+          }
+
+          const actionMapping: Record<string, string> = {
+            create: "CREATE",
+            update: "UPDATE",
+            delete: "DELETE",
+            upsert: "UPSERT"
+          };
+
+          try {
+            await (prisma as any).auditLog.create({
+              data: {
+                organizationId: context.organizationId,
+                actorUserId: context.actorUserId,
+                action: actionMapping[operation] || operation.toUpperCase(),
+                entityType: model,
+                entityId: entityId || null,
+              }
+            });
+          } catch (auditError) {
+            // We log but do not crash the transaction if the audit fails
+            console.error(`Failed to automatically write AuditLog for ${model} ${operation}`, auditError);
+          }
+        }
+
+        return result;
       },
     },
   },

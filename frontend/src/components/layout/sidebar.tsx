@@ -60,7 +60,20 @@ const navigationSections: Array<{ label: string; items: SidebarItem[] }> = [
           { label: "Balance Sheet", href: "/accounting/balance-sheet" },
         ],
       },
-      { label: "Treasury", icon: Landmark, feature: "reports", children: [ { label: "Accounts", href: "/treasury/accounts" }, { label: "Transactions", href: "/treasury/transactions" } ] }, {
+      {
+        label: "Treasury",
+        icon: Landmark,
+        feature: "reports",
+        children: [
+          { label: "Overview", href: "/treasury" },
+          { label: "Accounts", href: "/treasury/accounts" },
+          { label: "Transfers", href: "/treasury/transfers" },
+          { label: "Cash", href: "/treasury/cash" },
+          { label: "Advances", href: "/treasury/advances" },
+          { label: "Reports", href: "/treasury/reports" },
+          { label: "Activity", href: "/treasury/activity" },
+        ]
+      }, {
         label: "Inventory",
         icon: Boxes,
         feature: "inventory",

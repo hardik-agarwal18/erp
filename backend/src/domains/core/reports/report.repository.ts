@@ -1,5 +1,7 @@
 
 import prisma from "../../../config/database.js";
+import { invoiceQueryService } from "../../financials/invoices/invoice.query-service.js";
+import { customerQueryService } from "../../contacts/customers/customer.query-service.js";
 
 const resolveDateRange = (startDate?: string, endDate?: string) => {
   const start = startDate ? new Date(startDate) : undefined;
@@ -14,22 +16,7 @@ export const reportRepository = {
     endDate?: string,
   ) => {
     const { start, end } = resolveDateRange(startDate, endDate);
-    return prisma.invoice.findMany({
-      where: {
-        organizationId,
-        deletedAt: null,
-        status: { in: ["ISSUED", "PAID", "PARTIALLY_PAID", "OVERDUE"] },
-        ...(start || end
-          ? {
-              issueDate: {
-                ...(start ? { gte: start } : {}),
-                ...(end ? { lte: end } : {}),
-              },
-            }
-          : {}),
-      },
-      include: { customer: true },
-    });
+    return invoiceQueryService.listForRange(organizationId, start, end);
   },
   listExpensesForRange: (
     organizationId: string,
@@ -58,33 +45,10 @@ export const reportRepository = {
     endDate?: string,
   ) => {
     const { start, end } = resolveDateRange(startDate, endDate);
-    return prisma.invoice.groupBy({
-      by: ["customerId"],
-      where: {
-        organizationId,
-        deletedAt: null,
-        status: { in: ["ISSUED", "PAID", "PARTIALLY_PAID", "OVERDUE"] },
-        ...(start || end
-          ? {
-              issueDate: {
-                ...(start ? { gte: start } : {}),
-                ...(end ? { lte: end } : {}),
-              },
-            }
-          : {}),
-      },
-      _sum: { totalAmount: true },
-      _count: { _all: true },
-    });
+    return invoiceQueryService.groupBySalesCustomer(organizationId, start, end);
   },
   findCustomersByIds: (organizationId: string, customerIds: string[]) => {
-    return prisma.customer.findMany({
-      where: {
-        organizationId,
-        deletedAt: null,
-        id: { in: customerIds },
-      },
-    });
+    return customerQueryService.findManyByIds(organizationId, customerIds);
   },
   groupExpensesByCategory: (
     organizationId: string,
@@ -139,31 +103,10 @@ export const reportRepository = {
     endDate?: string,
   ) => {
     const { start, end } = resolveDateRange(startDate, endDate);
-    return prisma.invoice.aggregate({
-      where: {
-        organizationId,
-        deletedAt: null,
-        status: { in: ["ISSUED", "PAID", "PARTIALLY_PAID", "OVERDUE"] },
-        ...(start || end
-          ? {
-              issueDate: {
-                ...(start ? { gte: start } : {}),
-                ...(end ? { lte: end } : {}),
-              },
-            }
-          : {}),
-      },
-      _sum: { taxAmount: true },
-    });
+    return invoiceQueryService.aggregateTaxAmount(organizationId, start, end);
   },
   countUnpaidInvoices: (organizationId: string) => {
-    return prisma.invoice.count({
-      where: {
-        organizationId,
-        deletedAt: null,
-        status: { in: ["ISSUED", "PARTIALLY_PAID", "OVERDUE"] },
-      },
-    });
+    return invoiceQueryService.countUnpaid(organizationId);
   },
   aggregateInvoiceSales: (
     organizationId: string,
@@ -171,23 +114,7 @@ export const reportRepository = {
     endDate?: string,
   ) => {
     const { start, end } = resolveDateRange(startDate, endDate);
-    return prisma.invoice.aggregate({
-      where: {
-        organizationId,
-        deletedAt: null,
-        status: { in: ["ISSUED", "PAID", "PARTIALLY_PAID", "OVERDUE"] },
-        ...(start || end
-          ? {
-              issueDate: {
-                ...(start ? { gte: start } : {}),
-                ...(end ? { lte: end } : {}),
-              },
-            }
-          : {}),
-      },
-      _sum: { totalAmount: true },
-      _count: { _all: true },
-    });
+    return invoiceQueryService.aggregateSales(organizationId, start, end);
   },
   aggregateExpenses: (
     organizationId: string,
@@ -239,22 +166,7 @@ export const reportRepository = {
     endDate?: string,
   ) => {
     const { start, end } = resolveDateRange(startDate, endDate);
-    return prisma.invoice.findMany({
-      where: {
-        organizationId,
-        deletedAt: null,
-        status: { in: ["ISSUED", "PAID", "PARTIALLY_PAID", "OVERDUE"] },
-        ...(start || end
-          ? {
-              issueDate: {
-                ...(start ? { gte: start } : {}),
-                ...(end ? { lte: end } : {}),
-              },
-            }
-          : {}),
-      },
-      select: { totalAmount: true, issueDate: true },
-    });
+    return invoiceQueryService.listDatesAndAmounts(organizationId, start, end);
   },
   calculateStockValue: async (organizationId: string) => {
     // Prisma aggregate does not support multiplication across relations

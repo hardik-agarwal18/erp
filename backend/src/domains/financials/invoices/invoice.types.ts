@@ -8,9 +8,12 @@ export type InvoiceItemInput = {
 
 export type CreateInvoiceInput = {
   customerId: string;
+  sourceType?: "SALES_ORDER" | "DELIVERY_CHALLAN";
+  salesOrderId?: string;
+  deliveryChallanId?: string;
   issueDate: string;
   dueDate?: string;
-  status?: "DRAFT" | "ISSUED";
+  status?: "DRAFT" | "POSTED";
   notes?: string;
   items: InvoiceItemInput[];
 };
@@ -18,7 +21,7 @@ export type CreateInvoiceInput = {
 export type UpdateInvoiceInput = {
   customerId?: string;
   issueDate?: string;
-  status?: "DRAFT" | "ISSUED" | "CANCELLED";
+  status?: "DRAFT" | "POSTED" | "VOID";
   dueDate?: string;
   notes?: string;
   items?: InvoiceItemInput[];

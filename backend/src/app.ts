@@ -47,8 +47,15 @@ import leaveRoutes from "./domains/hrms/leaves/leaves.routes.js";
 import payrollRoutes from "./domains/hrms/payroll/payroll.routes.js";
 import holidayRoutes from "./domains/hrms/holidays/holiday.routes.js";
 import claimsRoutes from "./domains/hrms/claims/claims.routes.js";
-import purchaseOrderRoutes from "./domains/financials/purchasing/purchase-orders/purchase-orders.routes.js";
+import purchaseOrderRoutes from "./domains/financials/purchasing/purchase-orders/purchase-order.routes.js";
+import requisitionRoutes from "./domains/financials/purchasing/requisitions/requisition.routes.js";
+import rfqRoutes from "./domains/financials/purchasing/rfqs/rfq.routes.js";
 import vendorInvoiceRoutes from "./domains/financials/purchasing/vendor-invoices/vendor-invoices.routes.js";
+import vendorPaymentRoutes from "./domains/financials/purchasing/vendor-payments/vendor-payments.routes.js";
+import paymentRunsRoutes from "./domains/financials/treasury/payment-runs/payment-runs.routes.js";
+import notificationRoutes from "./services/notifications/notification.routes.js";
+import governanceRoutes from "./domains/financials/accounting/governance.routes.js";
+
 const app = express();
 
 app.set("trust proxy", 1);
@@ -139,10 +146,16 @@ app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/reports", reportRoutes);
 app.use("/api/v1/approvals", approvalRoutes);
 app.use("/api/v1/accounting", accountingRoutes);
+app.use("/api/v1/accounting", governanceRoutes);
 app.use("/api/v1/treasury", treasuryRoutes);
 app.use("/api/v1/banking", treasuryRoutes); // Temporary compatibility alias
 app.use("/api/v1/purchase-orders", purchaseOrderRoutes);
+app.use("/api/v1/purchase-requisitions", requisitionRoutes);
+app.use("/api/v1/rfqs", rfqRoutes);
 app.use("/api/v1/vendor-invoices", vendorInvoiceRoutes);
+app.use("/api/v1/vendor-payments", vendorPaymentRoutes);
+app.use("/api/v1/payment-runs", paymentRunsRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/attendance", attendanceRoutes);
 app.use("/api/v1/leaves", leaveRoutes);
 app.use("/api/v1/payroll", payrollRoutes);
@@ -160,6 +173,9 @@ app.use("/api/v1/designations", designationRoutes);
 app.use("/api/v1/shifts", shiftRoutes);
 app.use("/api/v1/holidays", holidayRoutes);
 app.use("/api/v1/claims", claimsRoutes);
+
+import quotationRoutes from "./domains/sales/quotations/quotation.routes.js";
+app.use("/api/v1/quotations", quotationRoutes);
 
 import path from "path";
 app.use("/api/v1/storage", express.static(path.resolve(process.cwd(), env.STORAGE_LOCAL_PATH || "./uploads")));

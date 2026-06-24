@@ -56,8 +56,11 @@ export const accountingRepository = {
         description: data.description,
         referenceType: data.referenceType,
         referenceId: data.referenceId,
+        sourceEventId: data.sourceEventId,
         isPosted: true,
         postedAt: data.postedAt || new Date(),
+        isAccrual: data.isAccrual || false,
+        autoReversalDate: data.autoReversalDate,
         lines: {
           create: data.lines.map((line) => ({
             accountId: line.accountId,
@@ -66,7 +69,7 @@ export const accountingRepository = {
             description: line.description
           }))
         },
-      },
+      } as any,
       include: {
         lines: true,
       },
@@ -112,19 +115,25 @@ export const accountingRepository = {
           referenceId: original.referenceId,
           isPosted: true,
           postedAt: reversalDate || new Date(),
+          isReversal: true,
+          reversesEntryId: original.id,
           lines: {
             create: original.lines.map(line => ({
               accountId: line.accountId,
               // Swap debits and credits
               debit: line.credit as any,
               credit: line.debit as any,
-            })) as any,
+            } as any)),
           },
         },
         include: { lines: true },
       });
 
-      // Removed status update as status field is removed
+      // 2. Mark original as reversed
+      await tx.journalEntry.update({
+        where: { id: original.id },
+        data: { reversedByEntryId: reversal.id }
+      });
 
       return reversal;
     });
@@ -285,8 +294,7 @@ export const accountingRepository = {
 
   // PERIODS
   getAccountingPeriodForDate: async (organizationId: string, date: Date) => {
-    // AccountingPeriod model removed; using FiscalYear as fallback
-    return prisma.fiscalYear.findFirst({
+    return prisma.accountingPeriod.findFirst({
       where: {
         organizationId,
         startDate: { lte: date },
