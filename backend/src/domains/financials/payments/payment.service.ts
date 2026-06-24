@@ -7,7 +7,7 @@ import {
   auditService,
 } from "../../../services/audit/index.js";
 import { paymentRepository } from "./payment.repository.js";
-import { accountingService } from "../accounting/accounting.service.js";
+
 import { CreatePaymentInput } from "./payment.types.js";
 
 const resolveInvoiceStatus = (totalPaid: number, totalAmount: number) => {
@@ -92,6 +92,24 @@ export const paymentService = {
         tx,
       );
 
+      // Fire Accounting Event via Outbox
+      await (tx as any).outboxEvent.create({
+        data: {
+          organizationId,
+          aggregateType: "CustomerPayment",
+          aggregateId: payment.id,
+          eventType: "CustomerPaymentReceived",
+          payload: {
+            paymentId: payment.id,
+            paymentReference: payload.reference || payment.id,
+            customerId: scopedInvoice.customerId,
+            amount: payload.amount,
+            currency: "INR",
+            bankAccountId: payload.bankAccountId,
+            receivedAt: payment.paymentDate.toISOString(),
+          },
+        },
+      });
 
       return payment;
     });
